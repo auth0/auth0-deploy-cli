@@ -14,7 +14,7 @@ This type of exclusion is expressed by passing an array of resource names into e
 
 All supported resource values for exclusion:
 
-`actions`, `attackProtection`, `branding`, `clientGrants`, `clients`, `connections`, `customDomains`, `databases`, `emailProvider`, `emailTemplates`, `guardianFactorProviders`, `guardianFactorTemplates`, `guardianFactors`, `guardianPhoneFactorMessageTypes`, `guardianPhoneFactorSelectedProvider`, `guardianPolicies`, `logStreams`, `migrations`, `networkACLKeys`, `networkACLs`, `organizations`, `pages`, `prompts`, `resourceServers`, `roles`, `tenant`, `triggers`, `selfServiceProfiles`.
+`actions`, `attackProtection`, `branding`, `clientGrants`, `clients`, `connections`, `customDomains`, `databases`, `emailProvider`, `emailTemplates`, `guardianFactorProviders`, `guardianFactorTemplates`, `guardianFactors`, `guardianPhoneFactorMessageTypes`, `guardianPhoneFactorSelectedProvider`, `guardianPhoneFactorSettings`, `guardianEmailFactorSettings`, `guardianSettings`, `guardianPolicies`, `logStreams`, `migrations`, `networkACLKeys`, `networkACLs`, `organizations`, `pages`, `prompts`, `resourceServers`, `roles`, `tenant`, `triggers`, `selfServiceProfiles`.
 
 ### Exclusion Example
 
@@ -92,7 +92,7 @@ roles: # roles configuration is not omitted
 
 Resource configuration that is explicitly defined as empty. For set-based configurations like hooks, organizations and actions, setting these configurations to an empty set expresses an intentional emptying of those resources. In practice, this would signal a deletion, so long as the [`AUTH0_ALLOW_DELETE` deletion configuration property](configuring-the-deploy-cli.md#AUTH0_ALLOW_DELETE) is enabled.
 
-For non-set-based resource configuration like tenant, email provider and branding, the expected behavior when applying an explicitly empty configuration value will depend on the resource. The `tenant`, `branding`, `attackProtection`, and `guardianPhoneFactorSelectedProvider` resources cannot be deleted whereas the `emailProvider` resource can be deleted.
+For non-set-based resource configuration like tenant, email provider and branding, the expected behavior when applying an explicitly empty configuration value will depend on the resource. The `tenant`, `branding`, `attackProtection`, `guardianPhoneFactorSelectedProvider`, `guardianPhoneFactorSettings`, `guardianEmailFactorSettings`, and `guardianSettings` resources cannot be deleted whereas the `emailProvider` resource can be deleted.
 
 #### Example of emptiness
 
