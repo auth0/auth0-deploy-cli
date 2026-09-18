@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add support for the `post-credential-validation` action trigger. [#1494]
 - Add anonymous sessions support to tenant, clients, and resource servers. [#1496]
 - Support `enforce_permission_ceiling` and `enforce_self_assignment_restriction` on `my_organization_configuration` (EA). [#1495]
+- Support tenants without the `riskAssessment` and `guardianPolicies` entitlement by handling `insufficient_entitlement` 403 responses gracefully instead of failing the run. [#1493]
 
 ### Changed
 
@@ -25,7 +26,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Surface the real API error on `tokenExchangeProfiles` 403 responses. [#1492]
-- Handle `insufficient_entitlement` 403 responses gracefully for `riskAssessment` and `guardianPolicies` handlers. [#1493]
 - Honor `kid` and other credential fields on `private_key_jwt`/mTLS credential creation. [#1489]
 - Apply `AUTH0_INCLUDED_CONNECTIONS` on export. [#1442]
 - Prevent client grant loss and duplication in directory-format exports. [#1473]
