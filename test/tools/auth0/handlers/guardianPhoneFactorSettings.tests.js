@@ -177,6 +177,37 @@ describe('#guardianPhoneFactorSettings handler', () => {
       expect(handler.updated).to.equal(0);
     });
 
+    it('should write when there are changes in dry-run apply-after-preview mode', async () => {
+      // processChanges is only reached in dry-run when the user opts to apply after
+      // preview (AUTH0_DRY_RUN_APPLY / interactive "Apply changes"), where AUTH0_DRY_RUN
+      // is still set. In that flow a changed value should be written.
+      let called = false;
+      const auth0 = {
+        guardian: {
+          factors: {
+            phone: {
+              get: () => Promise.resolve({ otp_length: 6, otp_expiration_time: 300 }),
+              set: (data) => {
+                called = true;
+                expect(data).to.eql({ otp_length: 8, otp_expiration_time: 300 });
+                return Promise.resolve(data);
+              },
+            },
+          },
+        },
+      };
+
+      const config = (key) => (key === 'AUTH0_DRY_RUN' ? true : null);
+      const handler = new guardianPhoneFactorSettings.default({ client: auth0, config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        { guardianPhoneFactorSettings: { otp_length: 8, otp_expiration_time: 300 } },
+      ]);
+      expect(called).to.equal(true);
+      expect(handler.updated).to.equal(1);
+    });
+
     it('should rethrow errors that are not feature-unavailable/forbidden', async () => {
       const auth0 = {
         guardian: {
