@@ -1,8 +1,10 @@
 import pageClient from '../../../../src/tools/auth0/client';
 
 const { expect } = require('chai');
+const sinon = require('sinon');
 const tokenExchangeProfiles = require('../../../../src/tools/auth0/handlers/tokenExchangeProfiles');
 const { mockPagedData } = require('../../../utils');
+const log = require('../../../../src/logger').default;
 
 const pool = {
   addEachTask: (data) => {
@@ -130,9 +132,13 @@ describe('#tokenExchangeProfiles handler', () => {
         pool,
       };
 
+      const warnStub = sinon.spy(log, 'warn');
       const handler = new tokenExchangeProfiles.default({ client: pageClient(auth0), config });
       const data = await handler.getType();
       expect(data).to.deep.equal([]);
+      expect(warnStub.calledOnce).to.be.true;
+      expect(warnStub.firstCall.args[0]).to.include('Insufficient scope');
+      warnStub.restore();
     });
 
     it('should return an empty array and warn for 403 with non-scope message', async () => {
@@ -147,9 +153,13 @@ describe('#tokenExchangeProfiles handler', () => {
         pool,
       };
 
+      const warnStub = sinon.spy(log, 'warn');
       const handler = new tokenExchangeProfiles.default({ client: pageClient(auth0), config });
       const data = await handler.getType();
       expect(data).to.deep.equal([]);
+      expect(warnStub.calledOnce).to.be.true;
+      expect(warnStub.firstCall.args[0]).to.include('This feature is not available on your plan.');
+      warnStub.restore();
     });
 
     it('should throw error for 404 status code', async () => {
