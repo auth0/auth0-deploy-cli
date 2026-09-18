@@ -128,6 +128,22 @@ describe('#clients handler', () => {
       expect(valid).to.equal(false);
     });
 
+    it('should pass validation with my_organization_configuration enforce_permission_ceiling and enforce_self_assignment_restriction', () => {
+      const valid = ajv.validate(clients.schema, [
+        {
+          name: 'someMyOrgClient',
+          my_organization_configuration: {
+            allowed_strategies: ['oidc'],
+            connection_deletion_behavior: 'allow',
+            enforce_permission_ceiling: true,
+            enforce_self_assignment_restriction: false,
+          },
+        },
+      ]);
+      expect(valid).to.equal(true);
+      expect(ajv.errors).to.be.null;
+    });
+
     it('should pass validation with b2b_integration_configuration', () => {
       const valid = ajv.validate(clients.schema, [
         {

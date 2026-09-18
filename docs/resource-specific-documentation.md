@@ -8,6 +8,23 @@ However, there are some notable nuances to be aware of:
 
 The Deploy CLI's own client grant is intentionally not exported nor configurable by itself. This is done to prevent breaking changes, otherwise the tool could potentially revoke access or otherwise crash in the midst of an import. In a multi-tenant, multi-environment context, it is expect that new tenants will have a designated client already established for the Deploy CLI, as mentioned in the [getting started instructions](./../README.md#create-a-dedicated-auth0-application).
 
+### Anonymous Sessions subject type
+
+Client grants support a `subject_type` field, which is one of `client`, `user`, or `anonymous_user`. Setting `subject_type: anonymous_user` authorizes a client to obtain anonymous-session access tokens for the given audience. This is the grant that a resource server's `require_client_grant` anonymous policy checks for (see the Resource Servers section below).
+
+`subject_type` is immutable. If the `subject_type` of an existing grant changes, the Deploy CLI deletes the old grant and creates a new one rather than updating it in place.
+
+- `subject_type` (string): One of `client`, `user`, `anonymous_user`.
+
+```yaml
+clientGrants:
+  - client_id: My Application
+    audience: https://api.example.com/
+    subject_type: anonymous_user
+    scope:
+      - read:widgets
+```
+
 ## Prompts
 
 The prompts resource allows you to configure Universal Login pages, including custom text, custom HTML partials, and screen renderers.
@@ -444,6 +461,32 @@ clients:
       active: true
 ```
 
+## Clients (Anonymous Sessions)
+
+The Deploy CLI supports the `anonymous_sessions` property on clients, which controls whether the client can start anonymous sessions.
+
+- `anonymous_sessions.active` (boolean): Set to `true` to enable anonymous sessions for the client.
+
+**YAML Example**
+
+```yaml
+clients:
+  - name: My Application
+    anonymous_sessions:
+      active: true
+```
+
+**Directory Example**
+
+```json
+{
+  "name": "My Application",
+  "anonymous_sessions": {
+    "active": true
+  }
+}
+```
+
 ## Databases
 
 When managing database connections, the values of `options.customScripts` point to specific javascript files relative to
@@ -607,6 +650,59 @@ resourceServers:
   "identifier": "https://api.example.com",
   "allow_online_access": true,
   "allow_online_access_with_ephemeral_sessions": false
+}
+```
+
+### Anonymous Sessions: `subject_type_authorization.anonymous_user`, `token_lifetime_for_anonymous_access_tokens`, and `access_token.claims_mapping`
+
+The Deploy CLI supports the resource server fields that configure anonymous-session access tokens:
+
+- `subject_type_authorization.anonymous_user.policy` (string): The access policy for anonymous user flows. One of `deny_all` or `require_client_grant`. This sits alongside the existing `user` and `client` policies. Note that `subject_type_authorization` does not allow unknown properties, so `anonymous_user` must be spelled exactly as shown.
+- `token_lifetime_for_anonymous_access_tokens` (number): Expiration value, in seconds, for anonymous-session access tokens issued for this API.
+- `access_token.claims_mapping.custom_claims` (array): Custom claims to emit in anonymous-session access tokens. Each rule maps a value read from the anonymous-session context onto a named access-token claim, and has two fields:
+  - `name` (string): The access-token claim name to emit.
+  - `expression` (string): A restricted dot-path expression read from the anonymous-session context (for example `anonymous_session.metadata.country`).
+
+When the anonymous policy is `require_client_grant`, a client must hold a client grant with `subject_type: anonymous_user` for this audience (see the Client Grants section above).
+
+**YAML Example**
+
+```yaml
+resourceServers:
+  - name: My API
+    identifier: https://api.example.com
+    subject_type_authorization:
+      user:
+        policy: allow_all
+      client:
+        policy: require_client_grant
+      anonymous_user:
+        policy: require_client_grant
+    token_lifetime_for_anonymous_access_tokens: 3600
+    access_token:
+      claims_mapping:
+        custom_claims:
+          - name: country
+            expression: anonymous_session.metadata.country
+```
+
+**Directory Example**
+
+```json
+{
+  "name": "My API",
+  "identifier": "https://api.example.com",
+  "subject_type_authorization": {
+    "user": { "policy": "allow_all" },
+    "client": { "policy": "require_client_grant" },
+    "anonymous_user": { "policy": "require_client_grant" }
+  },
+  "token_lifetime_for_anonymous_access_tokens": 3600,
+  "access_token": {
+    "claims_mapping": {
+      "custom_claims": [{ "name": "country", "expression": "anonymous_session.metadata.country" }]
+    }
+  }
 }
 ```
 
@@ -953,6 +1049,42 @@ tenant:
   "country_codes": {
     "list": ["US", "GB", "CA"],
     "mode": "allow"
+  }
+}
+```
+
+## Tenant Settings (Anonymous Sessions)
+
+The Deploy CLI supports configuring anonymous session behavior via the top-level `sessions.anonymous` object in tenant settings:
+
+- `sessions.anonymous.lifetime_in_minutes` (integer): The lifetime of an anonymous session, in minutes.
+- `sessions.anonymous.activate_cookie` (boolean): Whether to activate the anonymous session cookie.
+
+Other keys under `sessions` are passed through untouched, so unmanaged session settings are preserved.
+
+**YAML Example**
+
+```yaml
+tenant:
+  sessions:
+    anonymous:
+      lifetime_in_minutes: 120
+      activate_cookie: true
+```
+
+**Directory Example**
+
+```
+./tenant.json
+```
+
+```json
+{
+  "sessions": {
+    "anonymous": {
+      "lifetime_in_minutes": 120,
+      "activate_cookie": true
+    }
   }
 }
 ```
@@ -1505,6 +1637,49 @@ clients:
     b2b_integration_configuration: null
 ```
 
+### My Organization Member Management on Clients
+
+> **Early Access** — requires the `my_org_member_management_ea` feature flag on your tenant.
+
+Two boolean fields control member management behaviour for the My Organization API. Both are nested under `my_organization_configuration` on the client object.
+
+| Field                                 | Type    | Default | Description                                                                                                                    |
+| ------------------------------------- | ------- | ------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `enforce_permission_ceiling`          | boolean | `false` | When `true`, limits the permissions that organization admins can assign to members to only those held by the admin themselves. |
+| `enforce_self_assignment_restriction` | boolean | `false` | When `true`, prevents organization admins from assigning permissions to themselves.                                            |
+
+**FF gating behaviour:** When the feature flag is off, the API strips both fields from `GET` responses (export produces no fields) and returns `403 UNSUPPORTED_OPERATION` if either field is included in a `PATCH`/`POST` payload — even when set to `false`. The deploy-cli surfaces this error to the user.
+
+**Export behaviour for `false` values:** The API omits these fields from `GET` responses when their value is `false`. As a result, exported YAML will only contain `enforce_permission_ceiling` or `enforce_self_assignment_restriction` when they are `true`. This is expected — a missing field in the export means the value is `false`.
+
+**Omitting a field resets it to `false`:** If you include `my_organization_configuration` in your config but omit one of the enforce fields, the API treats the omitted field as `false` on the next deploy. To preserve an existing `true` value you must explicitly include the field.
+
+```yaml
+clients:
+  - name: 'My Organization App'
+    app_type: 'regular_web'
+    my_organization_configuration:
+      allowed_strategies:
+        - oidc
+      connection_deletion_behavior: allow
+      enforce_permission_ceiling: true
+      enforce_self_assignment_restriction: true
+```
+
+To disable the restrictions, either omit the fields or set them explicitly to `false`:
+
+```yaml
+clients:
+  - name: 'My Organization App'
+    app_type: 'regular_web'
+    my_organization_configuration:
+      allowed_strategies:
+        - oidc
+      connection_deletion_behavior: allow
+      enforce_permission_ceiling: false
+      enforce_self_assignment_restriction: false
+```
+
 ### Express Configuration on Clients
 
 Connection profiles are used in conjunction with the `express_configuration` property on client applications: (In order to use express_configuration app_type should not be 'express_configuration')
@@ -1629,6 +1804,8 @@ For more details, see the [Management API documentation](https://auth0.com/docs/
 ## Risk Assessments
 
 Risk assessments configuration allows you to enable or disable risk assessment features for your tenant.
+
+> **Entitlement required:** Risk assessments are part of [Adaptive MFA](https://auth0.com/docs/secure/multi-factor-authentication/adaptive-mfa), which requires an Enterprise add-on. On tenants without this entitlement, export and deploy of `riskAssessment` will be skipped with a warning.
 
 - `settings.enabled`: toggles the feature true/flase (required)
 - `new_device.remember_for` (optional): days to remember devices
@@ -2034,6 +2211,19 @@ The Deploy CLI supports managing client authentication credentials for Private K
 | `x509_cert`       | `self_signed_tls_client_auth` | mTLS (self-signed cert)           |
 | `cert_subject_dn` | `tls_client_auth`             | mTLS (CA-signed cert, subject DN) |
 
+### Optional credential fields
+
+Beyond `name`, `credential_type`, and `pem`, the following optional fields are forwarded to Auth0 when a `public_key` (`private_key_jwt`) credential is created (see the [Management API docs](https://auth0.com/docs/api/management/v2/clients/post-credentials)):
+
+| Field                    | Notes                                                                        |
+| ------------------------ | ---------------------------------------------------------------------------- |
+| `kid`                    | Key ID. If omitted, Auth0 auto-generates one. Format: `[0-9a-zA-Z-_]{10,64}` |
+| `alg`                    | Signing algorithm: `RS256`, `RS384`, or `PS256`                              |
+| `expires_at`             | ISO 8601 expiry. If omitted, the credential never expires                    |
+| `parse_expiry_from_cert` | Parse the expiry from the X509 certificate supplied in `pem`                 |
+
+> **Note:** These fields are honored **only when the credential is created** (matching is by `name`). Changing a field such as `kid` on an existing credential with the same `name` is a no-op — rotate by adding a new credential under a new `name` and removing the old one. `kid` is not exported (Auth0 returns only `name` and `credential_type` on read).
+
 ### Workflow
 
 To add or rotate a credential:
@@ -2055,6 +2245,8 @@ To add or rotate a credential:
            credentials:
              - name: my-key-v2
                credential_type: public_key
+               kid: my-custom-kid # optional; auto-generated if omitted
+               alg: RS256 # optional
                pem: |
                  -----BEGIN PUBLIC KEY-----
                  MIIBIjANBgkq...
@@ -2139,3 +2331,66 @@ clients:
             - 'chat:write'
             - 'channels:read'
 ```
+
+## MFA Advanced Factor Configuration
+
+The Deploy CLI manages the MFA (Guardian) advanced factor settings through three separate resources. Each is a single object rather than a set, so it cannot be deleted; an empty or omitted value is skipped rather than treated as a deletion. If the feature is unavailable on the tenant, the resource is skipped gracefully.
+
+- `guardianPhoneFactorSettings`: one-time password settings for the phone factor.
+  - `otp_length` (number): number of digits in the OTP code.
+  - `otp_expiration_time` (number): OTP validity window, in seconds.
+- `guardianEmailFactorSettings`: one-time password settings for the email factor, with the same fields as the phone factor.
+- `guardianSettings`: MFA session and "Remember Me" behavior.
+  - `display_remember_me_checkbox` (boolean): whether to show the "Remember Me" checkbox on the MFA prompt in Universal Login.
+  - `remember_me_default_value` (boolean): default state of that checkbox.
+  - `mfa_session_inactivity_timeout` (number): inactivity duration, in seconds, after which the user is prompted for MFA. Cannot exceed the overall timeout.
+  - `mfa_session_overall_timeout` (number): maximum duration, in seconds, after which the user is prompted for MFA regardless of activity.
+
+### YAML Example
+
+```yaml
+# Contents of ./tenant.yaml
+guardianPhoneFactorSettings:
+  otp_length: 6
+  otp_expiration_time: 300
+guardianEmailFactorSettings:
+  otp_length: 6
+  otp_expiration_time: 300
+guardianSettings:
+  display_remember_me_checkbox: true
+  remember_me_default_value: false
+  mfa_session_inactivity_timeout: 604800
+  mfa_session_overall_timeout: 2592000
+```
+
+### Directory Example
+
+Each resource is a JSON file inside the `guardian` folder:
+
+```json
+// Contents of ./guardian/phoneFactorSettings.json
+{
+  "otp_length": 6,
+  "otp_expiration_time": 300
+}
+```
+
+```json
+// Contents of ./guardian/emailFactorSettings.json
+{
+  "otp_length": 6,
+  "otp_expiration_time": 300
+}
+```
+
+```json
+// Contents of ./guardian/settings.json
+{
+  "display_remember_me_checkbox": true,
+  "remember_me_default_value": false,
+  "mfa_session_inactivity_timeout": 604800,
+  "mfa_session_overall_timeout": 2592000
+}
+```
+
+For more details, see the [Management API documentation](https://auth0.com/docs/api/management/v2#!/Guardian).

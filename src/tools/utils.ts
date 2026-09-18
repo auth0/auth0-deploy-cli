@@ -382,6 +382,20 @@ export const isDeprecatedError = (err: { message: string; statusCode: number }):
   return !!(err.statusCode === 403 || err.message?.includes('deprecated feature'));
 };
 
+export const isFeatureUnavailableError = (err): boolean => {
+  // A 404 indicates an older Management API version where the endpoint is not available.
+  // 403s (feature explicitly disabled) are handled by isForbiddenFeatureError.
+  return err.statusCode === 404;
+};
+
+export const isInsufficientEntitlementError = (err: unknown): boolean => {
+  if (!err || typeof err !== 'object') return false;
+  const e = err as { statusCode?: number; body?: unknown };
+  if (e.statusCode !== 403) return false;
+  const body = e.body as Record<string, unknown> | undefined;
+  return body?.errorCode === 'insufficient_entitlement';
+};
+
 export const isForbiddenFeatureError = (err, type): boolean => {
   if (err.statusCode === 403) {
     // The SDK error's top-level `message` is the full serialized response body; the clean,

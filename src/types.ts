@@ -136,6 +136,9 @@ export type Assets = Partial<{
     message_types: Asset[]; // TODO: eliminate this intermediate level for consistency
   } | null;
   guardianPhoneFactorSelectedProvider: Asset | null;
+  guardianPhoneFactorSettings: Asset | null;
+  guardianEmailFactorSettings: Asset | null;
+  guardianSettings: Asset | null;
   guardianPolicies: {
     policies: string[]; // TODO: eliminate this intermediate level for consistency
   } | null;
@@ -214,6 +217,9 @@ export type AssetTypes =
   | 'guardianFactorTemplates'
   | 'guardianPhoneFactorMessageTypes'
   | 'guardianPhoneFactorSelectedProvider'
+  | 'guardianPhoneFactorSettings'
+  | 'guardianEmailFactorSettings'
+  | 'guardianSettings'
   | 'guardianPolicies'
   | 'roles'
   | 'actions'
