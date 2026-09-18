@@ -32,9 +32,8 @@ function parse(context: DirectoryContext): ParsedHooks {
         normalizedScript
       );
       if (!resolvedPath.startsWith(configRoot + path.sep)) {
-        log.warn(
-          `Path "${hook.script}" resolves to "${resolvedPath}" which is outside the config directory "${configRoot}". ` +
-            `This will be blocked as an error in the next major release. ` +
+        throw new Error(
+          `Path traversal blocked: "${hook.script}" resolves to "${resolvedPath}" which is outside the config directory "${configRoot}". ` +
             `Move the file inside your config directory.`
         );
       }

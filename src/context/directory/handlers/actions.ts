@@ -30,9 +30,8 @@ function parse(context: DirectoryContext): ParsedActions {
       const configRoot = path.resolve(context.filePath);
       const resolvedPath = path.resolve(context.filePath, normalizedCode);
       if (!resolvedPath.startsWith(configRoot + path.sep)) {
-        log.warn(
-          `Path "${action.code}" resolves to "${resolvedPath}" which is outside the config directory "${configRoot}". ` +
-            `This will be blocked as an error in the next major release. ` +
+        throw new Error(
+          `Path traversal blocked: "${action.code}" resolves to "${resolvedPath}" which is outside the config directory "${configRoot}". ` +
             `Move the file inside your config directory.`
         );
       }

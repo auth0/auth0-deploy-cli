@@ -25,8 +25,7 @@ describe('#YAML context pages', () => {
     cleanThenMkdir(dir);
 
     const htmlContext = '<html>this is a ##val1## @@val2@@</html>';
-    const htmlFile = path.join(testDataDir, 'page.html');
-    fs.writeFileSync(htmlFile, htmlContext);
+    const htmlFile = path.join(dir, 'page.html');
 
     const errorPageUrl = 'https://example.com';
     const yaml = `
@@ -70,6 +69,8 @@ describe('#YAML context pages', () => {
       },
     ];
     createPagesDir(dir, target);
+    // Write page.html after createPagesDir since it calls cleanThenMkdir
+    fs.writeFileSync(htmlFile, htmlContext);
     const yamlFile = path.join(dir, 'rule1.yaml');
     fs.writeFileSync(yamlFile, yaml);
 

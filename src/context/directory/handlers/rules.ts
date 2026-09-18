@@ -33,9 +33,8 @@ function parse(context: DirectoryContext): ParsedRules {
         normalizedScript
       );
       if (!resolvedPath.startsWith(configRoot + path.sep)) {
-        log.warn(
-          `Path "${rule.script}" resolves to "${resolvedPath}" which is outside the config directory "${configRoot}". ` +
-            `This will be blocked as an error in the next major release. ` +
+        throw new Error(
+          `Path traversal blocked: "${rule.script}" resolves to "${resolvedPath}" which is outside the config directory "${configRoot}". ` +
             `Move the file inside your config directory.`
         );
       }

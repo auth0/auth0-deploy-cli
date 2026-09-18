@@ -51,9 +51,8 @@ export default class DirectoryContext {
     const basePath = path.resolve(this.filePath, folder);
     const toLoad = path.resolve(basePath, f.replace(/\\/g, '/'));
     if (!toLoad.startsWith(configRoot + path.sep)) {
-      log.warn(
-        `Path "${f}" resolves to "${toLoad}" which is outside the config directory "${configRoot}". ` +
-          `This will be blocked as an error in the next major release. ` +
+      throw new Error(
+        `Path traversal blocked: "${f}" resolves to "${toLoad}" which is outside the config directory "${configRoot}". ` +
           `Move the file inside your config directory.`
       );
     }

@@ -72,9 +72,8 @@ function getDatabase(
         const resolvedBase = path.resolve(configRoot);
         const toLoad = path.resolve(folder, script.replace(/\\/g, '/'));
         if (!toLoad.startsWith(resolvedBase + path.sep)) {
-          log.warn(
-            `Path "${script}" resolves to "${toLoad}" which is outside the config directory "${resolvedBase}". ` +
-              `This will be blocked as an error in the next major release. ` +
+          throw new Error(
+            `Path traversal blocked: "${script}" resolves to "${toLoad}" which is outside the config directory "${resolvedBase}". ` +
               `Move the file inside your config directory.`
           );
         }
