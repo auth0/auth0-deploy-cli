@@ -1,7 +1,6 @@
 import path from 'path';
 import { ensureDirSync, writeFileSync } from 'fs-extra';
 import { constants, loadFileAndReplaceKeywords } from '../../../tools';
-import log from '../../../logger';
 import {
   getFiles,
   dumpJSON,
