@@ -83,6 +83,12 @@ export function mockMgmtClient() {
         phone: {
           getMessageTypes: () => ({ message_types: ['sms'] }),
           getSelectedProvider: () => ({ provider: 'twilio' }),
+          get: () => ({ otp_length: 6, otp_expiration_time: 300 }),
+          set: (data) => data,
+        },
+        email: {
+          get: () => ({ otp_length: 6, otp_expiration_time: 300 }),
+          set: (data) => data,
         },
         pushNotification: {
           getSnsProvider: () => [],
@@ -91,6 +97,13 @@ export function mockMgmtClient() {
       policies: {
         list: () => [],
       },
+      get: () => ({
+        display_remember_me_checkbox: true,
+        remember_me_default_value: false,
+        mfa_session_inactivity_timeout: 604800,
+        mfa_session_overall_timeout: 2592000,
+      }),
+      set: (data) => data,
     },
     emailTemplates: {
       get: (template) => {

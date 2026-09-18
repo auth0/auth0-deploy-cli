@@ -659,6 +659,17 @@ guardianPhoneFactorSelectedProvider:
   provider: auth0
 guardianPhoneFactorMessageTypes:
   message_types: []
+guardianPhoneFactorSettings:
+  otp_expiration_time: 300
+  otp_length: 6
+guardianEmailFactorSettings:
+  otp_expiration_time: 300
+  otp_length: 6
+guardianSettings:
+  display_remember_me_checkbox: true
+  mfa_session_inactivity_timeout: 604800
+  mfa_session_overall_timeout: 2592000
+  remember_me_default_value: false
 roles:
   - name: Admin
     description: Can read and write things
