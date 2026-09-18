@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.0.0] - 2026-09-18
+
 ### Added
 
 - Add handlers for MFA advanced factor configuration (phone/email OTP and Guardian settings). [#1497]
@@ -1976,6 +1978,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1436]: https://github.com/auth0/auth0-deploy-cli/issues/1436
 [#1437]: https://github.com/auth0/auth0-deploy-cli/issues/1437
 [#1438]: https://github.com/auth0/auth0-deploy-cli/issues/1438
+[#1442]: https://github.com/auth0/auth0-deploy-cli/issues/1442
 [#1445]: https://github.com/auth0/auth0-deploy-cli/issues/1445
 [#1449]: https://github.com/auth0/auth0-deploy-cli/issues/1449
 [#1453]: https://github.com/auth0/auth0-deploy-cli/issues/1453
@@ -1989,6 +1992,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1465]: https://github.com/auth0/auth0-deploy-cli/issues/1465
 [#1470]: https://github.com/auth0/auth0-deploy-cli/issues/1470
 [#1471]: https://github.com/auth0/auth0-deploy-cli/issues/1471
+[#1473]: https://github.com/auth0/auth0-deploy-cli/issues/1473
 [#1474]: https://github.com/auth0/auth0-deploy-cli/issues/1474
 [#1476]: https://github.com/auth0/auth0-deploy-cli/issues/1476
 [#1477]: https://github.com/auth0/auth0-deploy-cli/issues/1477
@@ -2008,7 +2012,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1496]: https://github.com/auth0/auth0-deploy-cli/issues/1496
 [#1497]: https://github.com/auth0/auth0-deploy-cli/issues/1497
 [#1498]: https://github.com/auth0/auth0-deploy-cli/issues/1498
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.45.0...HEAD
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v9.0.0...HEAD
+[9.0.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.45.0...v9.0.0
 [8.45.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.44.0...v8.45.0
 [8.44.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.43.0...v8.44.0
 [8.43.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.42.0...v8.43.0
