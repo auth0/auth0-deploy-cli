@@ -964,5 +964,47 @@ describe('#resourceServers handler', () => {
       await stageFn.apply(handler, [data]);
       expect(updateCalled).to.equal(true);
     });
+
+    it('should update a system resource server other than "Auth0 My Account API" without name', async () => {
+      let updateCalled = false;
+      const existingResourceServer = {
+        id: 'rs_my_organization',
+        identifier: 'https://auth0.com/my-organization/my-org/',
+        name: 'Auth0 My Organization API',
+        is_system: true,
+      };
+
+      const auth0 = {
+        resourceServers: {
+          create: () => Promise.resolve({ data: [] }),
+          update: function (id, data) {
+            updateCalled = true;
+            expect(id).to.equal('rs_my_organization');
+            expect(data.name).to.equal(undefined);
+            expect(data.is_system).to.equal(undefined);
+            expect(data.token_lifetime).to.equal(600);
+            return Promise.resolve({ data });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) => mockPagedData(params, 'resource_servers', [existingResourceServer]),
+        },
+        pool,
+      };
+
+      const handler = new resourceServers.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      const data = {
+        resourceServers: [
+          {
+            name: 'Auth0 My Organization API',
+            identifier: 'https://auth0.com/my-organization/my-org/',
+            token_lifetime: 600,
+          },
+        ],
+      };
+
+      await stageFn.apply(handler, [data]);
+      expect(updateCalled).to.equal(true);
+    });
   });
 });
