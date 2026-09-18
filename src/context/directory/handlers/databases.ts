@@ -10,6 +10,7 @@ import {
   loadJSON,
   sanitize,
   mapClientID2NameSorted,
+  assertInsideConfigRoot,
 } from '../../../utils';
 
 import { DirectoryHandler } from '.';
@@ -71,13 +72,7 @@ function getDatabase(
       } else {
         const resolvedBase = path.resolve(configRoot);
         const toLoad = path.resolve(folder, script.replace(/\\/g, '/'));
-        if (!toLoad.startsWith(resolvedBase + path.sep)) {
-          log.warn(
-            `Path "${script}" resolves to "${toLoad}" which is outside the config directory "${resolvedBase}". ` +
-              `This will be blocked as an error in the next major release. ` +
-              `Move the file inside your config directory.`
-          );
-        }
+        assertInsideConfigRoot(script, toLoad, resolvedBase);
         database.options.customScripts[name] = loadFileAndReplaceKeywords(toLoad, mappingOpts);
       }
     });
