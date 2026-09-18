@@ -200,6 +200,19 @@ describe('#schema validation tests', () => {
 
       checkPassed({ clientGrants: data }, done);
     });
+
+    it('should pass validation with anonymous_user subject_type', (done) => {
+      const data = [
+        {
+          client_id: 'client_id',
+          scope: ['scope'],
+          audience: 'audience',
+          subject_type: 'anonymous_user',
+        },
+      ];
+
+      checkPassed({ clientGrants: data }, done);
+    });
   });
 
   describe('#clients validate', () => {
@@ -245,6 +258,47 @@ describe('#schema validation tests', () => {
       ];
 
       checkPassed({ clients: data }, done);
+    });
+
+    it('should pass validation with anonymous_sessions', (done) => {
+      const data = [
+        {
+          name: 'name',
+          anonymous_sessions: {
+            active: true,
+          },
+        },
+      ];
+
+      checkPassed({ clients: data }, done);
+    });
+
+    it('should fail validation if anonymous_sessions has unknown property', (done) => {
+      const data = [
+        {
+          name: 'name',
+          anonymous_sessions: {
+            active: true,
+            unknown: true,
+          },
+        },
+      ];
+
+      const auth0 = new Auth0(
+        {
+          prompts: {
+            _getRestClient: (endpoint) => ({
+              get: (...options) => Promise.resolve({ endpoint, method: 'get', options }),
+            }),
+          },
+        },
+        { clients: data },
+        mockConfigFn
+      );
+
+      auth0
+        .validate()
+        .then(failedCb(done), passedCb(done, 'should NOT have additional properties'));
     });
   });
 
@@ -799,6 +853,104 @@ describe('#schema validation tests', () => {
         done();
       });
     });
+
+    it('should pass validation with anonymous sessions configuration', (done) => {
+      const data = [
+        {
+          name: 'name',
+          identifier: 'identifier',
+          subject_type_authorization: {
+            anonymous_user: {
+              policy: 'require_client_grant',
+            },
+          },
+          token_lifetime_for_anonymous_access_tokens: 3600,
+          access_token: {
+            claims_mapping: {
+              custom_claims: [{ name: 'claim_name', expression: 'context.value' }],
+            },
+          },
+        },
+      ];
+
+      checkPassed({ resourceServers: data }, done);
+    });
+
+    it('should fail validation if anonymous_user has invalid policy', (done) => {
+      const data = [
+        {
+          name: 'name',
+          identifier: 'identifier',
+          subject_type_authorization: {
+            anonymous_user: {
+              policy: 'invalid_policy',
+            },
+          },
+        },
+      ];
+
+      const auth0 = new Auth0(
+        {
+          ...client,
+          resourceServers: {
+            getAll: async (params) => mockPagedData(params, 'resource_servers', []),
+          },
+        },
+        { resourceServers: data },
+        mockConfigFn
+      );
+
+      auth0.validate().then(failedCb(done), (err) => {
+        expect(err.message).to.contain('enum');
+        expect(err.message).to.contain('policy');
+        done();
+      });
+    });
+
+    it('should fail validation if subject_type_authorization has unknown subject type', (done) => {
+      const data = [
+        {
+          name: 'name',
+          identifier: 'identifier',
+          subject_type_authorization: {
+            unknown_subject: {
+              policy: 'require_client_grant',
+            },
+          },
+        },
+      ];
+
+      const auth0 = new Auth0(
+        {
+          ...client,
+          resourceServers: {
+            getAll: async (params) => mockPagedData(params, 'resource_servers', []),
+          },
+        },
+        { resourceServers: data },
+        mockConfigFn
+      );
+
+      auth0
+        .validate()
+        .then(failedCb(done), passedCb(done, 'should NOT have additional properties'));
+    });
+
+    it('should fail validation if custom_claims rule is missing expression', (done) => {
+      const data = [
+        {
+          name: 'name',
+          identifier: 'identifier',
+          access_token: {
+            claims_mapping: {
+              custom_claims: [{ name: 'claim_name' }],
+            },
+          },
+        },
+      ];
+
+      checkRequired('expression', { resourceServers: data }, done);
+    });
   });
 
   describe('#tenant validate', () => {
@@ -830,6 +982,44 @@ describe('#schema validation tests', () => {
       };
 
       checkPassed({ tenant: data }, done);
+    });
+
+    it('should pass validation with anonymous sessions settings', (done) => {
+      const data = {
+        sessions: {
+          anonymous: {
+            lifetime_in_minutes: 60,
+            activate_cookie: true,
+          },
+        },
+      };
+
+      checkPassed({ tenant: data }, done);
+    });
+
+    it('should pass validation with unknown properties under sessions.anonymous', (done) => {
+      const data = {
+        sessions: {
+          anonymous: {
+            lifetime_in_minutes: 60,
+            future_api_field: 'value',
+          },
+        },
+      };
+
+      checkPassed({ tenant: data }, done);
+    });
+
+    it('should fail validation if anonymous lifetime_in_minutes is not an integer', (done) => {
+      const data = {
+        sessions: {
+          anonymous: {
+            lifetime_in_minutes: 'sixty',
+          },
+        },
+      };
+
+      checkTypeError('lifetime_in_minutes', 'integer', { tenant: data }, done);
     });
   });
 

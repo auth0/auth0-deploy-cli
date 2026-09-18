@@ -382,6 +382,14 @@ export const isDeprecatedError = (err: { message: string; statusCode: number }):
   return !!(err.statusCode === 403 || err.message?.includes('deprecated feature'));
 };
 
+export const isInsufficientEntitlementError = (err: unknown): boolean => {
+  if (!err || typeof err !== 'object') return false;
+  const e = err as { statusCode?: number; body?: unknown };
+  if (e.statusCode !== 403) return false;
+  const body = e.body as Record<string, unknown> | undefined;
+  return body?.errorCode === 'insufficient_entitlement';
+};
+
 export const isForbiddenFeatureError = (err, type): boolean => {
   if (err.statusCode === 403) {
     // The SDK error's top-level `message` is the full serialized response body; the clean,
