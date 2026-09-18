@@ -842,6 +842,80 @@ describe('#databases handler', () => {
       ]);
     });
 
+    it('should pass validation for a valid otp_settings payload', async () => {
+      const handler = new databases.default({ client: {}, config });
+      const stageFn = Object.getPrototypeOf(handler).validate;
+
+      await stageFn.apply(handler, [
+        {
+          databases: [
+            {
+              name: 'testDatabase',
+              options: {
+                otp_settings: {
+                  email: { otp_length: 8, otp_expiry: 600 },
+                  phone: { otp_length: 6, otp_expiry: 300 },
+                },
+              },
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('should export otp_settings unchanged', async () => {
+      const auth0 = {
+        connections: {
+          list: function (params) {
+            return mockPagedData(params, 'connections', [
+              {
+                id: 'con1',
+                strategy: 'auth0',
+                name: 'Username-Password-Authentication',
+                options: {
+                  otp_settings: {
+                    email: { otp_length: 8, otp_expiry: 600 },
+                    phone: { otp_length: 6, otp_expiry: 300 },
+                  },
+                  brute_force_protection: true,
+                },
+              },
+            ]);
+          },
+          clients: {
+            get: () => Promise.resolve(mockPagedData({}, 'clients', [])),
+          },
+        },
+        clients: {
+          list: function (params) {
+            return mockPagedData(params, 'clients', []);
+          },
+        },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
+        },
+        pool,
+      };
+
+      const handler = new databases.default({ client: pageClient(auth0), config });
+      const data = await handler.getType();
+
+      expect(data).to.deep.equal([
+        {
+          id: 'con1',
+          strategy: 'auth0',
+          name: 'Username-Password-Authentication',
+          options: {
+            otp_settings: {
+              email: { otp_length: 8, otp_expiry: 600 },
+              phone: { otp_length: 6, otp_expiry: 300 },
+            },
+            brute_force_protection: true,
+          },
+        },
+      ]);
+    });
+
     it('should strip legacy password fields on export when password_options is present', async () => {
       const auth0 = {
         connections: {

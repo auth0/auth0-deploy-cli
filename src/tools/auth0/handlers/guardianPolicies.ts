@@ -2,7 +2,8 @@ import { Management } from 'auth0';
 import DefaultHandler from './default';
 import constants from '../../constants';
 import { Assets } from '../../../types';
-import { isDryRun } from '../../utils';
+import { isDryRun, isInsufficientEntitlementError } from '../../utils';
+import log from '../../../logger';
 
 export const schema = {
   type: 'object',
@@ -54,7 +55,17 @@ export default class GuardianPoliciesHandler extends DefaultHandler {
     }
 
     const data = guardianPolicies.policies as Management.SetGuardianPoliciesRequestContent;
-    await this.client.guardian.policies.set(data);
+    try {
+      await this.client.guardian.policies.set(data);
+    } catch (err) {
+      if (isInsufficientEntitlementError(err)) {
+        log.warn(
+          'Skipping guardianPolicies deploy: tenant does not have Adaptive MFA entitlement (confidence-score requires an Enterprise add-on)'
+        );
+        return;
+      }
+      throw err;
+    }
     this.updated += 1;
     this.didUpdate(guardianPolicies);
   }

@@ -11,6 +11,13 @@ import { Client } from './clients';
 import { Connection } from './connections';
 import { ClientGrant } from './clientGrants';
 
+// Org sub-resources are skipped when the tenant can't read them: the EA feature is off
+// (feature_not_enabled, returned as 400 or 403) or the token lacks scope (403). The SDK
+// puts the API code on `err.body.errorCode`, not `err.errorCode`.
+function isOrgSubresourceUnavailable(err: any): boolean {
+  return err?.statusCode === 403 || err?.body?.errorCode === 'feature_not_enabled';
+}
+
 export const schema = {
   type: 'array',
   items: {
@@ -842,9 +849,9 @@ export default class OrganizationsHandler extends DefaultHandler {
       if (err.statusCode === 404 || err.statusCode === 501) {
         return null;
       }
-      if (err.statusCode === 403 || err.errorCode === 'feature_not_enabled') {
+      if (isOrgSubresourceUnavailable(err)) {
         log.debug(
-          'Organization Discovery domains are not enabled for this tenant. Please verify `scope` or contact Auth0 support to enable this feature.'
+          `Skipping organization discovery domains (${err?.body?.errorCode ?? err.statusCode}).`
         );
         return null;
       }
@@ -933,10 +940,8 @@ export default class OrganizationsHandler extends DefaultHandler {
       if (err.statusCode === 404 || err.statusCode === 501) {
         return null;
       }
-      if (err.statusCode === 403 || err.errorCode === 'feature_not_enabled') {
-        log.debug(
-          'Org-to-app entitlement is not enabled for this tenant. Skipping org-client associations.'
-        );
+      if (isOrgSubresourceUnavailable(err)) {
+        log.debug(`Skipping org-client associations (${err?.body?.errorCode ?? err.statusCode}).`);
         return null;
       }
       throw err;

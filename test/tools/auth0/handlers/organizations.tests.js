@@ -1823,7 +1823,55 @@ describe('#organizations handler', () => {
             list: () => {
               const err = new Error('feature_not_enabled');
               err.statusCode = 403;
-              err.errorCode = 'feature_not_enabled';
+              err.body = { errorCode: 'feature_not_enabled' };
+              throw err;
+            },
+          },
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', sampleClients),
+        },
+        pool,
+      };
+
+      const handler = new organizations.default({ client: pageClient(auth0), config });
+      const data = await handler.getType();
+
+      // clients property should not be set when feature is unavailable
+      expect(data[0].clients).to.be.undefined;
+    });
+
+    it('should gracefully handle when org-clients feature is not enabled (400 with errorCode on body)', async () => {
+      // Reproduces the reported failure: some tenants surface feature_not_enabled
+      // as a 400 whose error code lives on `err.body.errorCode`, not `err.errorCode`.
+      const freshOrg = {
+        id: '999',
+        name: 'fresh-org',
+        display_name: 'Fresh Org',
+        client_grants: [],
+      };
+      const auth0 = {
+        organizations: {
+          list: (params) => Promise.resolve(mockPagedData(params, 'organizations', [freshOrg])),
+          connections: {
+            list: () => ({ data: [], hasNextPage: () => false }),
+          },
+          clientGrants: {
+            list: () => ({ data: [], hasNextPage: () => false }),
+          },
+          discoveryDomains: {
+            list: () => ({ data: [], hasNextPage: () => false }),
+          },
+          clients: {
+            list: () => {
+              const err = new Error('Feature not enabled for this tenant.');
+              err.statusCode = 400;
+              err.body = {
+                statusCode: 400,
+                error: 'Bad Request',
+                message: 'Feature not enabled for this tenant.',
+                errorCode: 'feature_not_enabled',
+              };
               throw err;
             },
           },

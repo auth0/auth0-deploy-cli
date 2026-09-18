@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.45.0] - 2026-09-09
+
+### Added
+
+- Support `b2b_integration_configuration` for Enterprise Connect (EA). [#1486]
+- Add `networkACLKeys` handler for HMAC signature key management. [#1480]
+- Support `match_all` in network ACL rules for unconditional block/allow. [#1483]
+- Add `otp_settings` support for database connections. [#1481]
+
+### Fixed
+
+- Prevent export crash when a handler has no identifiers during keyword preservation. [#1487]
+- Catch `feature_not_enabled` via `err.body.errorCode` and 400 status in organizations handler. [#1482]
+- Prevent false `enabled_clients` diff in database dry-run. [#1479]
+
 ## [8.44.0] - 2026-08-26
 
 ### Added
@@ -1955,7 +1970,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1474]: https://github.com/auth0/auth0-deploy-cli/issues/1474
 [#1476]: https://github.com/auth0/auth0-deploy-cli/issues/1476
 [#1477]: https://github.com/auth0/auth0-deploy-cli/issues/1477
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.44.0...HEAD
+[#1479]: https://github.com/auth0/auth0-deploy-cli/issues/1479
+[#1480]: https://github.com/auth0/auth0-deploy-cli/issues/1480
+[#1481]: https://github.com/auth0/auth0-deploy-cli/issues/1481
+[#1482]: https://github.com/auth0/auth0-deploy-cli/issues/1482
+[#1483]: https://github.com/auth0/auth0-deploy-cli/issues/1483
+[#1486]: https://github.com/auth0/auth0-deploy-cli/issues/1486
+[#1487]: https://github.com/auth0/auth0-deploy-cli/issues/1487
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.45.0...HEAD
+[8.45.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.44.0...v8.45.0
 [8.44.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.43.0...v8.44.0
 [8.43.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.42.0...v8.43.0
 [8.42.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.41.0...v8.42.0

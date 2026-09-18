@@ -149,6 +149,77 @@ describe('#networkACLs handler', () => {
       ]);
       expect(valid).to.equal(false);
     });
+
+    it('should pass schema validation for match_all rule', () => {
+      const valid = ajv.validate(schema, [
+        {
+          description: 'block all',
+          active: true,
+          priority: 99,
+          rule: {
+            action: { block: true },
+            scope: 'tenant',
+            match_all: true,
+          },
+        },
+      ]);
+      expect(valid).to.equal(true);
+      expect(ajv.errors).to.be.null;
+    });
+
+    it('should fail schema validation for match_all set to false', () => {
+      const valid = ajv.validate(schema, [
+        {
+          description: 'block all',
+          active: true,
+          priority: 99,
+          rule: {
+            action: { block: true },
+            scope: 'tenant',
+            match_all: false,
+          },
+        },
+      ]);
+      expect(valid).to.equal(false);
+    });
+
+    it('should fail schema validation for match_all combined with match', () => {
+      const valid = ajv.validate(schema, [
+        {
+          description: 'block all',
+          active: true,
+          priority: 99,
+          rule: {
+            action: { block: true },
+            scope: 'tenant',
+            match_all: true,
+            match: {
+              asns: [12345],
+            },
+          },
+        },
+      ]);
+      expect(valid).to.equal(false);
+    });
+
+    it('should fail schema validation for match_all combined with not_match', () => {
+      const valid = ajv.validate(schema, [
+        {
+          description: 'block all',
+          active: true,
+          priority: 99,
+          rule: {
+            action: { block: true },
+            scope: 'tenant',
+            match_all: true,
+            not_match: {
+              asns: [12345],
+            },
+          },
+        },
+      ]);
+      expect(valid).to.equal(false);
+    });
   });
 
   describe('#networkACLs process', () => {

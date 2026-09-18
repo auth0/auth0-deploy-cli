@@ -223,6 +223,11 @@ export function mockMgmtClient() {
     networkAcls: {
       list: (params) => mockPagedData(params, 'network_acls', []),
     },
+    keys: {
+      networkAcls: {
+        list: () => Promise.resolve({ keys: [] }),
+      },
+    },
     organizations: {
       list: (params) => mockPagedData(params, 'organizations', []),
       enabledConnections: {

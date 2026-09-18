@@ -88,6 +88,16 @@ const myOrganizationConfigurationSchema = {
       description:
         'The client ID of the invitation landing client for the My Organization configuration',
     },
+    enforce_permission_ceiling: {
+      type: 'boolean',
+      description:
+        'When true, limits the permissions that organization admins can assign to members to only those held by the admin themselves. Early Access, gated by the my_org_member_management_ea feature flag.',
+    },
+    enforce_self_assignment_restriction: {
+      type: 'boolean',
+      description:
+        'When true, prevents organization admins from assigning permissions to themselves. Early Access, gated by the my_org_member_management_ea feature flag.',
+    },
   },
   required: ['allowed_strategies', 'connection_deletion_behavior'],
 };
@@ -311,9 +321,40 @@ export const schema = {
         required: ['active'],
         additionalProperties: false,
       },
+      anonymous_sessions: {
+        type: 'object',
+        description: 'Configuration for anonymous sessions for this client.',
+        properties: {
+          active: {
+            type: 'boolean',
+            description: 'Whether anonymous sessions are enabled for this client.',
+          },
+        },
+        required: ['active'],
+        additionalProperties: false,
+      },
       app_type: {
         type: 'string',
         description: 'The type of application this client represents',
+      },
+      b2b_integration_configuration: {
+        type: ['object', 'null'],
+        description:
+          'B2B integration configuration. Early Access. Required feature flag: enterprise_connect_entitled.',
+        properties: {
+          integration_type: {
+            type: 'string',
+            enum: ['custom_auth_server', 'third_party', 'application'],
+            description: 'The type of integration used to connect to this B2B integration client.',
+          },
+          sso_profiles: {
+            type: 'array',
+            description:
+              'List of SSO profile IDs linked to this B2B integration client. Maximum 1 entry.',
+            items: { type: 'string' },
+          },
+        },
+        additionalProperties: false,
       },
       resource_server_identifier: {
         type: 'string',
@@ -663,6 +704,9 @@ export default class ClientHandler extends DefaultAPIHandler {
         'jwks_uri',
         // third_party_security_mode is immutable after creation; PATCH returns 400
         'third_party_security_mode',
+        // API-generated timestamps; PATCH returns 400 if present
+        'created_at',
+        'updated_at',
       ],
       functions: {
         create: (client: Client) => this.createClient(client),
@@ -890,7 +934,31 @@ export default class ClientHandler extends DefaultAPIHandler {
   private async updateClient(clientId: string, client: Client): Promise<Client> {
     // For non-CIMD clients
     if (!this.isCimdClient(client)) {
-      return this.client.clients.update(clientId, client as Management.UpdateClientRequestContent);
+      const payload = { ...client } as Management.UpdateClientRequestContent & {
+        b2b_integration_configuration?: unknown;
+      };
+
+      // b2b_integration_configuration: PATCH only allowed if client already has the object.
+      // Sending it to a client that lacks it returns 400 invalid_body.
+      // null clears the object — but only for clients that already have it; stripping
+      // null for a client without the field is a safe no-op.
+      if ('b2b_integration_configuration' in payload) {
+        const existing = (this.existing || []).find(
+          (c) => c.client_id === (client.client_id || clientId)
+        );
+        if (!existing?.b2b_integration_configuration) {
+          if (payload.b2b_integration_configuration !== null) {
+            log.warn(
+              `b2b_integration_configuration cannot be added to an existing client via PATCH ` +
+                `(client: ${client.name || clientId}). Skipping field. ` +
+                `Re-create the client to set this field.`
+            );
+          }
+          delete payload.b2b_integration_configuration;
+        }
+      }
+
+      return this.client.clients.update(clientId, payload);
     }
 
     const updatePayload = this.getCIMDEditableFields(client);
