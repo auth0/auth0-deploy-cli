@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [9.0.0] - 2026-09-18
 
+### Changed
+
+- **⚠️ Breaking changes:**
+  - **Path traversal in config handlers is now a hard error.** A file reference that resolves outside the config directory now aborts the import with an error instead of logging a deprecation warning (the warning shipped in 8.43.0 and 8.44.0). This applies to every file-backed field in both directory and YAML formats: action `code`, rule/hook `script`, database `customScripts`, client `custom_login_page`, connection/email-template/branding `body`, prompt partials, and flow/form bodies. Move any out-of-tree references (`../` relative paths or absolute paths) inside your config directory. Blocked references fail with `Path traversal blocked: "<input>" resolves to "<resolved>" which is outside the config directory "<root>".` before any Management API call. `a0deploy export` is unaffected. [#1498]
+  - **`node-auth0` upgraded to v7; `AUTH0_DOMAIN` must now be a bare host.** v7 validates the domain more strictly and rejects values that include a scheme or a trailing slash (for example `https://tenant.auth0.com/`); use a bare host such as `tenant.us.auth0.com`. This Management-API-only release also moves token acquisition to the SDK's managed auth, which auto-refreshes tokens during long-running import/export runs while preserving the previous fail-fast behavior on bad credentials. See the [node-auth0 v7 migration guide](https://github.com/auth0/node-auth0/blob/master/v7_MIGRATION_GUIDE.md). [#1491]
+
 ### Added
 
 - Add handlers for MFA advanced factor configuration (phone/email OTP and Guardian settings). [#1497]
@@ -16,11 +22,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add anonymous sessions support to tenant, clients, and resource servers. [#1496]
 - Support `enforce_permission_ceiling` and `enforce_self_assignment_restriction` on `my_organization_configuration` (EA). [#1495]
 - Support tenants without the `riskAssessment` and `guardianPolicies` entitlement by handling `insufficient_entitlement` 403 responses gracefully instead of failing the run. [#1493]
-
-### Changed
-
-- **BREAKING: path traversal in config handlers is now a hard error.** A file reference that resolves outside the config directory now aborts the import with an error instead of logging a deprecation warning (the warning shipped in 8.43.0 and 8.44.0). This applies to every file-backed field in both directory and YAML formats: action `code`, rule/hook `script`, database `customScripts`, client `custom_login_page`, connection/email-template/branding `body`, prompt partials, and flow/form bodies. Move any out-of-tree references (`../` relative paths or absolute paths) inside your config directory. Blocked references fail with `Path traversal blocked: "<input>" resolves to "<resolved>" which is outside the config directory "<root>".` before any Management API call. `a0deploy export` is unaffected. [#1498]
-- **BREAKING: upgrade `node-auth0` from v6 to v7, which requires `AUTH0_DOMAIN` to be a bare host.** v7 validates the domain more strictly and rejects values that include a scheme or a trailing slash (for example `https://tenant.auth0.com/`); use a bare host such as `tenant.us.auth0.com`. This Management-API-only release also moves token acquisition to the SDK's managed auth, which auto-refreshes tokens during long-running import/export runs while preserving the previous fail-fast behavior on bad credentials. See the [node-auth0 v7 migration guide](https://github.com/auth0/node-auth0/blob/master/v7_MIGRATION_GUIDE.md). [#1491]
 
 ### Fixed
 
