@@ -1505,6 +1505,49 @@ clients:
     b2b_integration_configuration: null
 ```
 
+### My Organization Member Management on Clients
+
+> **Early Access** — requires the `my_org_member_management_ea` feature flag on your tenant.
+
+Two boolean fields control member management behaviour for the My Organization API. Both are nested under `my_organization_configuration` on the client object.
+
+| Field                                 | Type    | Default | Description                                                                                                                    |
+| ------------------------------------- | ------- | ------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `enforce_permission_ceiling`          | boolean | `false` | When `true`, limits the permissions that organization admins can assign to members to only those held by the admin themselves. |
+| `enforce_self_assignment_restriction` | boolean | `false` | When `true`, prevents organization admins from assigning permissions to themselves.                                            |
+
+**FF gating behaviour:** When the feature flag is off, the API strips both fields from `GET` responses (export produces no fields) and returns `403 UNSUPPORTED_OPERATION` if either field is included in a `PATCH`/`POST` payload — even when set to `false`. The deploy-cli surfaces this error to the user.
+
+**Export behaviour for `false` values:** The API omits these fields from `GET` responses when their value is `false`. As a result, exported YAML will only contain `enforce_permission_ceiling` or `enforce_self_assignment_restriction` when they are `true`. This is expected — a missing field in the export means the value is `false`.
+
+**Omitting a field resets it to `false`:** If you include `my_organization_configuration` in your config but omit one of the enforce fields, the API treats the omitted field as `false` on the next deploy. To preserve an existing `true` value you must explicitly include the field.
+
+```yaml
+clients:
+  - name: 'My Organization App'
+    app_type: 'regular_web'
+    my_organization_configuration:
+      allowed_strategies:
+        - oidc
+      connection_deletion_behavior: allow
+      enforce_permission_ceiling: true
+      enforce_self_assignment_restriction: true
+```
+
+To disable the restrictions, either omit the fields or set them explicitly to `false`:
+
+```yaml
+clients:
+  - name: 'My Organization App'
+    app_type: 'regular_web'
+    my_organization_configuration:
+      allowed_strategies:
+        - oidc
+      connection_deletion_behavior: allow
+      enforce_permission_ceiling: false
+      enforce_self_assignment_restriction: false
+```
+
 ### Express Configuration on Clients
 
 Connection profiles are used in conjunction with the `express_configuration` property on client applications: (In order to use express_configuration app_type should not be 'express_configuration')
