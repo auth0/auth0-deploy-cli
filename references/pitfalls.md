@@ -47,13 +47,13 @@ AUTH0_DEBUG=true node lib/index.js import -c config.json -i ./local/tenant.json
 
 ### Common issues
 
-| Symptom | Likely cause | Fix |
-|---------|-------------|-----|
-| Build errors / import not found | `tsconfig.json` path mismatch | Check `tsconfig.json` and ensure all imports resolve |
-| "Handler not found" / resource skipped silently | Resource type not registered | Verify it's added to `src/tools/constants.ts` |
-| Schema validation fails on deploy | Schema too strict or missing fields | Check schema definition in the handler file; confirm against a real API response |
-| Keyword replacement produces raw `@@KEY@@` in output | Mapping missing or wrong pattern | Verify `AUTH0_KEYWORD_REPLACE_MAPPINGS` config and confirm `@@KEY@@` vs `##KEY##` |
-| E2E fails with auth errors | Missing or wrong credentials | Check `AUTH0_DOMAIN`, `AUTH0_CLIENT_ID`, `AUTH0_CLIENT_SECRET` |
+| Symptom                                              | Likely cause                        | Fix                                                                               |
+| ---------------------------------------------------- | ----------------------------------- | --------------------------------------------------------------------------------- |
+| Build errors / import not found                      | `tsconfig.json` path mismatch       | Check `tsconfig.json` and ensure all imports resolve                              |
+| "Handler not found" / resource skipped silently      | Resource type not registered        | Verify it's added to `src/tools/constants.ts`                                     |
+| Schema validation fails on deploy                    | Schema too strict or missing fields | Check schema definition in the handler file; confirm against a real API response  |
+| Keyword replacement produces raw `@@KEY@@` in output | Mapping missing or wrong pattern    | Verify `AUTH0_KEYWORD_REPLACE_MAPPINGS` config and confirm `@@KEY@@` vs `##KEY##` |
+| E2E fails with auth errors                           | Missing or wrong credentials        | Check `AUTH0_DOMAIN`, `AUTH0_CLIENT_ID`, `AUTH0_CLIENT_SECRET`                    |
 
 ### Key files for debugging
 

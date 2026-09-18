@@ -30,7 +30,11 @@ npm run test:coverage
 ```javascript
 const mockClient = {
   clients: {
-    getAll: sinon.stub().returns(mockPagedData([/* existing resources */])),
+    getAll: sinon.stub().returns(
+      mockPagedData([
+        /* existing resources */
+      ])
+    ),
     create: sinon.stub().resolves({ client_id: 'abc', name: 'my-app' }),
     update: sinon.stub().resolves({}),
     delete: sinon.stub().resolves({}),
@@ -98,8 +102,8 @@ When testing resource exclusion and property filtering:
 const mockConfig = (key) => {
   const config = {
     AUTH0_ALLOW_DELETE: false,
-    AUTH0_EXCLUDED: [],                    // resource types excluded entirely
-    AUTH0_EXCLUDED_CLIENTS: ['my-app'],    // named exclusion per resource type
+    AUTH0_EXCLUDED: [], // resource types excluded entirely
+    AUTH0_EXCLUDED_CLIENTS: ['my-app'], // named exclusion per resource type
     EXCLUDED_PROPS: { clients: ['description'] }, // properties excluded from comparison
     INCLUDED_PROPS: { clients: ['name', 'app_type'] }, // properties included in comparison
   };

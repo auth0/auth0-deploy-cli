@@ -2,13 +2,13 @@
 
 ## Naming Conventions
 
-| Element | Convention | Example |
-|---------|-----------|---------|
-| Source files | camelCase | `clients.ts`, `attackProtection.ts` |
-| Classes | PascalCase | `ClientsHandler`, `YAMLContext` |
-| Methods / variables | camelCase | `processChanges`, `calcChanges` |
-| Constants / env vars | UPPER_SNAKE_CASE | `AUTH0_ALLOW_DELETE` |
-| Test files | `<name>.test.js` | `clients.test.js` |
+| Element              | Convention       | Example                             |
+| -------------------- | ---------------- | ----------------------------------- |
+| Source files         | camelCase        | `clients.ts`, `attackProtection.ts` |
+| Classes              | PascalCase       | `ClientsHandler`, `YAMLContext`     |
+| Methods / variables  | camelCase        | `processChanges`, `calcChanges`     |
+| Constants / env vars | UPPER_SNAKE_CASE | `AUTH0_ALLOW_DELETE`                |
+| Test files           | `<name>.test.js` | `clients.test.js`                   |
 
 ## Handler Implementation Pattern
 
@@ -116,6 +116,7 @@ Wrong order causes 404s or constraint errors mid-deploy.
 **Config priority order:** CLI args → env vars → config files → defaults
 
 **Error handling conventions:**
+
 - Use `ValidationError` from `src/tools/validationError.ts` for all validation failures
 - Validate early, before making API calls
 - Preserve context when bubbling errors up the call stack
