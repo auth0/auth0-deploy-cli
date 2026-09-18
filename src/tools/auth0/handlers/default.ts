@@ -289,6 +289,9 @@ export default class APIHandler {
       this.type === 'branding' ||
       this.type === 'emailProvider' ||
       this.type === 'guardianPhoneFactorSelectedProvider' ||
+      this.type === 'guardianPhoneFactorSettings' ||
+      this.type === 'guardianEmailFactorSettings' ||
+      this.type === 'guardianSettings' ||
       this.type === 'guardianPolicies' ||
       this.type === 'riskAssessment'
     ) {
