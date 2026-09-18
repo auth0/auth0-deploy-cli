@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.0.0] - 2026-09-18
+
+### Changed
+
+- **⚠️ Breaking changes:**
+  - **Config file handlers (import): path traversal is now a hard error.** A file reference that resolves outside the config directory now aborts the import with an error instead of logging a deprecation warning (the warning shipped in 8.43.0 and 8.44.0). This applies to every file-backed field in both directory and YAML formats: action `code`, rule/hook `script`, database `customScripts`, client `custom_login_page`, connection/email-template/branding `body`, prompt partials, and flow/form bodies. Move any out-of-tree references (`../` relative paths or absolute paths) inside your config directory. Blocked references fail with `Path traversal blocked: "<input>" resolves to "<resolved>" which is outside the config directory "<root>".` before any Management API call. `a0deploy export` is unaffected. [#1498]
+  - **`AUTH0_DOMAIN` environment variable: must now be a bare host.** The `node-auth0` v7 upgrade validates the domain more strictly and rejects values that include a scheme or a trailing slash (for example `https://tenant.auth0.com/`); use a bare host such as `tenant.us.auth0.com`. This Management-API-only release also moves token acquisition to the SDK's managed auth, which auto-refreshes tokens during long-running import/export runs while preserving the previous fail-fast behavior on bad credentials. See the [node-auth0 v7 migration guide](https://github.com/auth0/node-auth0/blob/master/v7_MIGRATION_GUIDE.md). [#1491]
+
+### Added
+
+- Add handlers for MFA advanced factor configuration (phone/email OTP and Guardian settings). [#1497]
+- Add support for the `post-credential-validation` action trigger. [#1494]
+- Add anonymous sessions support to tenant, clients, and resource servers. [#1496]
+- Support `enforce_permission_ceiling` and `enforce_self_assignment_restriction` on `my_organization_configuration` (EA). [#1495]
+- Support tenants without the `riskAssessment` and `guardianPolicies` entitlement by handling `insufficient_entitlement` 403 responses gracefully instead of failing the run. [#1493]
+
+### Fixed
+
+- Surface the real API error on `tokenExchangeProfiles` 403 responses. [#1492]
+- Honor `kid` and other credential fields on `private_key_jwt`/mTLS credential creation. [#1489]
+- Apply `AUTH0_INCLUDED_CONNECTIONS` on export. [#1442]
+- Prevent client grant loss and duplication in directory-format exports. [#1473]
+
 ## [8.45.0] - 2026-09-09
 
 ### Added
@@ -1954,6 +1977,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1436]: https://github.com/auth0/auth0-deploy-cli/issues/1436
 [#1437]: https://github.com/auth0/auth0-deploy-cli/issues/1437
 [#1438]: https://github.com/auth0/auth0-deploy-cli/issues/1438
+[#1442]: https://github.com/auth0/auth0-deploy-cli/issues/1442
 [#1445]: https://github.com/auth0/auth0-deploy-cli/issues/1445
 [#1449]: https://github.com/auth0/auth0-deploy-cli/issues/1449
 [#1453]: https://github.com/auth0/auth0-deploy-cli/issues/1453
@@ -1967,6 +1991,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1465]: https://github.com/auth0/auth0-deploy-cli/issues/1465
 [#1470]: https://github.com/auth0/auth0-deploy-cli/issues/1470
 [#1471]: https://github.com/auth0/auth0-deploy-cli/issues/1471
+[#1473]: https://github.com/auth0/auth0-deploy-cli/issues/1473
 [#1474]: https://github.com/auth0/auth0-deploy-cli/issues/1474
 [#1476]: https://github.com/auth0/auth0-deploy-cli/issues/1476
 [#1477]: https://github.com/auth0/auth0-deploy-cli/issues/1477
@@ -1977,7 +2002,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1483]: https://github.com/auth0/auth0-deploy-cli/issues/1483
 [#1486]: https://github.com/auth0/auth0-deploy-cli/issues/1486
 [#1487]: https://github.com/auth0/auth0-deploy-cli/issues/1487
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v8.45.0...HEAD
+[#1489]: https://github.com/auth0/auth0-deploy-cli/issues/1489
+[#1491]: https://github.com/auth0/auth0-deploy-cli/issues/1491
+[#1492]: https://github.com/auth0/auth0-deploy-cli/issues/1492
+[#1493]: https://github.com/auth0/auth0-deploy-cli/issues/1493
+[#1494]: https://github.com/auth0/auth0-deploy-cli/issues/1494
+[#1495]: https://github.com/auth0/auth0-deploy-cli/issues/1495
+[#1496]: https://github.com/auth0/auth0-deploy-cli/issues/1496
+[#1497]: https://github.com/auth0/auth0-deploy-cli/issues/1497
+[#1498]: https://github.com/auth0/auth0-deploy-cli/issues/1498
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v9.0.0...HEAD
+[9.0.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.45.0...v9.0.0
 [8.45.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.44.0...v8.45.0
 [8.44.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.43.0...v8.44.0
 [8.43.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.42.0...v8.43.0
