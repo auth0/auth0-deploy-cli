@@ -1805,6 +1805,8 @@ For more details, see the [Management API documentation](https://auth0.com/docs/
 
 Risk assessments configuration allows you to enable or disable risk assessment features for your tenant.
 
+> **Entitlement required:** Risk assessments are part of [Adaptive MFA](https://auth0.com/docs/secure/multi-factor-authentication/adaptive-mfa), which requires an Enterprise add-on. On tenants without this entitlement, export and deploy of `riskAssessment` will be skipped with a warning.
+
 - `settings.enabled`: toggles the feature true/flase (required)
 - `new_device.remember_for` (optional): days to remember devices
 
