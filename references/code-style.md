@@ -37,14 +37,14 @@ Register the handler in `src/tools/constants.ts`. Handler schemas are defined in
 ## Identifiers
 
 ```typescript
-// ✅ Stable name-based identifier
-static identifiers = ['name'];
+// ✅ Stable name-based identifier (passed as constructor option to super())
+super({ ...options, identifiers: ['name'] });
 
 // ✅ ID alongside name (when the API uses both for matching)
-static identifiers = ['client_id', 'name'];
+super({ ...options, identifiers: ['client_id', 'name'] });
 
 // 🚫 Never — sole auto-generated UUID breaks cross-tenant portability
-static identifiers = ['id'];
+super({ ...options, identifiers: ['id'] });
 ```
 
 ## Keyword Replacement
