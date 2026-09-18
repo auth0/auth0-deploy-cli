@@ -350,3 +350,21 @@ export const getFormattedOptions = (connection, clients) => {
     return {};
   }
 };
+
+/**
+ * Asserts that `resolvedPath` is inside `configRoot`.
+ * Throws a hard error on path traversal attempts so there is a single,
+ * canonical enforcement point across all handlers.
+ */
+export function assertInsideConfigRoot(
+  input: string,
+  resolvedPath: string,
+  configRoot: string
+): void {
+  if (!resolvedPath.startsWith(configRoot + path.sep)) {
+    throw new Error(
+      `Path traversal blocked: "${input}" resolves to "${resolvedPath}" which is outside the config directory "${configRoot}". ` +
+        `Move the file inside your config directory.`
+    );
+  }
+}

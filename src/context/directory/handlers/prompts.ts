@@ -2,7 +2,14 @@ import path from 'path';
 import { ensureDirSync, writeFileSync } from 'fs-extra';
 import { constants, loadFileAndReplaceKeywords } from '../../../tools';
 import log from '../../../logger';
-import { getFiles, dumpJSON, existsMustBeDir, isFile, loadJSON } from '../../../utils';
+import {
+  getFiles,
+  dumpJSON,
+  existsMustBeDir,
+  isFile,
+  loadJSON,
+  assertInsideConfigRoot,
+} from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 import { ParsedAsset } from '../../../types';
@@ -72,15 +79,8 @@ function parse(context: DirectoryContext): ParsedPrompts {
             (insertionAcc, { name, template }) => {
               const configRoot = path.resolve(context.filePath);
               const resolvedTemplatePath = path.resolve(promptsDirectory, template);
-              if (
-                isFile(resolvedTemplatePath) &&
-                !resolvedTemplatePath.startsWith(configRoot + path.sep)
-              ) {
-                log.warn(
-                  `Prompt partial template "${template}" resolves to "${resolvedTemplatePath}" which is outside the config directory "${configRoot}". ` +
-                    `This will be blocked as an error in the next major release. ` +
-                    `Move the file inside your config directory.`
-                );
+              if (isFile(resolvedTemplatePath)) {
+                assertInsideConfigRoot(template, resolvedTemplatePath, configRoot);
               }
               insertionAcc[name] = isFile(resolvedTemplatePath)
                 ? loadFileAndReplaceKeywords(resolvedTemplatePath, {

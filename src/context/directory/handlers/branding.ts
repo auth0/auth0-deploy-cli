@@ -9,6 +9,7 @@ import {
   isFile,
   loadJSON,
   nomalizedYAMLPath,
+  assertInsideConfigRoot,
 } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
@@ -50,13 +51,7 @@ function parse(context: DirectoryContext): ParsedBranding {
     const normalizedPathArray = nomalizedYAMLPath(definition.body);
     const resolvedBodyFile = path.resolve(brandingTemplatesFolder, ...normalizedPathArray);
     const configRoot = path.resolve(context.filePath);
-    if (!resolvedBodyFile.startsWith(configRoot + path.sep)) {
-      log.warn(
-        `Branding template body path "${definition.body}" resolves to "${resolvedBodyFile}" which is outside the config directory "${configRoot}". ` +
-          `This will be blocked as an error in the next major release. ` +
-          `Move the file inside your config directory.`
-      );
-    }
+    assertInsideConfigRoot(definition.body, resolvedBodyFile, configRoot);
     definition.body = loadFileAndReplaceKeywords(resolvedBodyFile, {
       mappings: context.mappings,
       disableKeywordReplacement: context.disableKeywordReplacement,

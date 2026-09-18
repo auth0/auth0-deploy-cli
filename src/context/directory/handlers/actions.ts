@@ -3,7 +3,14 @@ import path from 'path';
 import fs from 'fs-extra';
 import { constants, loadFileAndReplaceKeywords } from '../../../tools';
 
-import { getFiles, existsMustBeDir, loadJSON, sanitize, dumpJSON } from '../../../utils';
+import {
+  getFiles,
+  existsMustBeDir,
+  loadJSON,
+  sanitize,
+  dumpJSON,
+  assertInsideConfigRoot,
+} from '../../../utils';
 import log from '../../../logger';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
@@ -29,12 +36,7 @@ function parse(context: DirectoryContext): ParsedActions {
       const normalizedCode = action.code.replace(/\\/g, '/');
       const configRoot = path.resolve(context.filePath);
       const resolvedPath = path.resolve(context.filePath, normalizedCode);
-      if (!resolvedPath.startsWith(configRoot + path.sep)) {
-        throw new Error(
-          `Path traversal blocked: "${action.code}" resolves to "${resolvedPath}" which is outside the config directory "${configRoot}". ` +
-            `Move the file inside your config directory.`
-        );
-      }
+      assertInsideConfigRoot(action.code, resolvedPath, configRoot);
       action.code = loadFileAndReplaceKeywords(resolvedPath, {
         mappings: context.mappings,
         disableKeywordReplacement: context.disableKeywordReplacement,

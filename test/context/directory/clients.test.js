@@ -1,10 +1,8 @@
 import path from 'path';
 import fs from 'fs-extra';
-import sinon from 'sinon';
 
 import { expect } from 'chai';
 import { constants } from '../../../src/tools';
-import log from '../../../src/logger';
 
 import Context from '../../../src/context/directory';
 import handler from '../../../src/context/directory/handlers/clients';
@@ -417,7 +415,7 @@ describe('#directory context clients', () => {
     expect(context.assets.clients).to.deep.equal(target);
   });
 
-  it('should warn when custom_login_page path resolves outside the config directory', async () => {
+  it('should throw when custom_login_page path resolves outside the config directory', async () => {
     const repoDir = path.join(testDataDir, 'directory', 'clients-traversal-warn');
     // "../../outside-login.html" from inside clients/ escapes the config root.
     const outsideFile = path.join(testDataDir, 'directory', 'outside-login.html');
@@ -433,16 +431,9 @@ describe('#directory context clients', () => {
 
     const config = { AUTH0_INPUT_FILE: repoDir };
     const context = new Context(config, mockMgmtClient());
-    if (log.warn.restore) log.warn.restore();
-    const warnSpy = sinon.spy(log, 'warn');
     try {
-      await context.loadAssetsFromLocal();
-      const traversalWarned = warnSpy.args.some(([msg]) =>
-        msg.includes('will be blocked as an error')
-      );
-      expect(traversalWarned).to.be.true;
+      await expect(context.loadAssetsFromLocal()).to.be.rejectedWith('Path traversal blocked');
     } finally {
-      warnSpy.restore();
       fs.removeSync(outsideFile);
     }
   });

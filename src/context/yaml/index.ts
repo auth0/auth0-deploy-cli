@@ -11,7 +11,13 @@ import {
 import pagedClient from '../../tools/auth0/client';
 
 import log from '../../logger';
-import { toConfigFn, stripIdentifiers, formatResults, recordsSorter } from '../../utils';
+import {
+  toConfigFn,
+  stripIdentifiers,
+  formatResults,
+  recordsSorter,
+  assertInsideConfigRoot,
+} from '../../utils';
 import handlers, { YAMLHandler } from './handlers';
 import cleanAssets from '../../readonly';
 import { Assets, Config, Auth0APIClient, AssetTypes, KeywordMappings } from '../../types';
@@ -60,12 +66,7 @@ export default class YAMLContext {
   loadFile(f) {
     const configRoot = path.resolve(this.basePath);
     const toLoad = path.resolve(this.basePath, f.replace(/\\/g, '/'));
-    if (!toLoad.startsWith(configRoot + path.sep)) {
-      throw new Error(
-        `Path traversal blocked: "${f}" resolves to "${toLoad}" which is outside the config directory "${configRoot}". ` +
-          `Move the file inside your config directory.`
-      );
-    }
+    assertInsideConfigRoot(f, toLoad, configRoot);
     return loadFileAndReplaceKeywords(toLoad, {
       mappings: this.mappings,
       disableKeywordReplacement: this.disableKeywordReplacement,

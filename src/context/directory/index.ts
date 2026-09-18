@@ -6,7 +6,7 @@ import pagedClient from '../../tools/auth0/client';
 import cleanAssets from '../../readonly';
 import log from '../../logger';
 import handlers, { DirectoryHandler } from './handlers';
-import { isDirectory, stripIdentifiers, toConfigFn } from '../../utils';
+import { isDirectory, stripIdentifiers, toConfigFn, assertInsideConfigRoot } from '../../utils';
 import { Assets, Auth0APIClient, Config, AssetTypes } from '../../types';
 import { filterOnlyIncludedResourceTypes } from '..';
 import { preserveKeywords } from '../../keywordPreservation';
@@ -50,12 +50,7 @@ export default class DirectoryContext {
     const configRoot = path.resolve(this.filePath);
     const basePath = path.resolve(this.filePath, folder);
     const toLoad = path.resolve(basePath, f.replace(/\\/g, '/'));
-    if (!toLoad.startsWith(configRoot + path.sep)) {
-      throw new Error(
-        `Path traversal blocked: "${f}" resolves to "${toLoad}" which is outside the config directory "${configRoot}". ` +
-          `Move the file inside your config directory.`
-      );
-    }
+    assertInsideConfigRoot(f, toLoad, configRoot);
     return loadFileAndReplaceKeywords(toLoad, {
       mappings: this.mappings,
       disableKeywordReplacement: this.disableKeywordReplacement,
