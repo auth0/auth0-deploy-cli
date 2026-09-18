@@ -1,11 +1,9 @@
 import path from 'path';
 import fs from 'fs-extra';
-import sinon from 'sinon';
 import { expect } from 'chai';
 
 import Context from '../../../src/context/yaml';
 import handler from '../../../src/context/yaml/handlers/clients';
-import log from '../../../src/logger';
 import { cleanThenMkdir, testDataDir, mockMgmtClient } from '../../utils';
 
 describe('#YAML context clients', () => {
@@ -102,7 +100,7 @@ describe('#YAML context clients', () => {
     expect(client.custom_login_page).to.equal('html code');
   });
 
-  it('should warn when custom_login_page path resolves outside the config directory', async () => {
+  it('should throw when custom_login_page path resolves outside the config directory', async () => {
     const dir = path.join(testDataDir, 'yaml', 'clients-traversal-warn');
     cleanThenMkdir(dir);
 
@@ -124,16 +122,9 @@ describe('#YAML context clients', () => {
 
     const config = { AUTH0_INPUT_FILE: yamlFile };
     const context = new Context(config, mockMgmtClient());
-    if (log.warn.restore) log.warn.restore();
-    const warnSpy = sinon.spy(log, 'warn');
     try {
-      await context.loadAssetsFromLocal();
-      const traversalWarned = warnSpy.args.some(([msg]) =>
-        msg.includes('will be blocked as an error')
-      );
-      expect(traversalWarned).to.be.true;
+      await expect(context.loadAssetsFromLocal()).to.be.rejectedWith('Path traversal blocked');
     } finally {
-      warnSpy.restore();
       fs.removeSync(outsideFile);
     }
   });

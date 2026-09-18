@@ -1,12 +1,10 @@
 import path from 'path';
 import { expect } from 'chai';
 import fs from 'fs-extra';
-import sinon from 'sinon';
 import Context from '../../../src/context/directory';
 import handler from '../../../src/context/directory/handlers/branding';
 import { constants } from '../../../src/tools';
 import { loadJSON } from '../../../src/utils';
-import log from '../../../src/logger';
 import { cleanThenMkdir, mockMgmtClient, testDataDir } from '../../utils';
 
 const html = '<html>##foo##</html>';
@@ -95,7 +93,7 @@ describe('#directory context branding', () => {
     expect(context.assets.branding).to.deep.equal(JSON.parse(brandingSettings));
   });
 
-  it('should warn when branding template body path resolves outside the config directory', async () => {
+  it('should throw when branding template body path resolves outside the config directory', async () => {
     const dir = path.join(testDataDir, 'directory', 'branding-traversal-warn');
     cleanThenMkdir(dir);
     const brandingDir = path.join(dir, constants.BRANDING_DIRECTORY);
@@ -114,16 +112,9 @@ describe('#directory context branding', () => {
 
     const config = { AUTH0_INPUT_FILE: dir };
     const context = new Context(config, mockMgmtClient());
-    if (log.warn.restore) log.warn.restore();
-    const warnSpy = sinon.spy(log, 'warn');
     try {
-      await context.loadAssetsFromLocal();
-      const traversalWarned = warnSpy.args.some(([msg]) =>
-        msg.includes('will be blocked as an error')
-      );
-      expect(traversalWarned).to.be.true;
+      await expect(context.loadAssetsFromLocal()).to.be.rejectedWith('Path traversal blocked');
     } finally {
-      warnSpy.restore();
       fs.removeSync(outsideFile);
     }
   });

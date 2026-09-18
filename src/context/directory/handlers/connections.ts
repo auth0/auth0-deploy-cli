@@ -14,6 +14,7 @@ import {
   mapClientID2NameSorted,
   encodeCertStringToBase64,
   getFormattedOptions,
+  assertInsideConfigRoot,
 } from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
@@ -47,13 +48,7 @@ function parse(context: DirectoryContext): ParsedConnections {
             `Passwordless email template purportedly located at ${resolvedHtmlFile} does not exist for connection. Ensure the existence of this file to proceed with deployment.`
           );
         }
-        if (!resolvedHtmlFile.startsWith(configRoot + path.sep)) {
-          log.warn(
-            `Path "${connection.options.email.body}" resolves to "${resolvedHtmlFile}" which is outside the config directory "${configRoot}". ` +
-              `This will be blocked as an error in the next major release. ` +
-              `Move the file inside your config directory.`
-          );
-        }
+        assertInsideConfigRoot(connection.options.email.body, resolvedHtmlFile, configRoot);
         connection.options.email.body = loadFileAndReplaceKeywords(resolvedHtmlFile, {
           mappings: context.mappings,
           disableKeywordReplacement: context.disableKeywordReplacement,

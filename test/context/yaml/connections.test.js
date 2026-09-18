@@ -1,11 +1,9 @@
 import path from 'path';
 import fs from 'fs-extra';
-import sinon from 'sinon';
 import { expect } from 'chai';
 
 import Context from '../../../src/context/yaml';
 import handler from '../../../src/context/yaml/handlers/connections';
-import log from '../../../src/logger';
 import { cleanThenMkdir, testDataDir, mockMgmtClient } from '../../utils';
 
 describe('#YAML context connections', () => {
@@ -313,7 +311,7 @@ describe('#YAML context connections', () => {
     expect(context.assets.connections[0].options.email.body).to.equal('html body content');
   });
 
-  it('should warn when email body path resolves outside the config directory', async () => {
+  it('should throw when email body path resolves outside the config directory', async () => {
     const dir = path.join(testDataDir, 'yaml', 'connections-traversal-warn');
     cleanThenMkdir(dir);
 
@@ -337,16 +335,9 @@ describe('#YAML context connections', () => {
 
     const config = { AUTH0_INPUT_FILE: yamlFile };
     const context = new Context(config, mockMgmtClient());
-    if (log.warn.restore) log.warn.restore();
-    const warnSpy = sinon.spy(log, 'warn');
     try {
-      await context.loadAssetsFromLocal();
-      const traversalWarned = warnSpy.args.some(([msg]) =>
-        msg.includes('will be blocked as an error')
-      );
-      expect(traversalWarned).to.be.true;
+      await expect(context.loadAssetsFromLocal()).to.be.rejectedWith('Path traversal blocked');
     } finally {
-      warnSpy.restore();
       fs.removeSync(outsideFile);
     }
   });

@@ -2,7 +2,14 @@ import path from 'path';
 import fs from 'fs-extra';
 import { constants, loadFileAndReplaceKeywords } from '../../../tools';
 
-import { getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize } from '../../../utils';
+import {
+  getFiles,
+  existsMustBeDir,
+  dumpJSON,
+  loadJSON,
+  sanitize,
+  assertInsideConfigRoot,
+} from '../../../utils';
 import log from '../../../logger';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
@@ -31,13 +38,7 @@ function parse(context: DirectoryContext): ParsedHooks {
         constants.HOOKS_DIRECTORY,
         normalizedScript
       );
-      if (!resolvedPath.startsWith(configRoot + path.sep)) {
-        log.warn(
-          `Path "${hook.script}" resolves to "${resolvedPath}" which is outside the config directory "${configRoot}". ` +
-            `This will be blocked as an error in the next major release. ` +
-            `Move the file inside your config directory.`
-        );
-      }
+      assertInsideConfigRoot(hook.script, resolvedPath, configRoot);
       hook.script = loadFileAndReplaceKeywords(resolvedPath, {
         mappings: context.mappings,
         disableKeywordReplacement: context.disableKeywordReplacement,

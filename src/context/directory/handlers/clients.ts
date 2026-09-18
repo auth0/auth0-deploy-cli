@@ -11,6 +11,7 @@ import {
   loadJSON,
   sanitize,
   clearClientArrays,
+  assertInsideConfigRoot,
 } from '../../../utils';
 import { ParsedAsset } from '../../../types';
 import { DirectoryHandler } from '.';
@@ -37,13 +38,7 @@ function parse(context: DirectoryContext): ParsedClients {
         const resolvedLoginPage = path.resolve(clientsFolder, client.custom_login_page);
 
         if (isFile(resolvedLoginPage)) {
-          if (!resolvedLoginPage.startsWith(configRoot + path.sep)) {
-            log.warn(
-              `Path "${client.custom_login_page}" resolves to "${resolvedLoginPage}" which is outside the config directory "${configRoot}". ` +
-                `This will be blocked as an error in the next major release. ` +
-                `Move the file inside your config directory.`
-            );
-          }
+          assertInsideConfigRoot(client.custom_login_page, resolvedLoginPage, configRoot);
           client.custom_login_page = loadFileAndReplaceKeywords(resolvedLoginPage, {
             mappings: context.mappings,
             disableKeywordReplacement: context.disableKeywordReplacement,
