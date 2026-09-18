@@ -33,25 +33,6 @@ describe('#guardianPolicies handler', () => {
         policies: ['all-applications'],
       });
     });
-
-    it('should return {} when list() returns 403 insufficient_entitlement', async () => {
-      const auth0 = {
-        guardian: {
-          policies: {
-            list: () => {
-              const error = new ManagementError('Forbidden');
-              error.statusCode = 403;
-              error.body = { errorCode: 'insufficient_entitlement' };
-              return Promise.reject(error);
-            },
-          },
-        },
-      };
-
-      const handler = new guardianPolicies.default({ client: auth0 });
-      const data = await handler.getType();
-      expect(data).to.deep.equal({});
-    });
   });
 
   describe('#processChanges', () => {

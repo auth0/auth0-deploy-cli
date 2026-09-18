@@ -34,17 +34,9 @@ export default class GuardianPoliciesHandler extends DefaultHandler {
   // TODO: standardize empty object literal with more intentional empty indicator
   async getType(): Promise<GuardianPoliciesHandler['existing'] | {}> {
     if (this.existing) return this.existing;
-    try {
-      const policies = await this.client.guardian.policies.list();
-      this.existing = { policies };
-      return this.existing;
-    } catch (err) {
-      if (isInsufficientEntitlementError(err)) {
-        log.warn('Skipping guardianPolicies export: tenant does not have Adaptive MFA entitlement');
-        return {};
-      }
-      throw err;
-    }
+    const policies = await this.client.guardian.policies.list();
+    this.existing = { policies };
+    return this.existing;
   }
 
   async processChanges(assets: Assets): Promise<void> {
