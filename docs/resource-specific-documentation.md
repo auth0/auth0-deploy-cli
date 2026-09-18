@@ -8,6 +8,23 @@ However, there are some notable nuances to be aware of:
 
 The Deploy CLI's own client grant is intentionally not exported nor configurable by itself. This is done to prevent breaking changes, otherwise the tool could potentially revoke access or otherwise crash in the midst of an import. In a multi-tenant, multi-environment context, it is expect that new tenants will have a designated client already established for the Deploy CLI, as mentioned in the [getting started instructions](./../README.md#create-a-dedicated-auth0-application).
 
+### Anonymous Sessions subject type
+
+Client grants support a `subject_type` field, which is one of `client`, `user`, or `anonymous_user`. Setting `subject_type: anonymous_user` authorizes a client to obtain anonymous-session access tokens for the given audience. This is the grant that a resource server's `require_client_grant` anonymous policy checks for (see the Resource Servers section below).
+
+`subject_type` is immutable. If the `subject_type` of an existing grant changes, the Deploy CLI deletes the old grant and creates a new one rather than updating it in place.
+
+- `subject_type` (string): One of `client`, `user`, `anonymous_user`.
+
+```yaml
+clientGrants:
+  - client_id: My Application
+    audience: https://api.example.com/
+    subject_type: anonymous_user
+    scope:
+      - read:widgets
+```
+
 ## Prompts
 
 The prompts resource allows you to configure Universal Login pages, including custom text, custom HTML partials, and screen renderers.
@@ -444,6 +461,32 @@ clients:
       active: true
 ```
 
+## Clients (Anonymous Sessions)
+
+The Deploy CLI supports the `anonymous_sessions` property on clients, which controls whether the client can start anonymous sessions.
+
+- `anonymous_sessions.active` (boolean): Set to `true` to enable anonymous sessions for the client.
+
+**YAML Example**
+
+```yaml
+clients:
+  - name: My Application
+    anonymous_sessions:
+      active: true
+```
+
+**Directory Example**
+
+```json
+{
+  "name": "My Application",
+  "anonymous_sessions": {
+    "active": true
+  }
+}
+```
+
 ## Databases
 
 When managing database connections, the values of `options.customScripts` point to specific javascript files relative to
@@ -607,6 +650,59 @@ resourceServers:
   "identifier": "https://api.example.com",
   "allow_online_access": true,
   "allow_online_access_with_ephemeral_sessions": false
+}
+```
+
+### Anonymous Sessions: `subject_type_authorization.anonymous_user`, `token_lifetime_for_anonymous_access_tokens`, and `access_token.claims_mapping`
+
+The Deploy CLI supports the resource server fields that configure anonymous-session access tokens:
+
+- `subject_type_authorization.anonymous_user.policy` (string): The access policy for anonymous user flows. One of `deny_all` or `require_client_grant`. This sits alongside the existing `user` and `client` policies. Note that `subject_type_authorization` does not allow unknown properties, so `anonymous_user` must be spelled exactly as shown.
+- `token_lifetime_for_anonymous_access_tokens` (number): Expiration value, in seconds, for anonymous-session access tokens issued for this API.
+- `access_token.claims_mapping.custom_claims` (array): Custom claims to emit in anonymous-session access tokens. Each rule maps a value read from the anonymous-session context onto a named access-token claim, and has two fields:
+  - `name` (string): The access-token claim name to emit.
+  - `expression` (string): A restricted dot-path expression read from the anonymous-session context (for example `anonymous_session.metadata.country`).
+
+When the anonymous policy is `require_client_grant`, a client must hold a client grant with `subject_type: anonymous_user` for this audience (see the Client Grants section above).
+
+**YAML Example**
+
+```yaml
+resourceServers:
+  - name: My API
+    identifier: https://api.example.com
+    subject_type_authorization:
+      user:
+        policy: allow_all
+      client:
+        policy: require_client_grant
+      anonymous_user:
+        policy: require_client_grant
+    token_lifetime_for_anonymous_access_tokens: 3600
+    access_token:
+      claims_mapping:
+        custom_claims:
+          - name: country
+            expression: anonymous_session.metadata.country
+```
+
+**Directory Example**
+
+```json
+{
+  "name": "My API",
+  "identifier": "https://api.example.com",
+  "subject_type_authorization": {
+    "user": { "policy": "allow_all" },
+    "client": { "policy": "require_client_grant" },
+    "anonymous_user": { "policy": "require_client_grant" }
+  },
+  "token_lifetime_for_anonymous_access_tokens": 3600,
+  "access_token": {
+    "claims_mapping": {
+      "custom_claims": [{ "name": "country", "expression": "anonymous_session.metadata.country" }]
+    }
+  }
 }
 ```
 
@@ -953,6 +1049,42 @@ tenant:
   "country_codes": {
     "list": ["US", "GB", "CA"],
     "mode": "allow"
+  }
+}
+```
+
+## Tenant Settings (Anonymous Sessions)
+
+The Deploy CLI supports configuring anonymous session behavior via the top-level `sessions.anonymous` object in tenant settings:
+
+- `sessions.anonymous.lifetime_in_minutes` (integer): The lifetime of an anonymous session, in minutes.
+- `sessions.anonymous.activate_cookie` (boolean): Whether to activate the anonymous session cookie.
+
+Other keys under `sessions` are passed through untouched, so unmanaged session settings are preserved.
+
+**YAML Example**
+
+```yaml
+tenant:
+  sessions:
+    anonymous:
+      lifetime_in_minutes: 120
+      activate_cookie: true
+```
+
+**Directory Example**
+
+```
+./tenant.json
+```
+
+```json
+{
+  "sessions": {
+    "anonymous": {
+      "lifetime_in_minutes": 120,
+      "activate_cookie": true
+    }
   }
 }
 ```
