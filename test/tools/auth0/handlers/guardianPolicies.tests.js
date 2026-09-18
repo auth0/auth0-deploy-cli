@@ -1,4 +1,5 @@
 const { expect } = require('chai');
+const { ManagementError } = require('auth0');
 const guardianPolicies = require('../../../../src/tools/auth0/handlers/guardianPolicies');
 
 describe('#guardianPolicies handler', () => {
@@ -58,6 +59,53 @@ describe('#guardianPolicies handler', () => {
           },
         },
       ]);
+    });
+
+    it('should warn and skip when set() returns 403 insufficient_entitlement', async () => {
+      const auth0 = {
+        guardian: {
+          policies: {
+            set: () => {
+              const error = new ManagementError('Forbidden');
+              error.statusCode = 403;
+              error.body = { errorCode: 'insufficient_entitlement' };
+              return Promise.reject(error);
+            },
+          },
+        },
+      };
+
+      const handler = new guardianPolicies.default({ client: auth0 });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [{ guardianPolicies: { policies: ['confidence-score'] } }]);
+      expect(handler.updated).to.equal(0);
+    });
+
+    it('should re-throw 403 errors that are not insufficient_entitlement', async () => {
+      const auth0 = {
+        guardian: {
+          policies: {
+            set: () => {
+              const error = new ManagementError('Forbidden');
+              error.statusCode = 403;
+              error.body = { errorCode: 'some_other_error' };
+              return Promise.reject(error);
+            },
+          },
+        },
+      };
+
+      const handler = new guardianPolicies.default({ client: auth0 });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      try {
+        await stageFn.apply(handler, [{ guardianPolicies: { policies: ['confidence-score'] } }]);
+        expect.fail('Should have thrown an error');
+      } catch (err) {
+        expect(err.statusCode).to.equal(403);
+        expect(err.body.errorCode).to.not.equal('insufficient_entitlement');
+      }
     });
 
     it('should skip processing if assets are empty', async () => {
