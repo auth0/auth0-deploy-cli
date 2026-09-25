@@ -339,6 +339,7 @@ describe('#YAML context validation', () => {
         bruteForceProtection: {},
         captcha: {},
         suspiciousIpThrottling: {},
+        phoneProviderProtection: {},
       },
       logStreams: [],
       prompts: {
@@ -499,6 +500,7 @@ describe('#YAML context validation', () => {
         bruteForceProtection: {},
         captcha: {},
         suspiciousIpThrottling: {},
+        phoneProviderProtection: {},
       },
       logStreams: [],
       prompts: {
@@ -660,6 +662,7 @@ describe('#YAML context validation', () => {
         bruteForceProtection: {},
         captcha: {},
         suspiciousIpThrottling: {},
+        phoneProviderProtection: {},
       },
       prompts: {
         customText: {},

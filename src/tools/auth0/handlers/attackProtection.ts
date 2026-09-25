@@ -177,6 +177,19 @@ export const schema = {
     suspiciousIpThrottling: {
       type: 'object',
     },
+    phoneProviderProtection: {
+      type: 'object',
+      properties: {
+        type: {
+          type: 'string',
+          enum: ['exponential', 'default'],
+          description:
+            'The backoff strategy applied to Send SMS during MFA enrollment. Gated by the sms_exponential_backoff feature flag; when the flag is disabled the API returns 403 and this setting is skipped on export.',
+        },
+      },
+      required: ['type'],
+      additionalProperties: false,
+    },
   },
   additionalProperties: false,
 };
@@ -187,6 +200,7 @@ export type AttackProtection = {
   bruteForceProtection: Asset;
   captcha?: Asset | null;
   suspiciousIpThrottling: Asset;
+  phoneProviderProtection?: Asset | null;
 };
 
 export default class AttackProtectionHandler extends DefaultAPIHandler {
@@ -236,6 +250,11 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
           enabled: item.suspiciousIpThrottling.enabled,
         };
       }
+      if (item.phoneProviderProtection?.type) {
+        obj['phone-provider-protection'] = {
+          type: item.phoneProviderProtection.type,
+        };
+      }
       return obj;
     })();
 
@@ -256,6 +275,7 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
 
     let botDetection: Asset | null = null;
     let captcha: Asset | null = null;
+    let phoneProviderProtection: Asset | null = null;
 
     try {
       botDetection = await this.client.attackProtection.botDetection.get();
@@ -281,6 +301,18 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
       }
     }
 
+    try {
+      phoneProviderProtection = await this.client.attackProtection.phoneProviderProtection.get();
+    } catch (err) {
+      if (err.statusCode === 403) {
+        log.warn(
+          'Phone provider protection is not enabled for this tenant (sms_exponential_backoff feature flag). Skipping phone provider protection settings.'
+        );
+      } else {
+        throw err;
+      }
+    }
+
     const attackProtection: AttackProtection = {
       breachedPasswordDetection: breachedPasswordDetection,
       bruteForceProtection: bruteForceProtection,
@@ -293,6 +325,10 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
 
     if (captcha) {
       attackProtection.captcha = captcha;
+    }
+
+    if (phoneProviderProtection) {
+      attackProtection.phoneProviderProtection = phoneProviderProtection;
     }
 
     this.existing = attackProtection;
@@ -364,6 +400,15 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
         this.client.attackProtection.suspiciousIpThrottling.update(
           attackProtection.suspiciousIpThrottling
         )
+      );
+    }
+
+    // Phone provider protection uses PATCH (not update) and requires `type` on every request
+    if (attackProtection.phoneProviderProtection?.type) {
+      updates.push(
+        this.client.attackProtection.phoneProviderProtection.patch({
+          type: attackProtection.phoneProviderProtection.type,
+        })
       );
     }
 
