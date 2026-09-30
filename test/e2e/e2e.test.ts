@@ -16,7 +16,12 @@ const shouldUseRecordings = process.env['AUTH0_HTTP_RECORDINGS'] === 'lockdown';
 const AUTH0_DOMAIN = shouldUseRecordings
   ? 'deploy-cli-dev.eu.auth0.com'
   : process.env['AUTH0_E2E_TENANT_DOMAIN'] || '';
-const AUTH0_CLIENT_ID = process.env['AUTH0_E2E_CLIENT_ID'] || '';
+// Public client_id of the dev tenant's "Deploy CLI" app — already present in the
+// committed recordings. Pinned so the self-exclusion in the clients handler fires
+// under lockdown on forks too (forks don't get AUTH0_E2E_CLIENT_ID). Not a secret.
+const AUTH0_CLIENT_ID = shouldUseRecordings
+  ? 'Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE'
+  : process.env['AUTH0_E2E_CLIENT_ID'] || '';
 const AUTH0_CLIENT_SECRET = process.env['AUTH0_E2E_CLIENT_SECRET'] || '';
 const AUTH0_ACCESS_TOKEN = shouldUseRecordings ? 'insecure' : undefined;
 
