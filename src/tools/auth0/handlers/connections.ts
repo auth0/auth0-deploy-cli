@@ -421,6 +421,11 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
 
   scimHandler: ScimHandler;
 
+  // On import, limits getType()'s enabled_clients enrichment to connections in
+  // the local config, skipping an API call per remote-only connection on large
+  // tenants. Null on export, where every connection is enriched.
+  private enabledClientsEnrichmentFilter: Set<string> | null = null;
+
   constructor(config: DefaultAPIHandler) {
     super({
       ...config,
@@ -763,8 +768,22 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
       .promise();
   }
 
+  // Scopes getType()'s enabled_clients enrichment to the local config's
+  // connection names. Called on import; export leaves it unset (enrich all).
+  private setEnabledClientsEnrichmentFilter(connections: Asset[]): void {
+    this.enabledClientsEnrichmentFilter = new Set(
+      connections
+        .map((connection) => connection.name)
+        .filter((name): name is string => typeof name === 'string')
+    );
+  }
+
   async getType(): Promise<Asset[] | null> {
     if (this.existing) return this.existing;
+
+    // Consume the import filter and reset it so it can't leak into a later call.
+    const enrichmentFilter = this.enabledClientsEnrichmentFilter;
+    this.enabledClientsEnrichmentFilter = null;
 
     const [connections, directoryProvisioningConfigs] = await Promise.all([
       paginate<Connection>(this.client.connections.list, {
@@ -788,7 +807,13 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     this.existing = filteredConnections;
     if (this.existing === null) return [];
 
-    const connectionTasks = filteredConnections.map((con, index) => ({ con, index }));
+    // Import: enrich only local-config connections. Export (null): enrich all.
+    const shouldEnrich = (con: Connection): boolean =>
+      enrichmentFilter === null || (con.name != null && enrichmentFilter.has(con.name));
+
+    const connectionTasks = filteredConnections
+      .map((con, index) => ({ con, index }))
+      .filter(({ con }) => shouldEnrich(con));
 
     const connectionsWithEnabledClients = await this.client.pool
       .addEachTask({
@@ -835,9 +860,11 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
       })
       .promise();
 
-    this.existing = connectionsWithEnabledClients
-      .sort((a, b) => a.index - b.index)
-      .map(({ connection }) => connection);
+    // Merge enriched connections back by index; skipped ones pass through.
+    const enrichedByIndex = new Map(
+      connectionsWithEnabledClients.map(({ index, connection }) => [index, connection])
+    );
+    this.existing = filteredConnections.map((con, index) => enrichedByIndex.get(index) ?? con);
 
     // Apply `scim_configuration` to all the relevant `SCIM` connections. This method mutates `this.existing`.
     await this.scimHandler.applyScimConfiguration(this.existing);
@@ -856,6 +883,9 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
         update: [],
         conflicts: [],
       };
+
+    // Scope getType() enrichment to the local config (see getType()).
+    this.setEnabledClientsEnrichmentFilter(connections);
 
     // Convert enabled_clients by name to the id
     const clients = await paginate<Client>(this.client.clients.list, {
@@ -903,6 +933,9 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
         conflicts: [],
       };
     }
+
+    // Scope getType() enrichment to the local config (see getType()).
+    this.setEnabledClientsEnrichmentFilter(connections);
 
     const clients = await paginate<Client>(this.client.clients.list, {
       paginate: true,

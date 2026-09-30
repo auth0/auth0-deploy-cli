@@ -112,6 +112,37 @@ describe('ScimHandler', () => {
       handler.getScimConfiguration = sinon.stub().rejects(new Error('Unexpected error'));
       await expect(handler.createIdMap(connections)).to.be.rejectedWith('Unexpected error');
     });
+
+    it('should only look up SCIM-capable strategies', async () => {
+      const connections = [
+        { id: 'con_saml', strategy: 'samlp' },
+        { id: 'con_db', strategy: 'auth0' }, // Non-SCIM
+        { id: 'con_google', strategy: 'google-oauth2' }, // Non-SCIM
+      ];
+
+      handler.getScimConfiguration = sinon.stub().resolves(null);
+      await handler.createIdMap(connections);
+
+      expect(handler.getScimConfiguration.calledOnceWith('con_saml')).to.be.true;
+      expect(handler.idMap.size).to.equal(1);
+      expect(handler.idMap.get('con_db')).to.be.undefined;
+      expect(handler.idMap.get('con_google')).to.be.undefined;
+    });
+
+    it('should skip all lookups when the read:scim_config scope is unavailable', async () => {
+      const connections = [
+        { id: 'con_saml', strategy: 'samlp' },
+        { id: 'con_oidc', strategy: 'oidc' },
+      ];
+
+      handler.scimScopes.read = false;
+      handler.getScimConfiguration = sinon.stub().resolves(null);
+
+      await handler.createIdMap(connections);
+
+      expect(handler.getScimConfiguration.called).to.be.false;
+      expect(handler.idMap.size).to.equal(0);
+    });
   });
 
   describe('applyScimConfiguration', () => {
