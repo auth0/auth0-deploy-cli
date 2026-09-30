@@ -519,6 +519,71 @@ describe('#attackProtection handler', () => {
       expect(handler.updated).to.equal(1);
     });
 
+    it('should skip phone provider protection patch on 403 without failing other updates', async () => {
+      let breachedUpdated = false;
+      const auth0 = {
+        attackProtection: {
+          breachedPasswordDetection: {
+            update: (data) => {
+              breachedUpdated = true;
+              return Promise.resolve(data);
+            },
+          },
+          phoneProviderProtection: {
+            patch: () => {
+              // Flag-off tenants 403 on write, same as on read
+              const err = new Error('Forbidden');
+              err.statusCode = 403;
+              return Promise.reject(err);
+            },
+          },
+        },
+      };
+
+      const handler = new attackProtection.default({ client: auth0 });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      // Should resolve (not reject) even though the phoneProviderProtection patch 403s
+      await stageFn.apply(handler, [
+        {
+          attackProtection: {
+            breachedPasswordDetection: { enabled: true },
+            phoneProviderProtection: { type: 'exponential' },
+          },
+        },
+      ]);
+
+      expect(breachedUpdated).to.equal(true);
+      expect(handler.updated).to.equal(1);
+    });
+
+    it('should rethrow non-403 errors from phone provider protection patch', async () => {
+      const auth0 = {
+        attackProtection: {
+          phoneProviderProtection: {
+            patch: () => {
+              const err = new Error('Internal Server Error');
+              err.statusCode = 500;
+              return Promise.reject(err);
+            },
+          },
+        },
+      };
+
+      const handler = new attackProtection.default({ client: auth0 });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await expect(
+        stageFn.apply(handler, [
+          {
+            attackProtection: {
+              phoneProviderProtection: { type: 'exponential' },
+            },
+          },
+        ])
+      ).to.be.rejectedWith('Internal Server Error');
+    });
+
     it('should not patch phone provider protection when type is absent', async () => {
       let patchCalled = false;
       const auth0 = {

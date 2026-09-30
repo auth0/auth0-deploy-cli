@@ -188,7 +188,6 @@ export const schema = {
         },
       },
       required: ['type'],
-      additionalProperties: false,
     },
   },
   additionalProperties: false,
@@ -403,12 +402,24 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
       );
     }
 
-    // Phone provider protection uses PATCH (not update) and requires `type` on every request
+    // Phone provider protection uses PATCH (not update) and requires `type` on every request.
+    // Guard the 403 (sms_exponential_backoff flag off) per-promise so a flag-off tenant does
+    // not fail the whole attackProtection stage — mirrors the 403-skip in getType().
     if (attackProtection.phoneProviderProtection?.type) {
       updates.push(
-        this.client.attackProtection.phoneProviderProtection.patch({
-          type: attackProtection.phoneProviderProtection.type,
-        })
+        this.client.attackProtection.phoneProviderProtection
+          .patch({
+            type: attackProtection.phoneProviderProtection.type,
+          })
+          .catch((err: any) => {
+            if (err.statusCode === 403) {
+              log.warn(
+                'Phone provider protection is not enabled for this tenant (sms_exponential_backoff feature flag). Skipping phone provider protection update.'
+              );
+              return;
+            }
+            throw err;
+          })
       );
     }
 
