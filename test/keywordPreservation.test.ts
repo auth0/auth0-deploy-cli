@@ -597,44 +597,46 @@ describe('preserveKeywords', () => {
     { id: 'id', identifiers: ['name'], type: 'pages' },
   ];
 
+  const standardKeywordMappings = {
+    COMPANY_NAME: 'Travel0',
+    URL: 'https://trave0.com',
+    ALLOWED_LOGOUT_URLS: ['localhost:3000/logout', 'https://travel0.com/logout'],
+    ENV: 'Production',
+    API_MAIN_IDENTIFIER: 'https://travel0.com/api/v1',
+    AUTH_TOKEN: 'mock-twilio-auth-token',
+    TWILIO_SID: 'twilio-sid',
+  };
+
+  const expectedPreservedAssets = () => {
+    const expected = cloneDeep(mockRemoteAssets);
+    //@ts-ignore
+    expected.tenant = mockLocalAssets.tenant;
+    expected.actions[0].display_name = '##ENV## Action 1';
+    expected.emailTemplates[0].body = '<html>Welcome to ##ENV## ##COMPANY_NAME## Tenant</html>';
+    expected.resourceServers = [
+      {
+        name: 'api-main',
+        identifier: '##API_MAIN_IDENTIFIER##',
+      },
+    ];
+    expected.customDomains[0].domain = '##COMPANY_NAME##.com';
+    expected.guardianFactorProviders[0].sid = '##TWILIO_SID##';
+    expected.guardianFactorProviders[0].messaging_service_sid = '##TWILIO_SID##';
+    expected.guardianFactorProviders[0].auth_token = '##AUTH_TOKEN##';
+    expected.guardianFactorProviders[0].from = '##COMPANY_NAME##';
+    expected.pages[0].url = '##URL##/error';
+    return expected;
+  };
+
   it('should preserve keywords when they correlate to keyword mappings', () => {
     const preservedAssets = preserveKeywords({
       localAssets: mockLocalAssets,
       remoteAssets: mockRemoteAssets,
-      keywordMappings: {
-        COMPANY_NAME: 'Travel0',
-        URL: 'https://trave0.com',
-        ALLOWED_LOGOUT_URLS: ['localhost:3000/logout', 'https://travel0.com/logout'],
-        ENV: 'Production',
-        API_MAIN_IDENTIFIER: 'https://travel0.com/api/v1',
-        AUTH_TOKEN: 'mock-twilio-auth-token',
-        TWILIO_SID: 'twilio-sid',
-      },
+      keywordMappings: standardKeywordMappings,
       auth0Handlers,
     });
 
-    expect(preservedAssets).to.deep.equal(
-      (() => {
-        const expected = cloneDeep(mockRemoteAssets);
-        //@ts-ignore
-        expected.tenant = mockLocalAssets.tenant;
-        expected.actions[0].display_name = '##ENV## Action 1';
-        expected.emailTemplates[0].body = '<html>Welcome to ##ENV## ##COMPANY_NAME## Tenant</html>';
-        expected.resourceServers = [
-          {
-            name: 'api-main',
-            identifier: '##API_MAIN_IDENTIFIER##',
-          },
-        ];
-        expected.customDomains[0].domain = '##COMPANY_NAME##.com';
-        expected.guardianFactorProviders[0].sid = '##TWILIO_SID##';
-        expected.guardianFactorProviders[0].messaging_service_sid = '##TWILIO_SID##';
-        expected.guardianFactorProviders[0].auth_token = '##AUTH_TOKEN##';
-        expected.guardianFactorProviders[0].from = '##COMPANY_NAME##';
-        expected.pages[0].url = '##URL##/error';
-        return expected;
-      })()
-    );
+    expect(preservedAssets).to.deep.equal(expectedPreservedAssets());
   });
 
   it('should not preserve keywords when no keyword mappings', () => {
@@ -645,6 +647,19 @@ describe('preserveKeywords', () => {
       auth0Handlers,
     });
     expect(preservedAssets).to.deep.equal(mockRemoteAssets);
+  });
+
+  it('should still preserve keywords when a handler has no identifiers', () => {
+    // Regression test for https://github.com/auth0/auth0-deploy-cli/issues/1446: standalone
+    // handlers (e.g. clientAuthCredentials) expose no `identifiers` and must not break preservation.
+    const preservedAssets = preserveKeywords({
+      localAssets: mockLocalAssets,
+      remoteAssets: mockRemoteAssets,
+      keywordMappings: standardKeywordMappings,
+      auth0Handlers: [...auth0Handlers, { id: 'id', type: 'clientAuthCredentials' }],
+    });
+
+    expect(preservedAssets).to.deep.equal(expectedPreservedAssets());
   });
 
   it('should preserve keywords in identifier fields', () => {

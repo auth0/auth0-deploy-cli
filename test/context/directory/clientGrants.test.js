@@ -195,6 +195,106 @@ describe('#directory context clientGrants', () => {
     ).to.deep.equal(context.assets.clientGrants[2]);
   });
 
+  it('should dump grants differing only by subject_type to separate files', async () => {
+    const dir = path.join(testDataDir, 'directory', 'clientGrantsDumpSubjectType');
+    cleanThenMkdir(dir);
+    const context = new Context(
+      { AUTH0_INPUT_FILE: dir },
+      {
+        ...mockMgmtClient(),
+        clients: {
+          list: (params) =>
+            mockPagedData(params, 'clients', [{ client_id: 'client-id-1', name: 'Primary M2M' }]),
+        },
+        resourceServers: {
+          list: (params) =>
+            mockPagedData(params, 'resource_servers', [
+              {
+                id: 'resource-server-1',
+                name: 'Payments Service',
+                identifier: 'https://payments.travel0.com/api',
+              },
+            ]),
+        },
+      }
+    );
+
+    context.assets.clientGrants = [
+      {
+        audience: 'https://payments.travel0.com/api',
+        client_id: 'client-id-1',
+        scope: ['read:card'],
+        subject_type: 'client',
+      },
+      {
+        audience: 'https://payments.travel0.com/api',
+        client_id: 'client-id-1',
+        scope: ['update:card'],
+        subject_type: 'user',
+      },
+    ];
+
+    await handler.dump(context);
+    const clientGrantsFolder = path.join(dir, constants.CLIENTS_GRANTS_DIRECTORY);
+
+    const files = getFiles(clientGrantsFolder, ['.json']);
+
+    // Both grants must survive the dump; previously the second overwrote the first.
+    expect(files).to.have.length(2);
+    expect(files).to.have.members([
+      path.join(clientGrantsFolder, 'Primary M2M-Payments Service-client.json'),
+      path.join(clientGrantsFolder, 'Primary M2M-Payments Service-user.json'),
+    ]);
+
+    expect(
+      loadJSON(path.join(clientGrantsFolder, 'Primary M2M-Payments Service-client.json'))
+    ).to.deep.equal(context.assets.clientGrants[0]);
+    expect(
+      loadJSON(path.join(clientGrantsFolder, 'Primary M2M-Payments Service-user.json'))
+    ).to.deep.equal(context.assets.clientGrants[1]);
+  });
+
+  it('should keep the legacy filename when subject_type is absent', async () => {
+    const dir = path.join(testDataDir, 'directory', 'clientGrantsDumpNoSubjectType');
+    cleanThenMkdir(dir);
+    const context = new Context(
+      { AUTH0_INPUT_FILE: dir },
+      {
+        ...mockMgmtClient(),
+        clients: {
+          list: (params) =>
+            mockPagedData(params, 'clients', [{ client_id: 'client-id-1', name: 'Primary M2M' }]),
+        },
+        resourceServers: {
+          list: (params) =>
+            mockPagedData(params, 'resource_servers', [
+              {
+                id: 'resource-server-1',
+                name: 'Payments Service',
+                identifier: 'https://payments.travel0.com/api',
+              },
+            ]),
+        },
+      }
+    );
+
+    context.assets.clientGrants = [
+      {
+        audience: 'https://payments.travel0.com/api',
+        client_id: 'client-id-1',
+        scope: ['read:card'],
+      },
+    ];
+
+    await handler.dump(context);
+    const clientGrantsFolder = path.join(dir, constants.CLIENTS_GRANTS_DIRECTORY);
+
+    const files = getFiles(clientGrantsFolder, ['.json']);
+
+    expect(files).to.have.length(1);
+    expect(files[0]).to.equal(path.join(clientGrantsFolder, 'Primary M2M-Payments Service.json'));
+  });
+
   it('should not dump grants for excluded clients', async () => {
     const dir = path.join(testDataDir, 'directory', 'clientGrantsDumpExclude');
     cleanThenMkdir(dir);
@@ -234,6 +334,371 @@ describe('#directory context clientGrants', () => {
 
     expect(files).to.have.length(1);
     expect(files[0]).to.equal(path.join(clientGrantsFolder, 'IncludedClient-Some API.json'));
+  });
+
+  it('should remove files for grants no longer present', async () => {
+    const dir = path.join(testDataDir, 'directory', 'clientGrantsDumpPrune');
+    cleanThenMkdir(dir);
+    const clientGrantsFolder = path.join(dir, constants.CLIENTS_GRANTS_DIRECTORY);
+    fs.ensureDirSync(clientGrantsFolder);
+
+    // A grant that no longer exists on the tenant, left over from an earlier dump.
+    fs.writeFileSync(
+      path.join(clientGrantsFolder, 'Primary M2M-Removed Service.json'),
+      JSON.stringify({
+        audience: 'https://removed.travel0.com/api',
+        client_id: 'client-id-1',
+        scope: [],
+      })
+    );
+
+    const context = new Context(
+      { AUTH0_INPUT_FILE: dir },
+      {
+        ...mockMgmtClient(),
+        clients: {
+          list: (params) =>
+            mockPagedData(params, 'clients', [{ client_id: 'client-id-1', name: 'Primary M2M' }]),
+        },
+        resourceServers: {
+          list: (params) =>
+            mockPagedData(params, 'resource_servers', [
+              {
+                id: 'resource-server-1',
+                name: 'Payments Service',
+                identifier: 'https://payments.travel0.com/api',
+              },
+            ]),
+        },
+      }
+    );
+
+    context.assets.clientGrants = [
+      {
+        audience: 'https://payments.travel0.com/api',
+        client_id: 'client-id-1',
+        scope: ['read:card'],
+      },
+    ];
+
+    await handler.dump(context);
+
+    const files = getFiles(clientGrantsFolder, ['.json']);
+    expect(files).to.have.length(1);
+    expect(files[0]).to.equal(path.join(clientGrantsFolder, 'Primary M2M-Payments Service.json'));
+  });
+
+  it('should remove a stale file when a grant filename changes', async () => {
+    const dir = path.join(testDataDir, 'directory', 'clientGrantsDumpPruneRename');
+    cleanThenMkdir(dir);
+    const clientGrantsFolder = path.join(dir, constants.CLIENTS_GRANTS_DIRECTORY);
+    fs.ensureDirSync(clientGrantsFolder);
+
+    const grant = {
+      audience: 'https://payments.travel0.com/api',
+      client_id: 'client-id-1',
+      scope: ['read:card'],
+      subject_type: 'client',
+    };
+
+    // Filename produced before subject_type was included in the name.
+    fs.writeFileSync(
+      path.join(clientGrantsFolder, 'Primary M2M-Payments Service.json'),
+      JSON.stringify(grant)
+    );
+
+    const context = new Context(
+      { AUTH0_INPUT_FILE: dir },
+      {
+        ...mockMgmtClient(),
+        clients: {
+          list: (params) =>
+            mockPagedData(params, 'clients', [{ client_id: 'client-id-1', name: 'Primary M2M' }]),
+        },
+        resourceServers: {
+          list: (params) =>
+            mockPagedData(params, 'resource_servers', [
+              {
+                id: 'resource-server-1',
+                name: 'Payments Service',
+                identifier: 'https://payments.travel0.com/api',
+              },
+            ]),
+        },
+      }
+    );
+
+    context.assets.clientGrants = [grant];
+
+    await handler.dump(context);
+
+    // The old name must not survive alongside the new one, otherwise the grant is parsed
+    // back twice and the import attempts to create a grant that already exists.
+    const files = getFiles(clientGrantsFolder, ['.json']);
+    expect(files).to.have.length(1);
+    expect(files[0]).to.equal(
+      path.join(clientGrantsFolder, 'Primary M2M-Payments Service-client.json')
+    );
+
+    const parseContext = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+    await parseContext.loadAssetsFromLocal();
+    expect(parseContext.assets.clientGrants).to.have.length(1);
+  });
+
+  it('should not remove non-JSON files when removing stale files', async () => {
+    const dir = path.join(testDataDir, 'directory', 'clientGrantsDumpPruneNonJson');
+    cleanThenMkdir(dir);
+    const clientGrantsFolder = path.join(dir, constants.CLIENTS_GRANTS_DIRECTORY);
+    fs.ensureDirSync(clientGrantsFolder);
+
+    // Files `parse` never reads back as grants. They are not stale state, so the cleanup pass
+    // must leave them alone.
+    fs.writeFileSync(path.join(clientGrantsFolder, 'README.md'), '# Grants');
+    fs.writeFileSync(path.join(clientGrantsFolder, 'notes.txt'), 'why these grants exist');
+
+    // A genuinely stale grant file, to prove cleanup still runs.
+    fs.writeFileSync(
+      path.join(clientGrantsFolder, 'Primary M2M-Removed Service.json'),
+      JSON.stringify({
+        audience: 'https://removed.travel0.com/api',
+        client_id: 'client-id-1',
+        scope: [],
+      })
+    );
+
+    const context = new Context(
+      { AUTH0_INPUT_FILE: dir },
+      {
+        ...mockMgmtClient(),
+        clients: {
+          list: (params) =>
+            mockPagedData(params, 'clients', [{ client_id: 'client-id-1', name: 'Primary M2M' }]),
+        },
+        resourceServers: {
+          list: (params) =>
+            mockPagedData(params, 'resource_servers', [
+              {
+                id: 'resource-server-1',
+                name: 'Payments Service',
+                identifier: 'https://payments.travel0.com/api',
+              },
+            ]),
+        },
+      }
+    );
+
+    context.assets.clientGrants = [
+      {
+        audience: 'https://payments.travel0.com/api',
+        client_id: 'client-id-1',
+        scope: ['read:card'],
+      },
+    ];
+
+    await handler.dump(context);
+
+    expect(fs.readdirSync(clientGrantsFolder).sort()).to.deep.equal([
+      'Primary M2M-Payments Service.json',
+      'README.md',
+      'notes.txt',
+    ]);
+  });
+
+  it('should preserve files for excluded clients when removing stale files', async () => {
+    const dir = path.join(testDataDir, 'directory', 'clientGrantsDumpPruneExclude');
+    cleanThenMkdir(dir);
+    const clientGrantsFolder = path.join(dir, constants.CLIENTS_GRANTS_DIRECTORY);
+    fs.ensureDirSync(clientGrantsFolder);
+
+    // Dumped by an older version, before subject_type was part of the filename, and before the
+    // client was excluded. The name this dump would derive for the grant is
+    // `ExcludedClient-Some API-client.json`, so the file must be preserved on its contents rather
+    // than on a name match.
+    fs.writeFileSync(
+      path.join(clientGrantsFolder, 'ExcludedClient-Some API.json'),
+      JSON.stringify({
+        audience: 'https://some.api.com',
+        client_id: 'client-id-2',
+        scope: ['write:data'],
+        subject_type: 'client',
+      })
+    );
+
+    const context = new Context(
+      { AUTH0_INPUT_FILE: dir },
+      {
+        ...mockMgmtClient(),
+        clients: {
+          list: (params) =>
+            mockPagedData(params, 'clients', [
+              { client_id: 'client-id-1', name: 'IncludedClient' },
+              { client_id: 'client-id-2', name: 'ExcludedClient' },
+            ]),
+        },
+        resourceServers: {
+          list: (params) =>
+            mockPagedData(params, 'resource_servers', [
+              {
+                id: 'resource-server-1',
+                name: 'Some API',
+                identifier: 'https://some.api.com',
+              },
+            ]),
+        },
+      }
+    );
+
+    context.assets.clientGrants = [
+      { audience: 'https://some.api.com', client_id: 'client-id-1', scope: ['read:data'] },
+      {
+        audience: 'https://some.api.com',
+        client_id: 'client-id-2',
+        scope: ['write:data'],
+        subject_type: 'client',
+      },
+    ];
+    context.assets.exclude = { clients: ['ExcludedClient'] };
+
+    await handler.dump(context);
+
+    const files = getFiles(clientGrantsFolder, ['.json']).map((f) => path.basename(f));
+    expect(files).to.have.members(['IncludedClient-Some API.json', 'ExcludedClient-Some API.json']);
+  });
+
+  it('should preserve an excluded client file recorded by client name', async () => {
+    const dir = path.join(testDataDir, 'directory', 'clientGrantsDumpPruneExcludeByName');
+    cleanThenMkdir(dir);
+    const clientGrantsFolder = path.join(dir, constants.CLIENTS_GRANTS_DIRECTORY);
+    fs.ensureDirSync(clientGrantsFolder);
+
+    // Dumps run with `clientsOrig` available store the client name in `client_id`, so the
+    // preservation check has to recognise that form too.
+    fs.writeFileSync(
+      path.join(clientGrantsFolder, 'Renamed API grant.json'),
+      JSON.stringify({
+        audience: 'https://some.api.com',
+        client_id: 'ExcludedClient',
+        scope: ['write:data'],
+      })
+    );
+
+    const context = new Context(
+      { AUTH0_INPUT_FILE: dir },
+      {
+        ...mockMgmtClient(),
+        clients: {
+          list: (params) =>
+            mockPagedData(params, 'clients', [
+              { client_id: 'client-id-1', name: 'IncludedClient' },
+              { client_id: 'client-id-2', name: 'ExcludedClient' },
+            ]),
+        },
+        resourceServers: {
+          list: (params) =>
+            mockPagedData(params, 'resource_servers', [
+              { id: 'resource-server-1', name: 'Some API', identifier: 'https://some.api.com' },
+            ]),
+        },
+      }
+    );
+
+    context.assets.clientGrants = [
+      { audience: 'https://some.api.com', client_id: 'client-id-1', scope: ['read:data'] },
+    ];
+    context.assets.exclude = { clients: ['ExcludedClient'] };
+
+    await handler.dump(context);
+
+    const files = getFiles(clientGrantsFolder, ['.json']).map((f) => path.basename(f));
+    expect(files).to.have.members(['IncludedClient-Some API.json', 'Renamed API grant.json']);
+  });
+
+  it('should preserve an excluded client file for a grant no longer on the tenant', async () => {
+    const dir = path.join(testDataDir, 'directory', 'clientGrantsDumpPruneExcludeGone');
+    cleanThenMkdir(dir);
+    const clientGrantsFolder = path.join(dir, constants.CLIENTS_GRANTS_DIRECTORY);
+    fs.ensureDirSync(clientGrantsFolder);
+
+    // The excluded client's grant is absent from the export, so no filename can be derived for it.
+    // The file is still the user's own config for a client they excluded, and must survive.
+    fs.writeFileSync(
+      path.join(clientGrantsFolder, 'ExcludedClient-Some API.json'),
+      JSON.stringify({
+        audience: 'https://some.api.com',
+        client_id: 'client-id-2',
+        scope: ['write:data'],
+      })
+    );
+
+    const context = new Context(
+      { AUTH0_INPUT_FILE: dir },
+      {
+        ...mockMgmtClient(),
+        clients: {
+          list: (params) =>
+            mockPagedData(params, 'clients', [
+              { client_id: 'client-id-1', name: 'IncludedClient' },
+              { client_id: 'client-id-2', name: 'ExcludedClient' },
+            ]),
+        },
+        resourceServers: {
+          list: (params) =>
+            mockPagedData(params, 'resource_servers', [
+              { id: 'resource-server-1', name: 'Some API', identifier: 'https://some.api.com' },
+            ]),
+        },
+      }
+    );
+
+    context.assets.clientGrants = [
+      { audience: 'https://some.api.com', client_id: 'client-id-1', scope: ['read:data'] },
+    ];
+    context.assets.exclude = { clients: ['ExcludedClient'] };
+
+    await handler.dump(context);
+
+    const files = getFiles(clientGrantsFolder, ['.json']).map((f) => path.basename(f));
+    expect(files).to.have.members(['IncludedClient-Some API.json', 'ExcludedClient-Some API.json']);
+  });
+
+  it('should keep an unreadable file instead of failing the dump', async () => {
+    const dir = path.join(testDataDir, 'directory', 'clientGrantsDumpPruneMalformed');
+    cleanThenMkdir(dir);
+    const clientGrantsFolder = path.join(dir, constants.CLIENTS_GRANTS_DIRECTORY);
+    fs.ensureDirSync(clientGrantsFolder);
+
+    // Reading files to identify excluded grants must not turn one bad file into a failed export.
+    fs.writeFileSync(path.join(clientGrantsFolder, 'broken.json'), '{ not json');
+
+    const context = new Context(
+      { AUTH0_INPUT_FILE: dir },
+      {
+        ...mockMgmtClient(),
+        clients: {
+          list: (params) =>
+            mockPagedData(params, 'clients', [
+              { client_id: 'client-id-1', name: 'IncludedClient' },
+              { client_id: 'client-id-2', name: 'ExcludedClient' },
+            ]),
+        },
+        resourceServers: {
+          list: (params) =>
+            mockPagedData(params, 'resource_servers', [
+              { id: 'resource-server-1', name: 'Some API', identifier: 'https://some.api.com' },
+            ]),
+        },
+      }
+    );
+
+    context.assets.clientGrants = [
+      { audience: 'https://some.api.com', client_id: 'client-id-1', scope: ['read:data'] },
+    ];
+    context.assets.exclude = { clients: ['ExcludedClient'] };
+
+    await handler.dump(context);
+
+    const files = getFiles(clientGrantsFolder, ['.json']).map((f) => path.basename(f));
+    expect(files).to.have.members(['IncludedClient-Some API.json', 'broken.json']);
   });
 
   it('should not fetch clients and resource servers if no client grants defined', async () => {

@@ -152,6 +152,25 @@ export const schema = {
               action_id: { type: 'string' },
             },
           },
+          otp_settings: {
+            type: 'object',
+            properties: {
+              email: {
+                type: 'object',
+                properties: {
+                  otp_length: { type: 'integer' },
+                  otp_expiry: { type: 'integer' },
+                },
+              },
+              phone: {
+                type: 'object',
+                properties: {
+                  otp_length: { type: 'integer' },
+                  otp_expiry: { type: 'integer' },
+                },
+              },
+            },
+          },
           password_options: {
             type: 'object',
             properties: {

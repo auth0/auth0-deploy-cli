@@ -1,6 +1,8 @@
 import DefaultAPIHandler from './default';
 import { Assets } from '../../../types';
 import { Management, ManagementError } from 'auth0';
+import log from '../../../logger';
+import { isInsufficientEntitlementError } from '../../utils';
 
 export const schema = {
   type: 'object',
@@ -44,7 +46,7 @@ export default class RiskAssessmentHandler extends DefaultAPIHandler {
     });
   }
 
-  async getType(): Promise<RiskAssessment> {
+  async getType(): Promise<RiskAssessment | null> {
     if (this.existing) {
       return this.existing;
     }
@@ -54,6 +56,9 @@ export default class RiskAssessmentHandler extends DefaultAPIHandler {
         this.client.riskAssessments.settings.get(),
         this.client.riskAssessments.settings.newDevice.get().catch((err) => {
           if (err instanceof ManagementError && err?.statusCode === 404) {
+            return { remember_for: 0 };
+          }
+          if (isInsufficientEntitlementError(err)) {
             return { remember_for: 0 };
           }
           throw err;
@@ -77,6 +82,10 @@ export default class RiskAssessmentHandler extends DefaultAPIHandler {
         };
         this.existing = riskAssessment;
         return this.existing;
+      }
+      if (isInsufficientEntitlementError(err)) {
+        log.warn('Skipping riskAssessment export: tenant does not have Adaptive MFA entitlement');
+        return null;
       }
       throw err;
     }
@@ -102,7 +111,15 @@ export default class RiskAssessmentHandler extends DefaultAPIHandler {
       );
     }
 
-    await Promise.all(updates);
+    try {
+      await Promise.all(updates);
+    } catch (err) {
+      if (isInsufficientEntitlementError(err)) {
+        log.warn('Skipping riskAssessment deploy: tenant does not have Adaptive MFA entitlement');
+        return;
+      }
+      throw err;
+    }
     this.updated += 1;
     this.didUpdate(riskAssessment);
   }

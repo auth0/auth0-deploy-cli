@@ -12,6 +12,9 @@ import guardianFactorProviders from './guardianFactorProviders';
 import guardianFactorTemplates from './guardianFactorTemplates';
 import guardianPhoneFactorMessageTypes from './guardianPhoneFactorMessageTypes';
 import guardianPhoneFactorSelectedProvider from './guardianPhoneFactorSelectedProvider';
+import guardianPhoneFactorSettings from './guardianPhoneFactorSettings';
+import guardianEmailFactorSettings from './guardianEmailFactorSettings';
+import guardianSettings from './guardianSettings';
 import guardianPolicies from './guardianPolicies';
 import roles from './roles';
 import actions from './actions';
@@ -33,6 +36,7 @@ import rulesConfigs from './rulesConfigs';
 import forms from './forms';
 import flows from './flows';
 import flowVaultConnections from './flowVaultConnections';
+import networkACLKeys from './networkACLKeys';
 import networkACLs from './networkACLs';
 import userAttributeProfiles from './userAttributeProfiles';
 import connectionProfiles from './connectionProfiles';
@@ -71,6 +75,9 @@ const directoryHandlers: {
   guardianFactorTemplates,
   guardianPhoneFactorMessageTypes,
   guardianPhoneFactorSelectedProvider,
+  guardianPhoneFactorSettings,
+  guardianEmailFactorSettings,
+  guardianSettings,
   guardianPolicies,
   roles,
   actions,
@@ -90,6 +97,7 @@ const directoryHandlers: {
   flows,
   flowVaultConnections,
   selfServiceProfiles,
+  networkACLKeys,
   networkACLs,
   userAttributeProfiles,
   connectionProfiles,

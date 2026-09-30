@@ -1,9 +1,7 @@
 import path from 'path';
 import fs from 'fs-extra';
-import sinon from 'sinon';
 import { expect } from 'chai';
 import { constants } from '../../../src/tools';
-import log from '../../../src/logger';
 
 import Context from '../../../src/context/directory';
 import handler from '../../../src/context/directory/handlers/emailTemplates';
@@ -89,7 +87,7 @@ describe('#directory context email templates', () => {
       .and.have.property('message', errorMessage);
   });
 
-  it('should warn when email template body path resolves outside the config directory', async () => {
+  it('should throw when email template body path resolves outside the config directory', async () => {
     const repoDir = path.join(testDataDir, 'directory', 'emailTemplates-traversal-warn');
     // "../../outside-email.html.liquid" from inside emails/ escapes the config root.
     const outsideFile = path.join(testDataDir, 'directory', 'outside-email.html.liquid');
@@ -105,16 +103,9 @@ describe('#directory context email templates', () => {
 
     const config = { AUTH0_INPUT_FILE: repoDir };
     const context = new Context(config, mockMgmtClient());
-    if (log.warn.restore) log.warn.restore();
-    const warnSpy = sinon.spy(log, 'warn');
     try {
-      await context.loadAssetsFromLocal();
-      const traversalWarned = warnSpy.args.some(([msg]) =>
-        msg.includes('will be blocked as an error')
-      );
-      expect(traversalWarned).to.be.true;
+      await expect(context.loadAssetsFromLocal()).to.be.rejectedWith('Path traversal blocked');
     } finally {
-      warnSpy.restore();
       fs.removeSync(outsideFile);
     }
   });

@@ -1,5 +1,5 @@
 import path from 'path';
-import { ResponseError } from 'auth0';
+import { ManagementError } from 'auth0';
 import fs from 'fs-extra';
 import chai, { expect } from 'chai';
 import sinon from 'sinon';
@@ -76,7 +76,7 @@ describe('#context loader validation', async () => {
       const result = await expect(
         setupContext({ ...tmpConfig, AUTH0_INPUT_FILE: dir }),
         'import'
-      ).to.be.eventually.rejectedWith(ResponseError);
+      ).to.be.eventually.rejectedWith(ManagementError);
 
       expect(result).to.be.an('error').that.has.property('statusCode').which.eq(404);
     });

@@ -1,7 +1,7 @@
 import { PromisePoolExecutor } from 'promise-pool-executor';
 import _ from 'lodash';
 
-import { JSONApiResponse, ManagementClient } from 'auth0';
+import { ApiResponse as SDKApiResponse, ManagementClient } from 'auth0';
 import { flatten } from '../utils';
 import {
   Asset,
@@ -11,7 +11,9 @@ import {
   PagePaginationParams,
 } from '../../types';
 
-type JSONApiResponseWithPage = JSONApiResponse<ApiResponse> & {
+// node-auth0 v7 removed the exported `JSONApiResponse` class; its response
+// envelope is now the `ApiResponse<T>` interface ({ data, headers, status }).
+type JSONApiResponseWithPage = SDKApiResponse<ApiResponse> & {
   response: {
     start: number;
     limit: number;

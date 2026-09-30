@@ -1,9 +1,7 @@
 import path from 'path';
 import fs from 'fs-extra';
-import sinon from 'sinon';
 import { expect } from 'chai';
 import { constants } from '../../../src/tools';
-import log from '../../../src/logger';
 
 import Context from '../../../src/context/directory';
 import handler from '../../../src/context/directory/handlers/databases';
@@ -167,7 +165,7 @@ describe('#directory context databases', () => {
     ]);
   });
 
-  it('should warn when customScript path resolves outside the config directory', async () => {
+  it('should throw when customScript path resolves outside the config directory', async () => {
     // Scripts are resolved from the connection subfolder (database-connections/users/),
     // so ../../../ is needed to escape the config root.
     const repoDir = path.join(testDataDir, 'directory', 'databases-traversal-warn');
@@ -188,16 +186,9 @@ describe('#directory context databases', () => {
       },
     });
     const context = new Context({ AUTH0_INPUT_FILE: repoDir }, mockMgmtClient());
-    if (log.warn.restore) log.warn.restore();
-    const warnSpy = sinon.spy(log, 'warn');
     try {
-      await context.loadAssetsFromLocal();
-      const deprecationWarned = warnSpy.args.some(([msg]) =>
-        msg.includes('will be blocked as an error')
-      );
-      expect(deprecationWarned).to.be.true;
+      await expect(context.loadAssetsFromLocal()).to.be.rejectedWith('Path traversal blocked');
     } finally {
-      warnSpy.restore();
       fs.removeSync(outsideFile);
     }
   });

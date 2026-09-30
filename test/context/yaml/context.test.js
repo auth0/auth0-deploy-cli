@@ -240,6 +240,11 @@ describe('#YAML context validation', () => {
           template: 'async_approval',
         },
         {
+          body: './emailTemplates/auth_email_by_code.html',
+          enabled: true,
+          template: 'auth_email_by_code',
+        },
+        {
           body: './emailTemplates/blocked_account.html',
           enabled: true,
           template: 'blocked_account',
@@ -287,6 +292,14 @@ describe('#YAML context validation', () => {
       guardianFactorTemplates: [],
       guardianPhoneFactorMessageTypes: { message_types: ['sms'] },
       guardianPhoneFactorSelectedProvider: { provider: 'twilio' },
+      guardianPhoneFactorSettings: { otp_length: 6, otp_expiration_time: 300 },
+      guardianEmailFactorSettings: { otp_length: 6, otp_expiration_time: 300 },
+      guardianSettings: {
+        display_remember_me_checkbox: true,
+        remember_me_default_value: false,
+        mfa_session_inactivity_timeout: 604800,
+        mfa_session_overall_timeout: 2592000,
+      },
       guardianPolicies: { policies: [] },
       resourceServers: [],
       riskAssessment: {
@@ -387,6 +400,11 @@ describe('#YAML context validation', () => {
           template: 'async_approval',
         },
         {
+          body: './emailTemplates/auth_email_by_code.html',
+          enabled: true,
+          template: 'auth_email_by_code',
+        },
+        {
           body: './emailTemplates/blocked_account.html',
           enabled: true,
           template: 'blocked_account',
@@ -434,6 +452,14 @@ describe('#YAML context validation', () => {
       guardianFactorTemplates: [],
       guardianPhoneFactorMessageTypes: { message_types: ['sms'] },
       guardianPhoneFactorSelectedProvider: { provider: 'twilio' },
+      guardianPhoneFactorSettings: { otp_length: 6, otp_expiration_time: 300 },
+      guardianEmailFactorSettings: { otp_length: 6, otp_expiration_time: 300 },
+      guardianSettings: {
+        display_remember_me_checkbox: true,
+        remember_me_default_value: false,
+        mfa_session_inactivity_timeout: 604800,
+        mfa_session_overall_timeout: 2592000,
+      },
       guardianPolicies: { policies: [] },
       resourceServers: [],
       riskAssessment: {
@@ -535,6 +561,11 @@ describe('#YAML context validation', () => {
           template: 'async_approval',
         },
         {
+          body: './emailTemplates/auth_email_by_code.html',
+          enabled: true,
+          template: 'auth_email_by_code',
+        },
+        {
           body: './emailTemplates/blocked_account.html',
           enabled: true,
           template: 'blocked_account',
@@ -582,6 +613,14 @@ describe('#YAML context validation', () => {
       guardianFactorTemplates: [],
       guardianPhoneFactorMessageTypes: { message_types: ['sms'] },
       guardianPhoneFactorSelectedProvider: { provider: 'twilio' },
+      guardianPhoneFactorSettings: { otp_length: 6, otp_expiration_time: 300 },
+      guardianEmailFactorSettings: { otp_length: 6, otp_expiration_time: 300 },
+      guardianSettings: {
+        display_remember_me_checkbox: true,
+        remember_me_default_value: false,
+        mfa_session_inactivity_timeout: 604800,
+        mfa_session_overall_timeout: 2592000,
+      },
       guardianPolicies: { policies: [] },
       resourceServers: [],
       riskAssessment: {

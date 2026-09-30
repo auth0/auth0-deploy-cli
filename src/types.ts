@@ -16,6 +16,7 @@ import { SsProfileWithCustomText } from './tools/auth0/handlers/selfServiceProfi
 import { PhoneProvider } from './tools/auth0/handlers/phoneProvider';
 import { PhoneTemplate } from './tools/auth0/handlers/phoneTemplates';
 import { NetworkACL } from './tools/auth0/handlers/networkACLs';
+import { NetworkAclKey } from './tools/auth0/handlers/networkACLKeys';
 import { UserAttributeProfile } from './tools/auth0/handlers/userAttributeProfiles';
 import { AttackProtection } from './tools/auth0/handlers/attackProtection';
 import { TokenExchangeProfile } from './tools/auth0/handlers/tokenExchangeProfiles';
@@ -135,6 +136,9 @@ export type Assets = Partial<{
     message_types: Asset[]; // TODO: eliminate this intermediate level for consistency
   } | null;
   guardianPhoneFactorSelectedProvider: Asset | null;
+  guardianPhoneFactorSettings: Asset | null;
+  guardianEmailFactorSettings: Asset | null;
+  guardianSettings: Asset | null;
   guardianPolicies: {
     policies: string[]; // TODO: eliminate this intermediate level for consistency
   } | null;
@@ -163,6 +167,7 @@ export type Assets = Partial<{
   flows: Flow[] | null;
   flowVaultConnections: FlowVaultConnection[] | null;
   selfServiceProfiles: SsProfileWithCustomText[] | null;
+  networkACLKeys: NetworkAclKey[] | null;
   networkACLs: NetworkACL[] | null;
   userAttributeProfiles: UserAttributeProfile[] | null;
   userAttributeProfilesWithId: UserAttributeProfile[] | null;
@@ -212,6 +217,9 @@ export type AssetTypes =
   | 'guardianFactorTemplates'
   | 'guardianPhoneFactorMessageTypes'
   | 'guardianPhoneFactorSelectedProvider'
+  | 'guardianPhoneFactorSettings'
+  | 'guardianEmailFactorSettings'
+  | 'guardianSettings'
   | 'guardianPolicies'
   | 'roles'
   | 'actions'
@@ -231,6 +239,7 @@ export type AssetTypes =
   | 'flows'
   | 'flowVaultConnections'
   | 'selfServiceProfiles'
+  | 'networkACLKeys'
   | 'networkACLs'
   | 'userAttributeProfiles'
   | 'connectionProfiles'

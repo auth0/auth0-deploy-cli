@@ -1,9 +1,7 @@
 import path from 'path';
 import fs from 'fs-extra';
-import sinon from 'sinon';
 import { expect } from 'chai';
 import { constants } from '../../../src/tools';
-import log from '../../../src/logger';
 
 import Context from '../../../src/context/directory';
 import promptsHandler from '../../../src/context/directory/handlers/prompts';
@@ -720,7 +718,7 @@ describe('#directory context prompts', () => {
     });
   });
 
-  it('should warn when prompt partial template path resolves outside the config directory', async () => {
+  it('should throw when prompt partial template path resolves outside the config directory', async () => {
     const repoDir = path.join(testDataDir, 'directory', 'prompts-traversal-warn');
     // "../../outside-partial.liquid" from inside prompts/ escapes the config root.
     const outsideFile = path.join(testDataDir, 'directory', 'outside-partial.liquid');
@@ -746,16 +744,9 @@ describe('#directory context prompts', () => {
 
     const config = { AUTH0_INPUT_FILE: repoDir };
     const context = new Context(config, mockMgmtClient());
-    if ((log.warn as any).restore) (log.warn as any).restore();
-    const warnSpy = sinon.spy(log, 'warn');
     try {
-      await context.loadAssetsFromLocal();
-      const traversalWarned = warnSpy.args.some(([msg]) =>
-        (msg as string).includes('will be blocked as an error')
-      );
-      expect(traversalWarned).to.be.true;
+      await expect(context.loadAssetsFromLocal()).to.be.rejectedWith('Path traversal blocked');
     } finally {
-      warnSpy.restore();
       fs.removeSync(outsideFile);
     }
   });

@@ -1,10 +1,8 @@
 import path from 'path';
 import fs from 'fs-extra';
-import sinon from 'sinon';
 
 import { expect } from 'chai';
 import { constants } from '../../../src/tools';
-import log from '../../../src/logger';
 
 import Context from '../../../src/context/directory';
 import handler from '../../../src/context/directory/handlers/connections';
@@ -253,7 +251,7 @@ describe('#directory context connections', () => {
     );
   });
 
-  it('should warn when email body path resolves outside the config directory', async () => {
+  it('should throw when email body path resolves outside the config directory', async () => {
     const repoDir = path.join(testDataDir, 'directory', 'connections-traversal-warn');
     // "../../outside-email.html" from inside connections/ escapes the config root.
     const outsideFile = path.join(testDataDir, 'directory', 'outside-email.html');
@@ -269,16 +267,9 @@ describe('#directory context connections', () => {
 
     const config = { AUTH0_INPUT_FILE: repoDir };
     const context = new Context(config, mockMgmtClient());
-    if (log.warn.restore) log.warn.restore();
-    const warnSpy = sinon.spy(log, 'warn');
     try {
-      await context.loadAssetsFromLocal();
-      const traversalWarned = warnSpy.args.some(([msg]) =>
-        msg.includes('will be blocked as an error')
-      );
-      expect(traversalWarned).to.be.true;
+      await expect(context.loadAssetsFromLocal()).to.be.rejectedWith('Path traversal blocked');
     } finally {
-      warnSpy.restore();
       fs.removeSync(outsideFile);
     }
   });
@@ -321,6 +312,69 @@ describe('#directory context connections', () => {
 
     expect(fs.existsSync(path.join(connectionsFolder, 'includedConnection.json'))).to.equal(true);
     expect(fs.existsSync(path.join(connectionsFolder, 'excludedConnection.json'))).to.equal(true);
+  });
+
+  it('should only dump included connections', async () => {
+    const dir = path.join(testDataDir, 'directory', 'connectionsDumpInclude');
+    cleanThenMkdir(dir);
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+
+    context.assets.connections = [
+      { name: 'includedConnection', strategy: 'waad' },
+      { name: 'unmanagedConnection', strategy: 'samlp' },
+    ];
+    context.assets.include = { connections: ['includedConnection'] };
+
+    await handler.dump(context);
+    const connectionsFolder = path.join(dir, constants.CONNECTIONS_DIRECTORY);
+
+    expect(fs.existsSync(path.join(connectionsFolder, 'includedConnection.json'))).to.equal(true);
+    expect(fs.existsSync(path.join(connectionsFolder, 'unmanagedConnection.json'))).to.equal(false);
+  });
+
+  it('should preserve pre-existing files for connections outside the include list on re-dump', async () => {
+    const dir = path.join(testDataDir, 'directory', 'connectionsDumpInclude');
+    cleanThenMkdir(dir);
+
+    // Simulate a prior export that wrote a connection now outside the include list
+    const connectionsFolder = path.join(dir, constants.CONNECTIONS_DIRECTORY);
+    fs.ensureDirSync(connectionsFolder);
+    fs.writeFileSync(
+      path.join(connectionsFolder, 'unmanagedConnection.json'),
+      '{"name":"unmanagedConnection"}'
+    );
+
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+    context.assets.connections = [
+      { name: 'includedConnection', strategy: 'waad' },
+      { name: 'unmanagedConnection', strategy: 'samlp' },
+    ];
+    context.assets.include = { connections: ['includedConnection'] };
+
+    await handler.dump(context);
+
+    expect(fs.existsSync(path.join(connectionsFolder, 'includedConnection.json'))).to.equal(true);
+    expect(fs.existsSync(path.join(connectionsFolder, 'unmanagedConnection.json'))).to.equal(true);
+  });
+
+  it('should remove stale files for included connections no longer present on the tenant', async () => {
+    const dir = path.join(testDataDir, 'directory', 'connectionsIncludeStaleFiles');
+    cleanThenMkdir(dir);
+
+    // Simulate a previous export of two included connections, one since deleted on the tenant
+    const connectionsFolder = path.join(dir, constants.CONNECTIONS_DIRECTORY);
+    fs.ensureDirSync(connectionsFolder);
+    fs.writeFileSync(path.join(connectionsFolder, 'facebook.json'), '{"name":"facebook"}');
+    fs.writeFileSync(path.join(connectionsFolder, 'github.json'), '{"name":"github"}');
+
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+    context.assets.connections = [{ name: 'github', strategy: 'github' }];
+    context.assets.include = { connections: ['facebook', 'github'] };
+
+    await handler.dump(context);
+
+    expect(fs.existsSync(path.join(connectionsFolder, 'github.json'))).to.equal(true);
+    expect(fs.existsSync(path.join(connectionsFolder, 'facebook.json'))).to.equal(false);
   });
 
   it('should remove stale connection files when connections are removed from source', async () => {

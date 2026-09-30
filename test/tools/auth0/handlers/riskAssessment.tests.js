@@ -44,6 +44,53 @@ describe('#riskAssessment handler', () => {
       });
     });
 
+    it('should return null when settings.get() returns 403 insufficient_entitlement', async () => {
+      const auth0 = {
+        riskAssessments: {
+          settings: {
+            get: () => {
+              const error = new ManagementError('Forbidden');
+              error.statusCode = 403;
+              error.body = { errorCode: 'insufficient_entitlement' };
+              return Promise.reject(error);
+            },
+            newDevice: {
+              get: () => Promise.resolve({ remember_for: 30 }),
+            },
+          },
+        },
+      };
+
+      const handler = new riskAssessment.default({ client: auth0 });
+      const data = await handler.getType();
+      expect(data).to.equal(null);
+    });
+
+    it('should use defaults when newDevice.get() returns 403 insufficient_entitlement', async () => {
+      const auth0 = {
+        riskAssessments: {
+          settings: {
+            get: () => Promise.resolve({ enabled: true }),
+            newDevice: {
+              get: () => {
+                const error = new ManagementError('Forbidden');
+                error.statusCode = 403;
+                error.body = { errorCode: 'insufficient_entitlement' };
+                return Promise.reject(error);
+              },
+            },
+          },
+        },
+      };
+
+      const handler = new riskAssessment.default({ client: auth0 });
+      const data = await handler.getType();
+      expect(data).to.deep.equal({
+        settings: { enabled: true },
+        new_device: { remember_for: 0 },
+      });
+    });
+
     it('should return default settings when not found', async () => {
       const auth0 = {
         riskAssessments: {
@@ -166,6 +213,59 @@ describe('#riskAssessment handler', () => {
 
       await stageFn.apply(handler, [{}]);
       expect(handler.updated).to.equal(0);
+    });
+
+    it('should warn and skip when settings.update() returns 403 insufficient_entitlement', async () => {
+      const auth0 = {
+        riskAssessments: {
+          settings: {
+            update: () => {
+              const error = new ManagementError('Forbidden');
+              error.statusCode = 403;
+              error.body = { errorCode: 'insufficient_entitlement' };
+              return Promise.reject(error);
+            },
+            newDevice: {
+              update: () => Promise.resolve(),
+            },
+          },
+        },
+      };
+
+      const handler = new riskAssessment.default({ client: auth0 });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [{ riskAssessment: { settings: { enabled: true } } }]);
+      expect(handler.updated).to.equal(0);
+    });
+
+    it('should re-throw 403 errors that are not insufficient_entitlement', async () => {
+      const auth0 = {
+        riskAssessments: {
+          settings: {
+            update: () => {
+              const error = new ManagementError('Forbidden');
+              error.statusCode = 403;
+              error.body = { errorCode: 'some_other_error' };
+              return Promise.reject(error);
+            },
+            newDevice: {
+              update: () => Promise.resolve(),
+            },
+          },
+        },
+      };
+
+      const handler = new riskAssessment.default({ client: auth0 });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      try {
+        await stageFn.apply(handler, [{ riskAssessment: { settings: { enabled: true } } }]);
+        expect.fail('Should have thrown an error');
+      } catch (err) {
+        expect(err.statusCode).to.equal(403);
+        expect(err.body.errorCode).to.not.equal('insufficient_entitlement');
+      }
     });
 
     it('should handle API errors properly', async () => {

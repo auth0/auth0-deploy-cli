@@ -21,6 +21,7 @@ const EMAIL_PASSWORD_RESET = 'password_reset';
 const EMAIL_MFA_OOB_CODE = 'mfa_oob_code';
 const EMAIL_USER_INVITATION = 'user_invitation';
 const EMAIL_ASYNC_APPROVAL = 'async_approval';
+const EMAIL_AUTH_BY_CODE = 'auth_email_by_code';
 
 const UNIVERSAL_LOGIN_TEMPLATE = 'universal_login';
 
@@ -60,6 +61,7 @@ const constants = {
     'password_reset',
     'user_invitation',
     'async_approval',
+    'auth_email_by_code',
   ] as Management.EmailTemplateNameEnum[],
   ACTIONS_TRIGGERS: [
     'post-login',
@@ -72,6 +74,7 @@ const constants = {
     'custom-token-exchange',
     'login-post-identifier',
     'signup-post-identifier',
+    'post-credential-validation',
   ],
   EMAIL_TEMPLATES_DIRECTORY: 'emails',
   EMAIL_VERIFY,
@@ -87,6 +90,7 @@ const constants = {
   EMAIL_MFA_OOB_CODE,
   EMAIL_USER_INVITATION,
   EMAIL_ASYNC_APPROVAL,
+  EMAIL_AUTH_BY_CODE,
   GUARDIAN_DIRECTORY: 'guardian',
   GUARDIAN_FACTORS_DIRECTORY: 'factors',
   GUARDIAN_PROVIDERS_DIRECTORY: 'providers',
@@ -184,6 +188,8 @@ const constants = {
     `${EMAIL_USER_INVITATION}.html`,
     `${EMAIL_ASYNC_APPROVAL}.json`,
     `${EMAIL_ASYNC_APPROVAL}.html`,
+    `${EMAIL_AUTH_BY_CODE}.json`,
+    `${EMAIL_AUTH_BY_CODE}.html`,
   ],
   SUPPORTED_BRANDING_TEMPLATES: [UNIVERSAL_LOGIN_TEMPLATE],
   LOG_STREAMS_DIRECTORY: 'log-streams',
@@ -220,6 +226,7 @@ const constants = {
   FLOWS_VAULT_DIRECTORY: 'flow-vault-connections',
   SELF_SERVICE_PROFILE_DIRECTORY: 'self-service-profiles',
   NETWORK_ACLS_DIRECTORY: 'network-acls',
+  NETWORK_ACL_KEYS_DIRECTORY: 'network-acl-keys',
   USER_ATTRIBUTE_PROFILES_DIRECTORY: 'user-attribute-profiles',
   CONNECTION_PROFILES_DIRECTORY: 'connection-profiles',
   TOKEN_EXCHANGE_PROFILES_DIRECTORY: 'token-exchange-profiles',

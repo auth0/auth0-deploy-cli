@@ -127,7 +127,9 @@ export default class TokenExchangeProfilesHandler extends DefaultHandler {
     } catch (err) {
       if (err.statusCode === 403) {
         log.warn(
-          'Token Exchange Profiles feature is not available on this tenant. Please contact Auth0 support to enable this feature.'
+          `Cannot retrieve tokenExchangeProfiles: ${err.message}. ` +
+            `Verify the M2M application has the 'read:token_exchange_profiles' scope and ` +
+            `your subscription plan includes Token Exchange Profiles.`
         );
         return [];
       }

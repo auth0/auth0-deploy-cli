@@ -16,5 +16,6 @@
     }
   ],
   "login-post-identifier": [],
-  "signup-post-identifier": []
+  "signup-post-identifier": [],
+  "post-credential-validation": []
 }

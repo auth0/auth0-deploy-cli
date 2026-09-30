@@ -1,8 +1,6 @@
 import path from 'path';
 import fs from 'fs-extra';
-import sinon from 'sinon';
 import { expect } from 'chai';
-import log from '../../../src/logger';
 
 import Context from '../../../src/context/yaml';
 import promptsHandler from '../../../src/context/yaml/handlers/prompts';
@@ -413,7 +411,7 @@ describe('#YAML context prompts', () => {
     });
   });
 
-  it('should warn when screen renderer file path resolves outside the config directory', async () => {
+  it('should throw when screen renderer file path resolves outside the config directory', async () => {
     const dir = path.join(testDataDir, 'yaml', 'prompts-traversal-warn');
     cleanThenMkdir(dir);
 
@@ -434,16 +432,9 @@ describe('#YAML context prompts', () => {
 
     const config = { AUTH0_INPUT_FILE: yamlFile };
     const context = new Context(config, mockMgmtClient());
-    if ((log.warn as any).restore) (log.warn as any).restore();
-    const warnSpy = sinon.spy(log, 'warn');
     try {
-      await context.loadAssetsFromLocal();
-      const traversalWarned = warnSpy.args.some(([msg]) =>
-        (msg as string).includes('will be blocked as an error')
-      );
-      expect(traversalWarned).to.be.true;
+      await expect(context.loadAssetsFromLocal()).to.be.rejectedWith('Path traversal blocked');
     } finally {
-      warnSpy.restore();
       fs.removeSync(outsideFile);
     }
   });
