@@ -27,6 +27,7 @@ async function dump(context: YAMLContext): Promise<ParsedAttackProtection> {
     breachedPasswordDetection,
     bruteForceProtection,
     captcha,
+    phoneProviderProtection,
   } = attackProtection;
 
   const attackProtectionConfig: ParsedAttackProtection['attackProtection'] = {
@@ -41,6 +42,10 @@ async function dump(context: YAMLContext): Promise<ParsedAttackProtection> {
 
   if (captcha) {
     attackProtectionConfig.captcha = captcha;
+  }
+
+  if (phoneProviderProtection) {
+    attackProtectionConfig.phoneProviderProtection = phoneProviderProtection;
   }
 
   const maskedAttackProtection = attackProtectionDefaults(attackProtectionConfig, context.config);

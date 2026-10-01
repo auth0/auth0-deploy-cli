@@ -17,6 +17,7 @@ function attackProtectionFiles(filePath: string): {
   bruteForceProtection: string;
   captcha: string;
   suspiciousIpThrottling: string;
+  phoneProviderProtection: string;
 } {
   const directory = path.join(filePath, constants.ATTACK_PROTECTION_DIRECTORY);
 
@@ -27,6 +28,7 @@ function attackProtectionFiles(filePath: string): {
     bruteForceProtection: path.join(directory, 'brute-force-protection.json'),
     captcha: path.join(directory, 'captcha.json'),
     suspiciousIpThrottling: path.join(directory, 'suspicious-ip-throttling.json'),
+    phoneProviderProtection: path.join(directory, 'phone-provider-protection.json'),
   };
 }
 
@@ -72,6 +74,13 @@ function parse(context: DirectoryContext): ParsedAttackProtection {
     });
   }
 
+  if (isFile(files.phoneProviderProtection)) {
+    attackProtection.phoneProviderProtection = loadJSON(files.phoneProviderProtection, {
+      mappings: context.mappings,
+      disableKeywordReplacement: context.disableKeywordReplacement,
+    });
+  }
+
   return {
     attackProtection,
   };
@@ -103,6 +112,9 @@ async function dump(context: DirectoryContext): Promise<void> {
   }
   if (maskedAttackProtection.suspiciousIpThrottling) {
     dumpJSON(files.suspiciousIpThrottling, maskedAttackProtection.suspiciousIpThrottling);
+  }
+  if (maskedAttackProtection.phoneProviderProtection) {
+    dumpJSON(files.phoneProviderProtection, maskedAttackProtection.phoneProviderProtection);
   }
 }
 
