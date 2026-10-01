@@ -506,6 +506,45 @@ describe('#connections handler', () => {
       expect(getEnabledClientsCalledOnce).to.equal(true);
     });
 
+    it('should limit enabled_clients enrichment to connections named in the import filter', async () => {
+      const enrichedConnectionIds = [];
+      const auth0 = {
+        connections: {
+          list: (params) =>
+            mockPagedData(params, 'connections', [
+              { id: 'con1', strategy: 'github', name: 'in-config' },
+              { id: 'con2', strategy: 'github', name: 'remote-only' },
+            ]),
+          clients: {
+            get: (connectionId) => {
+              enrichedConnectionIds.push(connectionId);
+              return Promise.resolve(mockPagedData({}, 'clients', [{ client_id: 'client_a' }]));
+            },
+          },
+        },
+        clients: {
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config });
+      handler.scimHandler.applyScimConfiguration = sinon.stub().resolves();
+      // Simulate the import path having scoped enrichment to the local config.
+      handler.enabledClientsEnrichmentFilter = new Set(['in-config']);
+
+      const data = await handler.getType();
+
+      // Only the connection present in the local config is fetched; the
+      // remote-only connection is never enqueued into the request pool.
+      expect(enrichedConnectionIds).to.deep.equal(['con1']);
+      expect(data).to.have.length(2);
+      const con1 = data.find((c) => c.id === 'con1');
+      const con2 = data.find((c) => c.id === 'con2');
+      expect(con1).to.have.property('enabled_clients').that.deep.equals(['client_a']);
+      expect(con2).to.not.have.property('enabled_clients');
+    });
+
     it('should include directory provisioning configuration for google-apps connections', async () => {
       const auth0 = {
         connections: {
