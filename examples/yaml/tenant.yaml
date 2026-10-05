@@ -601,6 +601,8 @@ attackProtection:
       pre-user-registration:
         max_attempts: 50
         rate: 1200
+  phoneProviderProtection:
+    type: default
 
 connectionProfiles:
   - name: "Enterprise SSO Profile"
