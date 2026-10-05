@@ -177,6 +177,10 @@ export function mockMgmtClient() {
       suspiciousIpThrottling: {
         get: () => ({}),
       },
+      phoneProviderProtection: {
+        get: () => ({}),
+        patch: (data) => Promise.resolve(data),
+      },
     },
     branding: {
       get: () => ({}),

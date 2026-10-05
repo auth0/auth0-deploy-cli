@@ -56,6 +56,11 @@ describe('#attackProtection handler', () => {
               },
             }),
           },
+          phoneProviderProtection: {
+            get: () => ({
+              type: 'exponential',
+            }),
+          },
         },
       };
 
@@ -98,6 +103,9 @@ describe('#attackProtection handler', () => {
               rate: 1200,
             },
           },
+        },
+        phoneProviderProtection: {
+          type: 'exponential',
         },
       });
     });
@@ -333,6 +341,9 @@ describe('#attackProtection handler', () => {
               },
             }),
           },
+          phoneProviderProtection: {
+            get: () => ({ type: 'default' }),
+          },
         },
       };
 
@@ -394,6 +405,9 @@ describe('#attackProtection handler', () => {
               },
             }),
           },
+          phoneProviderProtection: {
+            get: () => ({ type: 'default' }),
+          },
         },
       };
 
@@ -409,6 +423,193 @@ describe('#attackProtection handler', () => {
       expect(data).to.have.property('breachedPasswordDetection');
       expect(data).to.have.property('bruteForceProtection');
       expect(data).to.have.property('suspiciousIpThrottling');
+    });
+
+    it('should handle 403 error when fetching phone provider protection and preserve other data', async () => {
+      const auth0 = {
+        attackProtection: {
+          botDetection: {
+            get: () => ({
+              bot_detection_level: 'medium',
+              monitoring_mode_enabled: false,
+            }),
+          },
+          captcha: {
+            get: () => ({
+              selected: 'friendly_captcha',
+              policy: 'always',
+            }),
+          },
+          breachedPasswordDetection: {
+            get: () => ({
+              admin_notification_frequency: [],
+              enabled: true,
+              method: 'standard',
+              shields: [],
+            }),
+          },
+          bruteForceProtection: {
+            get: () => ({
+              allowlist: [],
+              enabled: true,
+              max_attempts: 10,
+              mode: 'count_per_identifier_and_ip',
+              shields: ['block', 'user_notification'],
+            }),
+          },
+          suspiciousIpThrottling: {
+            get: () => ({
+              allowlist: ['127.0.0.1'],
+              enabled: true,
+              shields: ['block', 'admin_notification'],
+              stage: {
+                'pre-login': { max_attempts: 100, rate: 864000 },
+                'pre-user-registration': { max_attempts: 50, rate: 1200 },
+              },
+            }),
+          },
+          phoneProviderProtection: {
+            get: () => {
+              // Flag-off tenants return 403 for the sms_exponential_backoff-gated endpoint
+              const err = new Error('Forbidden');
+              err.statusCode = 403;
+              throw err;
+            },
+          },
+        },
+      };
+
+      const handler = new attackProtection.default({ client: auth0 });
+      const data = await handler.getType();
+
+      // phoneProviderProtection should be skipped, everything else preserved
+      expect(data).to.not.have.property('phoneProviderProtection');
+      expect(data).to.have.property('botDetection');
+      expect(data).to.have.property('captcha');
+      expect(data).to.have.property('breachedPasswordDetection');
+      expect(data).to.have.property('bruteForceProtection');
+      expect(data).to.have.property('suspiciousIpThrottling');
+    });
+
+    it('should update phone provider protection via patch with the type payload', async () => {
+      let capturedPayload;
+      const auth0 = {
+        attackProtection: {
+          phoneProviderProtection: {
+            patch: (data) => {
+              capturedPayload = data;
+              return Promise.resolve(data);
+            },
+          },
+        },
+      };
+
+      const handler = new attackProtection.default({ client: auth0 });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          attackProtection: {
+            phoneProviderProtection: { type: 'exponential' },
+          },
+        },
+      ]);
+
+      expect(capturedPayload).to.deep.equal({ type: 'exponential' });
+      expect(handler.updated).to.equal(1);
+    });
+
+    it('should skip phone provider protection patch on 403 without failing other updates', async () => {
+      let breachedUpdated = false;
+      const auth0 = {
+        attackProtection: {
+          breachedPasswordDetection: {
+            update: (data) => {
+              breachedUpdated = true;
+              return Promise.resolve(data);
+            },
+          },
+          phoneProviderProtection: {
+            patch: () => {
+              // Flag-off tenants 403 on write, same as on read
+              const err = new Error('Forbidden');
+              err.statusCode = 403;
+              return Promise.reject(err);
+            },
+          },
+        },
+      };
+
+      const handler = new attackProtection.default({ client: auth0 });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      // Should resolve (not reject) even though the phoneProviderProtection patch 403s
+      await stageFn.apply(handler, [
+        {
+          attackProtection: {
+            breachedPasswordDetection: { enabled: true },
+            phoneProviderProtection: { type: 'exponential' },
+          },
+        },
+      ]);
+
+      expect(breachedUpdated).to.equal(true);
+      expect(handler.updated).to.equal(1);
+    });
+
+    it('should rethrow non-403 errors from phone provider protection patch', async () => {
+      const auth0 = {
+        attackProtection: {
+          phoneProviderProtection: {
+            patch: () => {
+              const err = new Error('Internal Server Error');
+              err.statusCode = 500;
+              return Promise.reject(err);
+            },
+          },
+        },
+      };
+
+      const handler = new attackProtection.default({ client: auth0 });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await expect(
+        stageFn.apply(handler, [
+          {
+            attackProtection: {
+              phoneProviderProtection: { type: 'exponential' },
+            },
+          },
+        ])
+      ).to.be.rejectedWith('Internal Server Error');
+    });
+
+    it('should not patch phone provider protection when type is absent', async () => {
+      let patchCalled = false;
+      const auth0 = {
+        attackProtection: {
+          phoneProviderProtection: {
+            patch: () => {
+              patchCalled = true;
+              return Promise.resolve({});
+            },
+          },
+        },
+      };
+
+      const handler = new attackProtection.default({ client: auth0 });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          attackProtection: {
+            phoneProviderProtection: {},
+          },
+        },
+      ]);
+
+      expect(patchCalled).to.equal(false);
+      expect(handler.updated).to.equal(0);
     });
 
     it('should skip updates when attackProtection is null', async () => {
@@ -686,6 +887,9 @@ describe('#attackProtection handler', () => {
           },
           suspiciousIpThrottling: {
             get: () => ({ enabled: true }),
+          },
+          phoneProviderProtection: {
+            get: () => ({ type: 'default' }),
           },
         },
       };
