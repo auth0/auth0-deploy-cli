@@ -624,6 +624,31 @@ resourceServers:
 
 > **Note:** `authorization_policy` is only accepted by the Auth0 API for the My Account resource server and only when the `acr` feature flag is enabled on the tenant.
 
+### Auth0 My Account API — `require_consent_non_repudiation`
+
+The `require_consent_non_repudiation` field is a boolean that can be set on the **Auth0 My Account API** resource server (the system resource server with identifier `https://<tenant-domain>/me/`) when the `my_account_consents` entitlement is enabled on the tenant. When `true`, the authorization server rejects consent decisions that do not include a valid signature and `kid`, so the approver cannot later deny a consent they granted. Defaults to `false`.
+
+**YAML Example**
+
+```yaml
+resourceServers:
+  - name: Auth0 My Account API
+    identifier: https://your-tenant.auth0.com/me/
+    require_consent_non_repudiation: true
+```
+
+**Directory Example**
+
+```json
+{
+  "name": "Auth0 My Account API",
+  "identifier": "https://your-tenant.auth0.com/me/",
+  "require_consent_non_repudiation": true
+}
+```
+
+> **Note:** `require_consent_non_repudiation` requires the `my_account_consents` entitlement to be enabled on the tenant.
+
 ### Online Refresh Tokens — `allow_online_access` and `allow_online_access_with_ephemeral_sessions`
 
 The `allow_online_access` field enables issuance of Online Refresh Tokens (ORTs) for a resource server. ORTs are stateless, non-rotating tokens bound to the Auth0 session lifetime — when the session expires or is revoked, the ORT becomes invalid.
