@@ -78,6 +78,10 @@ export default class ScimHandler {
    * @param connections
    */
   async createIdMap(connections: Asset[]) {
+    // No `read:scim_config` scope means nothing to fetch. Return before clearing
+    // to keep any existing map and skip a no-op pool task per connection.
+    if (!this.scimScopes.read) return;
+
     this.idMap.clear();
     const logMsg = 'Reviewing connections for SCIM support. This may take a while...';
     if (nconf.get('AUTH0_DRY_RUN')) {
@@ -86,12 +90,17 @@ export default class ScimHandler {
       log.info(logMsg);
     }
 
+    // Only SCIM-capable strategies can carry a SCIM configuration; filtering here
+    // keeps non-SCIM connections out of the throttled pool.
+    const scimConnections = (connections || []).filter((connection) =>
+      this.isScimStrategy(connection.strategy)
+    );
+
     await this.poolClient
       .addEachTask({
-        data: connections || [],
+        data: scimConnections,
         generator: (connection) => {
           if (!this.scimScopes.read) return Promise.resolve(null);
-          if (!this.isScimStrategy(connection.strategy)) return Promise.resolve(null);
 
           this.idMap.set(connection.id, { strategy: connection.strategy });
           return this.getScimConfiguration(connection.id)

@@ -240,6 +240,11 @@ describe('#YAML context validation', () => {
           template: 'async_approval',
         },
         {
+          body: './emailTemplates/auth_email_by_code.html',
+          enabled: true,
+          template: 'auth_email_by_code',
+        },
+        {
           body: './emailTemplates/blocked_account.html',
           enabled: true,
           template: 'blocked_account',
@@ -393,6 +398,11 @@ describe('#YAML context validation', () => {
           body: './emailTemplates/async_approval.html',
           enabled: true,
           template: 'async_approval',
+        },
+        {
+          body: './emailTemplates/auth_email_by_code.html',
+          enabled: true,
+          template: 'auth_email_by_code',
         },
         {
           body: './emailTemplates/blocked_account.html',
@@ -549,6 +559,11 @@ describe('#YAML context validation', () => {
           body: './emailTemplates/async_approval.html',
           enabled: true,
           template: 'async_approval',
+        },
+        {
+          body: './emailTemplates/auth_email_by_code.html',
+          enabled: true,
+          template: 'auth_email_by_code',
         },
         {
           body: './emailTemplates/blocked_account.html',
