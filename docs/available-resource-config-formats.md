@@ -6,6 +6,33 @@ Auth0 resource state is expressed in two available different configuration file 
 
 The YAML format is expressed mostly as a flat `tenant.yaml` file with supplemental code files for resources like actions and email templates. The single file makes tracking changes over time in version control more straightforward. Additionally, the single file eliminates a bit of ambiguity with directory and file names, which may not be immediately obvious.
 
+### Splitting a YAML config across files with `!include`
+
+For large tenants, a single `tenant.yaml` can become unwieldy. The `!include` directive lets you move any section into its own file and reference it from the main config:
+
+```yaml
+# tenant.yaml
+tenant:
+  friendly_name: 'My Tenant'
+
+clients: !include clients.yaml
+roles: !include roles.yaml
+```
+
+```yaml
+# clients.yaml
+- name: My App
+  app_type: spa
+```
+
+Notes and restrictions:
+
+- Includes are resolved on import (`a0deploy import -i tenant.yaml`). They are **not** supported in the directory format.
+- Paths are resolved relative to the file that declares the `!include`. For security, an included file must resolve **inside the config directory** (the directory of the entry file passed to `-i`); a path that escapes it with `../` or an absolute path is rejected with a `Path traversal blocked` error. This is the same guard applied to every other file reference.
+- Includes may be nested (an included file may itself use `!include`). Circular includes are detected and reported rather than looping forever.
+- Keyword replacement (`@@KEY@@` / `##KEY##`) is applied to included files just as it is to the main file.
+- Export does not emit `!include`; `a0deploy export` writes a single flattened `tenant.yaml`.
+
 ## Directory (JSON)
 
 The directory format separates resource types into separate directories, with each single resource living inside a dedicated JSON file. This format allows for easier conceptual separation between each type of resource as well as the individual resources themselves. Also, the Deploy CLI closely mirrors the data shapes defined in the [Auth0 Management API](https://auth0.com/docs/api/management/v2), so referencing the JSON examples in the docs may provide useful when using this format.

@@ -96,6 +96,79 @@ rules: !include rules.yaml
     expect(context.assets.rules).to.deep.equal([]);
   });
 
+  it('should block an include that escapes the config root', async () => {
+    const root = path.resolve(testDataDir, 'yaml', 'traversal');
+    const dir = path.join(root, 'config');
+    cleanThenMkdir(dir);
+
+    const mainFile = path.join(dir, 'main.yaml');
+    fs.writeFileSync(mainFile, 'tenant: !include ../secret.yaml');
+
+    fs.writeFileSync(path.join(root, 'secret.yaml'), 'friendly_name: leaked');
+
+    const config = { AUTH0_INPUT_FILE: mainFile };
+    const context = new Context(config, mockMgmtClient());
+
+    await expect(context.loadAssetsFromLocal()).to.be.eventually.rejectedWith(
+      Error,
+      /Path traversal blocked/
+    );
+  });
+
+  it('should block a chained include that escapes the config root', async () => {
+    const root = path.resolve(testDataDir, 'yaml', 'traversal-chained');
+    const dir = path.join(root, 'config');
+    cleanThenMkdir(dir);
+
+    const mainFile = path.join(dir, 'main.yaml');
+    fs.writeFileSync(mainFile, 'tenant: !include nested.yaml');
+
+    // nested.yaml lives inside the root but hops out with `../`.
+    fs.writeFileSync(path.join(dir, 'nested.yaml'), 'data: !include ../secret.yaml');
+    fs.writeFileSync(path.join(root, 'secret.yaml'), 'friendly_name: leaked');
+
+    const config = { AUTH0_INPUT_FILE: mainFile };
+    const context = new Context(config, mockMgmtClient());
+
+    await expect(context.loadAssetsFromLocal()).to.be.eventually.rejectedWith(
+      Error,
+      /Path traversal blocked/
+    );
+  });
+
+  it('should treat a literal __include key as data, not a directive', async () => {
+    const dir = path.resolve(testDataDir, 'yaml', 'literal-include-key');
+    cleanThenMkdir(dir);
+
+    const mainFile = path.join(dir, 'main.yaml');
+    fs.writeFileSync(mainFile, "tenant:\n  friendly_name: Test\n  __include: './not-a-file.yaml'");
+
+    const config = { AUTH0_INPUT_FILE: mainFile };
+    const context = new Context(config, mockMgmtClient());
+
+    await context.loadAssetsFromLocal();
+
+    expect(context.assets.tenant.__include).to.equal('./not-a-file.yaml');
+  });
+
+  it('should not pollute the prototype via a __proto__ key in an include', async () => {
+    const dir = path.resolve(testDataDir, 'yaml', 'proto-pollution');
+    cleanThenMkdir(dir);
+
+    const mainFile = path.join(dir, 'main.yaml');
+    fs.writeFileSync(mainFile, 'tenant: !include evil.yaml');
+
+    const evilFile = path.join(dir, 'evil.yaml');
+    fs.writeFileSync(evilFile, '{ "__proto__": { "polluted": true } }');
+
+    const config = { AUTH0_INPUT_FILE: mainFile };
+    const context = new Context(config, mockMgmtClient());
+
+    await context.loadAssetsFromLocal();
+
+    expect({}.polluted).to.equal(undefined);
+  });
+
   it('should allow same file included multiple times in different branches', async () => {
     const dir = path.resolve(testDataDir, 'yaml', 'multiple-includes');
     cleanThenMkdir(dir);

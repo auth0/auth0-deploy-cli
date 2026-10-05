@@ -24,13 +24,16 @@ import { Assets, Config, Auth0APIClient, AssetTypes, KeywordMappings } from '../
 import { filterOnlyIncludedResourceTypes } from '..';
 import { preserveKeywords } from '../../keywordPreservation';
 
+// Symbol marker so a literal `__include` key in user YAML isn't read as a directive
+const INCLUDE = Symbol('include');
+
 // Custom YAML type for file includes
 const includeType = new yaml.Type('!include', {
   kind: 'scalar',
   resolve: (data) => typeof data === 'string',
   construct: (data) => {
     // This will be handled during the actual loading process
-    return { __include: data };
+    return { [INCLUDE]: data };
   },
 });
 
@@ -52,21 +55,26 @@ function parseYaml(content: string) {
 
 type LoadIncludedYaml = (filePath: string) => any;
 
-// Resolves !include directives only. Keyword handling is applied by the caller
-// when preparing each file's raw content before parse.
+// Resolves !include directives. Keyword handling is applied by the caller before parse.
+// configRoot is threaded unchanged so chained `../` includes can't escape it.
 function resolveIncludes(
   obj: any,
   basePath: string,
+  configRoot: string,
   loadIncludedYaml: LoadIncludedYaml,
   visitedFiles = new Set<string>()
 ): any {
   if (Array.isArray(obj)) {
-    return obj.map((item) => resolveIncludes(item, basePath, loadIncludedYaml, visitedFiles));
+    return obj.map((item) =>
+      resolveIncludes(item, basePath, configRoot, loadIncludedYaml, visitedFiles)
+    );
   }
 
   if (obj && typeof obj === 'object') {
-    if (obj.__include) {
-      const filePath = path.resolve(basePath, obj.__include);
+    const includePath = obj[INCLUDE];
+    if (includePath !== undefined) {
+      const filePath = path.resolve(basePath, includePath);
+      assertInsideConfigRoot(includePath, filePath, configRoot);
 
       if (visitedFiles.has(filePath)) {
         throw new Error(`Circular include detected: ${filePath}`);
@@ -80,6 +88,7 @@ function resolveIncludes(
       const result = resolveIncludes(
         loadIncludedYaml(filePath),
         path.dirname(filePath),
+        configRoot,
         loadIncludedYaml,
         new Set(visitedFiles)
       );
@@ -89,7 +98,18 @@ function resolveIncludes(
 
     const result = {};
     for (const [key, value] of Object.entries(obj)) {
-      result[key] = resolveIncludes(value, basePath, loadIncludedYaml, visitedFiles);
+      const resolved = resolveIncludes(value, basePath, configRoot, loadIncludedYaml, visitedFiles);
+      // Define `__proto__` as an own property so an included file can't pollute the prototype
+      if (key === '__proto__') {
+        Object.defineProperty(result, key, {
+          value: resolved,
+          enumerable: true,
+          writable: true,
+          configurable: true,
+        });
+      } else {
+        result[key] = resolved;
+      }
     }
     return result;
   }
@@ -164,9 +184,11 @@ export default class YAMLContext {
 
         const parsed = parseYaml(prepareContent(fs.readFileSync(fPath, 'utf8')));
 
+        // Bound includes by the same config root loadFile() enforces
+        const configRoot = path.resolve(this.basePath);
         Object.assign(
           this.assets,
-          resolveIncludes(parsed, path.dirname(fPath), loadIncludedYaml) || {}
+          resolveIncludes(parsed, path.dirname(fPath), configRoot, loadIncludedYaml) || {}
         );
       } catch (err) {
         log.debug(err.stack);

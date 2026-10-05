@@ -27,6 +27,27 @@ Please refer to [tenant.yaml](tenant.yaml) for an example configuration.
 a0deploy import -c config.json -i tenant.yaml
 ```
 
+## Splitting the config across files with `!include`
+
+For large tenants you can keep `tenant.yaml` small by moving sections into their own files and pulling them in with the `!include` directive:
+
+```yaml
+# tenant.yaml
+tenant:
+  friendly_name: 'My Tenant'
+
+clients: !include clients.yaml
+roles: !include roles.yaml
+```
+
+```yaml
+# clients.yaml
+- name: My App
+  app_type: spa
+```
+
+Included files are resolved on import and must live inside the config directory (the directory of the file passed to `-i`); a path that escapes it with `../` or an absolute path is rejected. Includes may be nested, keyword replacement still applies, and `a0deploy export` writes everything back into a single flattened `tenant.yaml`. See [Available Resource Config Formats](../../docs/available-resource-config-formats.md) for details. `!include` is a YAML-only feature and is not available in the directory format.
+
 # Usage
 
 ## Config
