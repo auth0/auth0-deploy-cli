@@ -383,7 +383,7 @@ export const schema = {
           'An ordered array of notification channels enabled for CIBA (Client-Initiated Backchannel Authentication) requests. Channels are evaluated in the order specified.',
         items: {
           type: 'string',
-          enum: ['guardian-push', 'email'],
+          enum: ['guardian-push', 'email', 'my-account'],
         },
       },
       skip_non_verifiable_callback_uri_confirmation_prompt: {

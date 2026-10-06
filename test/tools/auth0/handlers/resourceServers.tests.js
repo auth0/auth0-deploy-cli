@@ -923,6 +923,76 @@ describe('#resourceServers handler', () => {
       expect(updateCalledWith.authorization_policy).to.equal(null);
     });
 
+    it('should preserve require_consent_non_repudiation on system resource server export (getType)', async () => {
+      const systemResourceServer = {
+        id: 'rs_system',
+        identifier: 'https://api.system.com/me/',
+        name: 'Auth0 My Account API',
+        is_system: true,
+        token_lifetime: 86400,
+        skip_consent_for_verifiable_first_party_clients: true,
+        require_consent_non_repudiation: true,
+        scopes: [{ value: 'read:users' }], // Should be removed
+        signing_alg: 'RS256', // Should be removed
+      };
+
+      const auth0 = {
+        resourceServers: {
+          list: (params) => mockPagedData(params, 'resource_servers', [systemResourceServer]),
+        },
+        pool,
+      };
+
+      const handler = new resourceServers.default({ client: pageClient(auth0), config });
+      const result = await handler.getType();
+
+      expect(result[0]).to.have.property('require_consent_non_repudiation');
+      expect(result[0].require_consent_non_repudiation).to.equal(true);
+      expect(result[0]).to.not.have.property('scopes');
+      expect(result[0]).to.not.have.property('signing_alg');
+    });
+
+    it('should include require_consent_non_repudiation in update payload for Auth0 My Account API', async () => {
+      let updateCalledWith = null;
+      const existingResourceServer = {
+        id: 'rs_my_account',
+        identifier: 'https://auth0.com/my-account/me/',
+        name: 'Auth0 My Account API',
+        is_system: true,
+      };
+
+      const auth0 = {
+        resourceServers: {
+          create: () => Promise.resolve({ data: [] }),
+          update: function (id, data) {
+            updateCalledWith = data;
+            return Promise.resolve({ data });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) => mockPagedData(params, 'resource_servers', [existingResourceServer]),
+        },
+        pool,
+      };
+
+      const handler = new resourceServers.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          resourceServers: [
+            {
+              name: 'Auth0 My Account API',
+              identifier: 'https://auth0.com/my-account/me/',
+              require_consent_non_repudiation: true,
+            },
+          ],
+        },
+      ]);
+
+      expect(updateCalledWith).to.not.equal(null);
+      expect(updateCalledWith.require_consent_non_repudiation).to.equal(true);
+    });
+
     it('should update "Auth0 My Account API" without name and is_system', async () => {
       let updateCalled = false;
       const existingResourceServer = {
