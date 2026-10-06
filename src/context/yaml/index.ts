@@ -2,6 +2,7 @@ import fs from 'fs-extra';
 import yaml from 'js-yaml';
 import path from 'path';
 import { ManagementClient } from 'auth0';
+import { isPlainObject } from 'lodash';
 import {
   loadFileAndReplaceKeywords,
   keywordReplace,
@@ -80,20 +81,32 @@ function resolveIncludes(
         throw new Error(`Circular include detected: ${filePath}`);
       }
 
-      if (!fs.existsSync(filePath)) {
+      let stat;
+      try {
+        stat = fs.statSync(filePath);
+      } catch {
         throw new Error(`Include file not found: ${filePath}`);
       }
+      if (stat.isDirectory()) {
+        throw new Error(`Include path is a directory, expected a file: ${filePath}`);
+      }
 
+      // visitedFiles backtracks (add before, delete after), so one shared set is enough
       visitedFiles.add(filePath);
       const result = resolveIncludes(
         loadIncludedYaml(filePath),
         path.dirname(filePath),
         configRoot,
         loadIncludedYaml,
-        new Set(visitedFiles)
+        visitedFiles
       );
       visitedFiles.delete(filePath);
       return result;
+    }
+
+    // Only rebuild plain objects; pass others (e.g. a Date from a YAML timestamp) through untouched
+    if (!isPlainObject(obj)) {
+      return obj;
     }
 
     const result = {};

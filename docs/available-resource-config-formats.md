@@ -28,7 +28,9 @@ roles: !include roles.yaml
 Notes and restrictions:
 
 - Includes are resolved on import (`a0deploy import -i tenant.yaml`). They are **not** supported in the directory format.
-- Paths are resolved relative to the file that declares the `!include`. For security, an included file must resolve **inside the config directory** (the directory of the entry file passed to `-i`); a path that escapes it with `../` or an absolute path is rejected with a `Path traversal blocked` error. This is the same guard applied to every other file reference.
+- The `!include` path is resolved relative to the file that declares it. For security, an included file must resolve **inside the config root**; a path that escapes it with `../` or an absolute path is rejected with a `Path traversal blocked` error. This is the same guard (and the same root) applied to every other file reference.
+- The config root is `AUTH0_BASE_PATH` when that is set, otherwise the directory of the entry file passed to `-i`. If you set `AUTH0_BASE_PATH` to a directory that does not contain your `tenant.yaml`, includes next to `tenant.yaml` can be rejected as traversal, so point `AUTH0_BASE_PATH` at the directory that holds your config.
+- Relative file references **inside** an included file (an action's `code:`, an email template body, and similar) still resolve from the config root, not from the included file's own directory. For example, an action split into `actions/actions.yaml` that points at `code.js` should reference it relative to the root (`actions/code.js`), not as a bare `code.js` sitting beside `actions.yaml`.
 - Includes may be nested (an included file may itself use `!include`). Circular includes are detected and reported rather than looping forever.
 - Keyword replacement (`@@KEY@@` / `##KEY##`) is applied to included files just as it is to the main file.
 - Export does not emit `!include`; `a0deploy export` writes a single flattened `tenant.yaml`.
