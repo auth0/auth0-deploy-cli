@@ -1,5 +1,5 @@
 import { Management } from 'auth0';
-import DefaultHandler, { order } from './default';
+import DefaultHandler, { order, retryWithExponentialBackoff } from './default';
 import { calculateChanges } from '../../calculateChanges';
 import log from '../../../logger';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
@@ -105,12 +105,13 @@ export default class RolesHandler extends DefaultHandler {
   }
 
   async updateRole(data, roles) {
-    const existingRole = await roles.find(
-      (roleDataForUpdate) => roleDataForUpdate.name === data.name
-    );
+    // Match on id first so a renamed role (matched by id, new name) still resolves to its
+    // existing permissions; fall back to name for configs imported without ids.
+    const existingRole =
+      roles.find((r) => r.id === data.id) || roles.find((r) => r.name === data.name);
 
     const params = { id: data.id };
-    const newPermissions = data.permissions;
+    const newPermissions = data.permissions || [];
 
     delete data.permissions;
     delete data.id;
@@ -118,16 +119,35 @@ export default class RolesHandler extends DefaultHandler {
     // lets files that already carry it (from a prior export) be imported cleanly.
     delete data.type;
 
-    await this.client.roles.update(params.id, data);
+    const retryConfig = this.getRetryConfig();
 
-    if (typeof existingRole.permissions !== 'undefined' && existingRole.permissions.length > 0) {
-      await this.client.roles.permissions.delete(params.id, {
-        permissions: existingRole.permissions,
-      });
+    await retryWithExponentialBackoff(() => this.client.roles.update(params.id, data), retryConfig);
+
+    // Only touch permissions that actually changed, and add before removing so an
+    // interrupted run can never leave a role with fewer permissions than it started with.
+    const existingPermissions = existingRole.permissions || [];
+    const samePermission = (a, b) =>
+      a.permission_name === b.permission_name &&
+      a.resource_server_identifier === b.resource_server_identifier;
+    const permissionsToAdd = newPermissions.filter(
+      (p) => !existingPermissions.some((e) => samePermission(e, p))
+    );
+    const permissionsToRemove = existingPermissions.filter(
+      (e) => !newPermissions.some((p) => samePermission(e, p))
+    );
+
+    if (permissionsToAdd.length > 0) {
+      await retryWithExponentialBackoff(
+        () => this.client.roles.permissions.add(params.id, { permissions: permissionsToAdd }),
+        retryConfig
+      );
     }
 
-    if (typeof newPermissions !== 'undefined' && newPermissions.length > 0) {
-      await this.client.roles.permissions.add(params.id, { permissions: newPermissions });
+    if (permissionsToRemove.length > 0) {
+      await retryWithExponentialBackoff(
+        () => this.client.roles.permissions.delete(params.id, { permissions: permissionsToRemove }),
+        retryConfig
+      );
     }
 
     return params;
