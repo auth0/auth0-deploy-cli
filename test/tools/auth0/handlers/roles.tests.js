@@ -330,6 +330,208 @@ describe('#roles handler', () => {
       ]);
     });
 
+    it('should only add newly granted permissions when updating a role', async () => {
+      let added;
+      let deleteCalled = false;
+      const auth0 = {
+        roles: {
+          update: () => Promise.resolve({}),
+          permissions: {
+            add: (roleId, data) => {
+              added = data.permissions;
+              return Promise.resolve([]);
+            },
+            delete: () => {
+              deleteCalled = true;
+              return Promise.resolve([]);
+            },
+          },
+        },
+        pool,
+      };
+
+      const handler = new roles.default({ client: pageClient(auth0), config });
+      const existing = [
+        {
+          name: 'myRole',
+          id: 'myRoleId',
+          permissions: [{ permission_name: 'read', resource_server_identifier: 'api' }],
+        },
+      ];
+
+      await handler.updateRole(
+        {
+          name: 'myRole',
+          id: 'myRoleId',
+          permissions: [
+            { permission_name: 'read', resource_server_identifier: 'api' },
+            { permission_name: 'write', resource_server_identifier: 'api' },
+          ],
+        },
+        existing
+      );
+
+      expect(added).to.deep.equal([
+        { permission_name: 'write', resource_server_identifier: 'api' },
+      ]);
+      expect(deleteCalled).to.equal(false);
+    });
+
+    it('should only remove revoked permissions when updating a role', async () => {
+      let removed;
+      let addCalled = false;
+      const auth0 = {
+        roles: {
+          update: () => Promise.resolve({}),
+          permissions: {
+            add: () => {
+              addCalled = true;
+              return Promise.resolve([]);
+            },
+            delete: (roleId, data) => {
+              removed = data.permissions;
+              return Promise.resolve([]);
+            },
+          },
+        },
+        pool,
+      };
+
+      const handler = new roles.default({ client: pageClient(auth0), config });
+      const existing = [
+        {
+          name: 'myRole',
+          id: 'myRoleId',
+          permissions: [
+            { permission_name: 'read', resource_server_identifier: 'api' },
+            { permission_name: 'write', resource_server_identifier: 'api' },
+          ],
+        },
+      ];
+
+      await handler.updateRole(
+        {
+          name: 'myRole',
+          id: 'myRoleId',
+          permissions: [{ permission_name: 'read', resource_server_identifier: 'api' }],
+        },
+        existing
+      );
+
+      expect(removed).to.deep.equal([
+        { permission_name: 'write', resource_server_identifier: 'api' },
+      ]);
+      expect(addCalled).to.equal(false);
+    });
+
+    it('should not touch permissions that are unchanged', async () => {
+      let addCalled = false;
+      let deleteCalled = false;
+      const auth0 = {
+        roles: {
+          update: () => Promise.resolve({}),
+          permissions: {
+            add: () => {
+              addCalled = true;
+              return Promise.resolve([]);
+            },
+            delete: () => {
+              deleteCalled = true;
+              return Promise.resolve([]);
+            },
+          },
+        },
+        pool,
+      };
+
+      const handler = new roles.default({ client: pageClient(auth0), config });
+      const permissions = [{ permission_name: 'read', resource_server_identifier: 'api' }];
+      const existing = [{ name: 'myRole', id: 'myRoleId', permissions }];
+
+      await handler.updateRole(
+        { name: 'myRole', id: 'myRoleId', permissions: [...permissions] },
+        existing
+      );
+
+      expect(addCalled).to.equal(false);
+      expect(deleteCalled).to.equal(false);
+    });
+
+    it('should add permissions before removing them', async () => {
+      const callOrder = [];
+      const auth0 = {
+        roles: {
+          update: () => Promise.resolve({}),
+          permissions: {
+            add: () => {
+              callOrder.push('add');
+              return Promise.resolve([]);
+            },
+            delete: () => {
+              callOrder.push('delete');
+              return Promise.resolve([]);
+            },
+          },
+        },
+        pool,
+      };
+
+      const handler = new roles.default({ client: pageClient(auth0), config });
+      const existing = [
+        {
+          name: 'myRole',
+          id: 'myRoleId',
+          permissions: [{ permission_name: 'read', resource_server_identifier: 'api' }],
+        },
+      ];
+
+      await handler.updateRole(
+        {
+          name: 'myRole',
+          id: 'myRoleId',
+          permissions: [{ permission_name: 'write', resource_server_identifier: 'api' }],
+        },
+        existing
+      );
+
+      expect(callOrder).to.deep.equal(['add', 'delete']);
+    });
+
+    it('should resolve existing permissions by id when a role is renamed', async () => {
+      let addCalled = false;
+      let deleteCalled = false;
+      const auth0 = {
+        roles: {
+          update: () => Promise.resolve({}),
+          permissions: {
+            add: () => {
+              addCalled = true;
+              return Promise.resolve([]);
+            },
+            delete: () => {
+              deleteCalled = true;
+              return Promise.resolve([]);
+            },
+          },
+        },
+        pool,
+      };
+
+      const handler = new roles.default({ client: pageClient(auth0), config });
+      const permissions = [{ permission_name: 'read', resource_server_identifier: 'api' }];
+      // Existing role is matched by id; its name differs from the renamed desired state.
+      const existing = [{ name: 'oldName', id: 'myRoleId', permissions }];
+
+      await handler.updateRole(
+        { name: 'newName', id: 'myRoleId', permissions: [...permissions] },
+        existing
+      );
+
+      // The id lookup finds the existing permissions, so an unchanged set touches nothing.
+      expect(addCalled).to.equal(false);
+      expect(deleteCalled).to.equal(false);
+    });
+
     it('should delete role', async () => {
       const auth0 = {
         roles: {

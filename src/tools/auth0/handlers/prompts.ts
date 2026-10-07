@@ -199,32 +199,42 @@ export const schema = {
     identifier_first: {
       type: 'boolean',
     },
+    // Every language/prompt shares the same shape, so the per-prompt and per-language schemas are
+    // defined once and referenced. Inlining them multiplies the schema by
+    // languages x promptTypes x screenTypes (~184k subschemas), which costs ~1 GB and ~2.5s of
+    // Ajv compile time on every `deploy`. The `$id` scopes the `#/definitions/...` refs to this
+    // subschema so they resolve wherever it is embedded.
     customText: {
+      $id: 'prompts-custom-text',
       type: 'object',
+      definitions: {
+        promptType: {
+          type: 'object',
+          properties: screenTypes.reduce(
+            (screenAcc, screenType) => ({
+              ...screenAcc,
+              [screenType]: {
+                type: 'object',
+              },
+            }),
+            {}
+          ),
+        },
+        language: {
+          type: 'object',
+          properties: promptTypes.reduce(
+            (promptAcc, promptType) => ({
+              ...promptAcc,
+              [promptType]: { $ref: '#/definitions/promptType' },
+            }),
+            {}
+          ),
+        },
+      },
       properties: languages.reduce(
         (acc, language) => ({
           ...acc,
-          [language]: {
-            type: 'object',
-            properties: promptTypes.reduce(
-              (promptAcc, promptType) => ({
-                ...promptAcc,
-                [promptType]: {
-                  type: 'object',
-                  properties: screenTypes.reduce(
-                    (screenAcc, screenType) => ({
-                      ...screenAcc,
-                      [screenType]: {
-                        type: 'object',
-                      },
-                    }),
-                    {}
-                  ),
-                },
-              }),
-              {}
-            ),
-          },
+          [language]: { $ref: '#/definitions/language' },
         }),
         {}
       ),

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Reduce `deploy`/`import` memory use and startup time by defining the `prompts.customText` JSON schema once and referencing it per language and prompt, instead of expanding it for every language × prompt × screen combination. [#1507]
+
 ## [9.0.0] - 2026-09-18
 
 ### Changed
@@ -2011,6 +2015,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1496]: https://github.com/auth0/auth0-deploy-cli/issues/1496
 [#1497]: https://github.com/auth0/auth0-deploy-cli/issues/1497
 [#1498]: https://github.com/auth0/auth0-deploy-cli/issues/1498
+[#1507]: https://github.com/auth0/auth0-deploy-cli/issues/1507
 [Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v9.0.0...HEAD
 [9.0.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.45.0...v9.0.0
 [8.45.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.44.0...v8.45.0
