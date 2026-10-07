@@ -1510,6 +1510,40 @@ describe('#clients handler', () => {
       await stageFn.apply(handler, [{ clients: [clientWithMultipleMethods] }]);
     });
 
+    it('should accept my-account in async_approval_notification_channels', async () => {
+      const clientWithMyAccountChannel = {
+        name: 'My Client',
+        async_approval_notification_channels: ['guardian-push', 'email', 'my-account'],
+      };
+
+      const auth0 = {
+        clients: {
+          create: function (data) {
+            (() => expect(this).to.not.be.undefined)();
+            expect(data.async_approval_notification_channels).to.deep.equal([
+              'guardian-push',
+              'email',
+              'my-account',
+            ]);
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) => mockPagedData(params, 'clients', []),
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [{ clients: [clientWithMyAccountChannel] }]);
+    });
+
     it('should update client organization_usage while preserving organization_require_behavior', async () => {
       const auth0 = {
         clients: {
