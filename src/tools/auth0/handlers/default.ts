@@ -309,6 +309,8 @@ export default class APIHandler {
   async load(): Promise<{ [key: string]: Asset | Asset[] | null }> {
     // Load Asset from Tenant
     const data = await (async () => {
+      // Log before fetching so a slow fetch is attributed to the handler actually running
+      log.info(`Retrieving ${this.type} data from Auth0`);
       const { data, hadSufficientScopes, requiredScopes } = await detectInsufficientScopeError<
         Asset | Asset[]
       >(this.getType.bind(this));
@@ -316,7 +318,6 @@ export default class APIHandler {
         log.warn(`Cannot retrieve ${this.type} due to missing scopes: ${requiredScopes}`);
         return null;
       }
-      log.info(`Retrieving ${this.type} data from Auth0`);
       return data;
     })();
 

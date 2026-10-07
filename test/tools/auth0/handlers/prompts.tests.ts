@@ -294,6 +294,50 @@ describe('#prompts handler', () => {
       sinon.restore();
     });
 
+    it('should log the number of custom text requests before fetching custom text', async () => {
+      const logDebugStub = sinon.stub(log, 'debug');
+      let customTextGetCalls = 0;
+
+      const auth0 = {
+        tenants: {
+          settings: {
+            get: () => Promise.resolve({ enabled_locales: ['en', 'fr'] }),
+          },
+        },
+        prompts: {
+          customText: {
+            get: () => {
+              // The request count must already be logged before any request is sent
+              expect(logDebugStub.called).to.equal(true);
+              customTextGetCalls += 1;
+              return Promise.resolve({});
+            },
+          },
+        },
+        pool: new PromisePoolExecutor({
+          concurrencyLimit: 3,
+          frequencyLimit: 1000,
+          frequencyWindow: 1000, // 1 sec
+        }),
+      };
+
+      const handler = new promptsHandler({
+        client: auth0,
+        config: config,
+      });
+
+      try {
+        const customText = await handler.getCustomTextSettings();
+        expect(customText).to.deep.equal({});
+        expect(logDebugStub.calledOnce).to.equal(true);
+        const message = logDebugStub.firstCall.args[0];
+        expect(message).to.include('2 language(s)');
+        expect(message).to.include(`(${customTextGetCalls} requests)`);
+      } finally {
+        sinon.restore();
+      }
+    });
+
     it('should update prompts settings but not custom text/partials settings if not set', async () => {
       let didCallUpdatePromptsSettings = false;
       let didCallUpdateCustomText = false;

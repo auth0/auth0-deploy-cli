@@ -375,6 +375,14 @@ export default class PromptsHandler extends DefaultHandler {
       return res.enabled_locales;
     });
 
+    log.debug(
+      `Fetching prompts custom text for ${supportedLanguages.length} language(s) x ${
+        promptTypes.length
+      } prompt type(s) (${
+        supportedLanguages.length * promptTypes.length
+      } requests). This endpoint is rate-limited by Auth0, so this may take a while on tenants with many languages enabled.`
+    );
+
     return this.client.pool
       .addEachTask({
         data:
