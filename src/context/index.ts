@@ -25,6 +25,7 @@ const nonPrimitiveProps: (keyof Config)[] = [
   'EXCLUDED_PROPS',
   'INCLUDED_PROPS',
   'AUTH0_INCLUDED_CONNECTIONS',
+  'AUTH0_EXPORT_CUSTOM_TEXT_LANGUAGES',
 ];
 
 const EA_FEATURES = [];

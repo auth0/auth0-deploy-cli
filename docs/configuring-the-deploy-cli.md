@@ -185,6 +185,33 @@ Boolean. When enabled, exports actual secret values (e.g. connection `client_sec
 
 > **Warning:** Enabling this option will write real credentials to exported files. Use with caution in shared or version-controlled environments.
 
+### `AUTH0_EXPORT_CUSTOM_TEXT_LANGUAGES`
+
+Array of language codes. When set, prompts custom text is only retrieved for the listed languages that are enabled on the tenant. When not set, custom text is retrieved for every enabled language. An empty array (`[]`) skips retrieving custom text entirely.
+
+Custom text is retrieved with one rate-limited request per language and prompt type, so on tenants with many enabled languages this step can take several minutes. Limiting the languages shortens it. Listed languages that are not enabled on the tenant are skipped with a warning.
+
+This option affects every operation that reads custom text from the tenant: export, and the dry-run comparison during import. Note:
+
+- After an export, the custom text file only contains the listed languages.
+- Import never deletes custom text, so custom text for unlisted languages is left untouched on the tenant.
+
+#### Example
+
+```json
+{
+  "AUTH0_EXPORT_CUSTOM_TEXT_LANGUAGES": ["en", "fr"]
+}
+```
+
+#### Environment Variable Format
+
+When passing as an environment variable, use JSON array format:
+
+```shell
+export AUTH0_EXPORT_CUSTOM_TEXT_LANGUAGES='["en","fr"]'
+```
+
 ### `EXCLUDED_PROPS`
 
 Provides ability to exclude any unwanted properties from management.

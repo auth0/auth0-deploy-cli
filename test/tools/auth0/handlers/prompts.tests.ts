@@ -294,6 +294,161 @@ describe('#prompts handler', () => {
       sinon.restore();
     });
 
+    it('should log the number of custom text requests before fetching custom text', async () => {
+      const logDebugStub = sinon.stub(log, 'debug');
+      let customTextGetCalls = 0;
+
+      const auth0 = {
+        tenants: {
+          settings: {
+            get: () => Promise.resolve({ enabled_locales: ['en', 'fr'] }),
+          },
+        },
+        prompts: {
+          customText: {
+            get: () => {
+              // The request count must already be logged before any request is sent
+              expect(logDebugStub.called).to.equal(true);
+              customTextGetCalls += 1;
+              return Promise.resolve({});
+            },
+          },
+        },
+        pool: new PromisePoolExecutor({
+          concurrencyLimit: 3,
+          frequencyLimit: 1000,
+          frequencyWindow: 1000, // 1 sec
+        }),
+      };
+
+      const handler = new promptsHandler({
+        client: auth0,
+        config: config,
+      });
+
+      try {
+        const customText = await handler.getCustomTextSettings();
+        expect(customText).to.deep.equal({});
+        expect(logDebugStub.calledOnce).to.equal(true);
+        const message = logDebugStub.firstCall.args[0];
+        expect(message).to.include('2 language(s)');
+        expect(message).to.include(`(${customTextGetCalls} requests)`);
+      } finally {
+        sinon.restore();
+      }
+    });
+
+    describe('AUTH0_EXPORT_CUSTOM_TEXT_LANGUAGES', () => {
+      const buildHandler = (configData, requestedLanguages: string[]) => {
+        const auth0 = {
+          tenants: {
+            settings: {
+              get: () => Promise.resolve({ enabled_locales: ['en', 'fr', 'de'] }),
+            },
+          },
+          prompts: {
+            customText: {
+              get: (promptType, language) => {
+                requestedLanguages.push(language);
+                if (promptType !== 'login') return Promise.resolve({});
+                return Promise.resolve({ login: { title: `login title in ${language}` } });
+              },
+            },
+          },
+          pool: new PromisePoolExecutor({
+            concurrencyLimit: 3,
+            frequencyLimit: 1000,
+            frequencyWindow: 1000, // 1 sec
+          }),
+        };
+        const handlerConfig = (key) => configData[key];
+
+        return new promptsHandler({ client: auth0, config: handlerConfig });
+      };
+
+      afterEach(() => {
+        sinon.restore();
+      });
+
+      it('should fetch custom text for all enabled languages when not set', async () => {
+        const requestedLanguages: string[] = [];
+        const handler = buildHandler({}, requestedLanguages);
+
+        const customText = await handler.getCustomTextSettings();
+
+        expect(_.uniq(requestedLanguages).sort()).to.deep.equal(['de', 'en', 'fr']);
+        expect(Object.keys(customText).sort()).to.deep.equal(['de', 'en', 'fr']);
+      });
+
+      it('should only fetch custom text for the listed languages', async () => {
+        const requestedLanguages: string[] = [];
+        const handler = buildHandler(
+          { AUTH0_EXPORT_CUSTOM_TEXT_LANGUAGES: ['fr', 'en'] },
+          requestedLanguages
+        );
+
+        const customText = await handler.getCustomTextSettings();
+
+        expect(_.uniq(requestedLanguages).sort()).to.deep.equal(['en', 'fr']);
+        expect(customText).to.deep.equal({
+          en: { login: { login: { title: 'login title in en' } } },
+          fr: { login: { login: { title: 'login title in fr' } } },
+        });
+      });
+
+      it('should warn about and skip listed languages that are not enabled on the tenant', async () => {
+        const logWarnStub = sinon.stub(log, 'warn');
+        const requestedLanguages: string[] = [];
+        const handler = buildHandler(
+          { AUTH0_EXPORT_CUSTOM_TEXT_LANGUAGES: ['en', 'ja'] },
+          requestedLanguages
+        );
+
+        const customText = await handler.getCustomTextSettings();
+
+        expect(_.uniq(requestedLanguages)).to.deep.equal(['en']);
+        expect(Object.keys(customText)).to.deep.equal(['en']);
+        expect(logWarnStub.calledOnce).to.equal(true);
+        expect(logWarnStub.firstCall.args[0]).to.include('ja');
+      });
+
+      it('should not fetch any custom text when set to an empty array', async () => {
+        const requestedLanguages: string[] = [];
+        const handler = buildHandler(
+          { AUTH0_EXPORT_CUSTOM_TEXT_LANGUAGES: [] },
+          requestedLanguages
+        );
+
+        const customText = await handler.getCustomTextSettings();
+
+        expect(requestedLanguages).to.deep.equal([]);
+        expect(customText).to.deep.equal({});
+      });
+
+      it('should throw when not set to an array of language codes', async () => {
+        const invalidValues = ['en', [1, 2], { en: true }];
+
+        for (const invalidValue of invalidValues) {
+          const requestedLanguages: string[] = [];
+          const handler = buildHandler(
+            { AUTH0_EXPORT_CUSTOM_TEXT_LANGUAGES: invalidValue },
+            requestedLanguages
+          );
+
+          let error;
+          try {
+            await handler.getCustomTextSettings();
+          } catch (err) {
+            error = err;
+          }
+
+          expect(error).to.be.an('error');
+          expect(error.message).to.include('AUTH0_EXPORT_CUSTOM_TEXT_LANGUAGES must be an array');
+          expect(requestedLanguages).to.deep.equal([]);
+        }
+      });
+    });
+
     it('should update prompts settings but not custom text/partials settings if not set', async () => {
       let didCallUpdatePromptsSettings = false;
       let didCallUpdateCustomText = false;

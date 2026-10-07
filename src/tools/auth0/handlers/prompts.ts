@@ -379,11 +379,58 @@ export default class PromptsHandler extends DefaultHandler {
     return prompts;
   }
 
+  /**
+   * Narrows the tenant's enabled languages to those listed in AUTH0_EXPORT_CUSTOM_TEXT_LANGUAGES.
+   * Custom text is fetched with one rate-limited request per language and prompt type, so
+   * limiting languages is the only way to shorten this step on tenants with many languages.
+   */
+  getCustomTextLanguages<T extends string>(enabledLanguages: T[]): T[] {
+    const configuredLanguages = this.config('AUTH0_EXPORT_CUSTOM_TEXT_LANGUAGES');
+    if (configuredLanguages === undefined) return enabledLanguages;
+
+    if (
+      !Array.isArray(configuredLanguages) ||
+      !configuredLanguages.every((language) => typeof language === 'string')
+    ) {
+      throw new Error(
+        'AUTH0_EXPORT_CUSTOM_TEXT_LANGUAGES must be an array of language codes, e.g. ["en", "fr"].'
+      );
+    }
+
+    const notEnabledLanguages = configuredLanguages.filter(
+      (language) => !enabledLanguages.includes(language as T)
+    );
+    if (notEnabledLanguages.length > 0) {
+      log.warn(
+        `Skipping custom text for languages listed in AUTH0_EXPORT_CUSTOM_TEXT_LANGUAGES that are not enabled on the tenant: ${notEnabledLanguages.join(
+          ', '
+        )}`
+      );
+    }
+
+    const languages = enabledLanguages.filter((language) => configuredLanguages.includes(language));
+    log.info(
+      `Retrieving prompts custom text only for languages in AUTH0_EXPORT_CUSTOM_TEXT_LANGUAGES: ${
+        languages.join(', ') || '(none)'
+      }`
+    );
+    return languages;
+  }
+
   async getCustomTextSettings(): Promise<AllPromptsByLanguage> {
-    const supportedLanguages = await this.client.tenants.settings.get().then((res) => {
+    const enabledLanguages = await this.client.tenants.settings.get().then((res) => {
       if (res.enabled_locales === undefined) return []; // In rare cases, private cloud tenants may not have `enabled_locales` defined
       return res.enabled_locales;
     });
+    const supportedLanguages = this.getCustomTextLanguages(enabledLanguages);
+
+    log.debug(
+      `Fetching prompts custom text for ${supportedLanguages.length} language(s) x ${
+        promptTypes.length
+      } prompt type(s) (${
+        supportedLanguages.length * promptTypes.length
+      } requests). This endpoint is rate-limited by Auth0, so this may take a while on tenants with many languages enabled; set AUTH0_EXPORT_CUSTOM_TEXT_LANGUAGES to limit which languages are fetched.`
+    );
 
     return this.client.pool
       .addEachTask({
