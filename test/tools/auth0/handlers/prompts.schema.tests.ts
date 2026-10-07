@@ -48,6 +48,15 @@ describe('#prompts schema', () => {
     expect(JSON.stringify(customText).length).to.be.lessThan(500 * 1024);
   });
 
+  it('keeps compiling the full tenant schema cheap', () => {
+    // The referenced form compiles in tens of ms (vs seconds/~1GB for the expanded form); the
+    // bound is generous for slow CI. Keep this before the expanded-schema test: that test's ~1GB
+    // compile leaves heap/GC pressure that slows a later compile enough to blow this bound.
+    const started = Date.now();
+    newAjv().compile(tenantSchema as object);
+    expect(Date.now() - started).to.be.lessThan(1500);
+  });
+
   it('validates customText identically to the fully expanded schema', () => {
     const leafValues: unknown[] = [{}, { a: 'b' }, 'text', 1, true, null, []];
     const cases: unknown[] = [{}, { customText: {} }, { customText: 'x' }, { customText: [] }];
@@ -78,14 +87,6 @@ describe('#prompts schema', () => {
         expect.fail(`schemas disagree for ${JSON.stringify(data).slice(0, 200)}`);
       }
     });
-  });
-
-  it('keeps compiling the full tenant schema cheap', () => {
-    // Compiling the original expanded schema takes seconds and ~1GB; the referenced form takes
-    // tens of milliseconds. The bound is deliberately generous so it is not flaky on slow CI.
-    const started = Date.now();
-    newAjv().compile(tenantSchema as object);
-    expect(Date.now() - started).to.be.lessThan(1500);
   });
 
   it('validates a realistic customText config loaded from YAML', () => {
