@@ -230,6 +230,8 @@ resourceServers:
     # authorization_policy is only applicable to the My Account API when the acr feature flag is enabled
     authorization_policy:
       policy_id: "019b76da-a800-73c9-b656-b349ae415c17"
+    # require_consent_non_repudiation is only applicable to the My Account API when the my_account_consents entitlement is enabled
+    require_consent_non_repudiation: true
 
 tokenExchangeProfiles:
   - name: "Custom Authentication Profile"
