@@ -2,6 +2,7 @@ import fs from 'fs-extra';
 import yaml from 'js-yaml';
 import path from 'path';
 import { ManagementClient } from 'auth0';
+import { isPlainObject } from 'lodash';
 import {
   loadFileAndReplaceKeywords,
   keywordReplace,
@@ -23,6 +24,114 @@ import cleanAssets from '../../readonly';
 import { Assets, Config, Auth0APIClient, AssetTypes, KeywordMappings } from '../../types';
 import { filterOnlyIncludedResourceTypes } from '..';
 import { preserveKeywords } from '../../keywordPreservation';
+
+// Symbol marker so a literal `__include` key in user YAML isn't read as a directive
+const INCLUDE = Symbol('include');
+
+// Custom YAML type for file includes
+const includeType = new yaml.Type('!include', {
+  kind: 'scalar',
+  resolve: (data) => typeof data === 'string',
+  construct: (data) => {
+    // This will be handled during the actual loading process
+    return { [INCLUDE]: data };
+  },
+});
+
+const schema = yaml.DEFAULT_SCHEMA.extend([includeType]);
+
+function prepareYamlContent(
+  content: string,
+  mappings: KeywordMappings,
+  disableKeywordReplacement: boolean
+): string {
+  return disableKeywordReplacement
+    ? wrapArrayReplaceMarkersInQuotes(content, mappings)
+    : keywordReplace(content, mappings);
+}
+
+function parseYaml(content: string) {
+  return yaml.load(content, { schema });
+}
+
+type LoadIncludedYaml = (filePath: string) => any;
+
+// Resolves !include directives. Keyword handling is applied by the caller before parse.
+// configRoot is threaded unchanged so chained `../` includes can't escape it.
+function resolveIncludes(
+  obj: any,
+  basePath: string,
+  configRoot: string,
+  loadIncludedYaml: LoadIncludedYaml,
+  visitedFiles = new Set<string>()
+): any {
+  if (Array.isArray(obj)) {
+    return obj.map((item) =>
+      resolveIncludes(item, basePath, configRoot, loadIncludedYaml, visitedFiles)
+    );
+  }
+
+  if (obj && typeof obj === 'object') {
+    const includePath = obj[INCLUDE];
+    if (includePath !== undefined) {
+      const filePath = path.resolve(basePath, includePath);
+      assertInsideConfigRoot(includePath, filePath, configRoot);
+
+      if (visitedFiles.has(filePath)) {
+        throw new Error(`Circular include detected: ${filePath}`);
+      }
+
+      let stat;
+      try {
+        stat = fs.statSync(filePath);
+      } catch (err) {
+        if (err.code === 'ENOENT') {
+          throw new Error(`Include file not found: ${filePath}`);
+        }
+        throw err;
+      }
+      if (stat.isDirectory()) {
+        throw new Error(`Include path is a directory, expected a file: ${filePath}`);
+      }
+
+      // visitedFiles backtracks (add before, delete after), so one shared set is enough
+      visitedFiles.add(filePath);
+      const result = resolveIncludes(
+        loadIncludedYaml(filePath),
+        path.dirname(filePath),
+        configRoot,
+        loadIncludedYaml,
+        visitedFiles
+      );
+      visitedFiles.delete(filePath);
+      return result;
+    }
+
+    // Only rebuild plain objects; pass others (e.g. a Date from a YAML timestamp) through untouched
+    if (!isPlainObject(obj)) {
+      return obj;
+    }
+
+    const result = {};
+    for (const [key, value] of Object.entries(obj)) {
+      const resolved = resolveIncludes(value, basePath, configRoot, loadIncludedYaml, visitedFiles);
+      // Define `__proto__` as an own property so an included file can't pollute the prototype
+      if (key === '__proto__') {
+        Object.defineProperty(result, key, {
+          value: resolved,
+          enumerable: true,
+          writable: true,
+          configurable: true,
+        });
+      } else {
+        result[key] = resolved;
+      }
+    }
+    return result;
+  }
+
+  return obj;
+}
 
 export default class YAMLContext {
   basePath: string;
@@ -82,13 +191,20 @@ export default class YAMLContext {
       try {
         const fPath = path.resolve(this.configFile);
         log.debug(`Loading YAML from ${fPath}`);
+
+        const prepareContent = (content: string) =>
+          prepareYamlContent(content, this.mappings, opts.disableKeywordReplacement);
+
+        const loadIncludedYaml: LoadIncludedYaml = (filePath) =>
+          parseYaml(prepareContent(fs.readFileSync(filePath, 'utf8')));
+
+        const parsed = parseYaml(prepareContent(fs.readFileSync(fPath, 'utf8')));
+
+        // Bound includes by the same config root loadFile() enforces
+        const configRoot = path.resolve(this.basePath);
         Object.assign(
           this.assets,
-          yaml.load(
-            opts.disableKeywordReplacement
-              ? wrapArrayReplaceMarkersInQuotes(fs.readFileSync(fPath, 'utf8'), this.mappings)
-              : keywordReplace(fs.readFileSync(fPath, 'utf8'), this.mappings)
-          ) || {}
+          resolveIncludes(parsed, path.dirname(fPath), configRoot, loadIncludedYaml) || {}
         );
       } catch (err) {
         log.debug(err.stack);
