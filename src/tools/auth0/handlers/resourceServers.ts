@@ -134,6 +134,11 @@ export const schema = {
           'The client ID of the client that this resource server is linked to (readonly)',
         readOnly: true,
       },
+      require_consent_non_repudiation: {
+        type: 'boolean',
+        description:
+          'When true, the authorization server rejects consent decisions that do not include a valid signature and kid. Requires the my_account_consents entitlement.',
+      },
     },
     required: ['name', 'identifier'],
   },
@@ -184,6 +189,7 @@ export default class ResourceServersHandler extends DefaultHandler {
             'id',
             'is_system',
             'authorization_policy',
+            'require_consent_non_repudiation',
           ];
           const sanitized: any = {};
           allowedKeys.forEach((key) => {
@@ -262,6 +268,7 @@ export default class ResourceServersHandler extends DefaultHandler {
           update.skip_consent_for_verifiable_first_party_clients,
         subject_type_authorization: update.subject_type_authorization,
         authorization_policy: update.authorization_policy,
+        require_consent_non_repudiation: update.require_consent_non_repudiation,
       };
 
       return this.client.resourceServers.update(id, updateFields);
