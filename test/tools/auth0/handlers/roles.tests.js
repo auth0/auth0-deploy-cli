@@ -497,6 +497,41 @@ describe('#roles handler', () => {
       expect(callOrder).to.deep.equal(['add', 'delete']);
     });
 
+    it('should resolve existing permissions by id when a role is renamed', async () => {
+      let addCalled = false;
+      let deleteCalled = false;
+      const auth0 = {
+        roles: {
+          update: () => Promise.resolve({}),
+          permissions: {
+            add: () => {
+              addCalled = true;
+              return Promise.resolve([]);
+            },
+            delete: () => {
+              deleteCalled = true;
+              return Promise.resolve([]);
+            },
+          },
+        },
+        pool,
+      };
+
+      const handler = new roles.default({ client: pageClient(auth0), config });
+      const permissions = [{ permission_name: 'read', resource_server_identifier: 'api' }];
+      // Existing role is matched by id; its name differs from the renamed desired state.
+      const existing = [{ name: 'oldName', id: 'myRoleId', permissions }];
+
+      await handler.updateRole(
+        { name: 'newName', id: 'myRoleId', permissions: [...permissions] },
+        existing
+      );
+
+      // The id lookup finds the existing permissions, so an unchanged set touches nothing.
+      expect(addCalled).to.equal(false);
+      expect(deleteCalled).to.equal(false);
+    });
+
     it('should delete role', async () => {
       const auth0 = {
         roles: {

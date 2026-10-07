@@ -105,9 +105,10 @@ export default class RolesHandler extends DefaultHandler {
   }
 
   async updateRole(data, roles) {
-    const existingRole = await roles.find(
-      (roleDataForUpdate) => roleDataForUpdate.name === data.name
-    );
+    // Match on id first so a renamed role (matched by id, new name) still resolves to its
+    // existing permissions; fall back to name for configs imported without ids.
+    const existingRole =
+      roles.find((r) => r.id === data.id) || roles.find((r) => r.name === data.name);
 
     const params = { id: data.id };
     const newPermissions = data.permissions || [];
