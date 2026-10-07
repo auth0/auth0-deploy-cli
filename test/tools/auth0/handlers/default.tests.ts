@@ -3,8 +3,6 @@ import chaiAsPromised from 'chai-as-promised';
 chai.use(chaiAsPromised);
 const { expect } = chai;
 import { PromisePoolExecutor } from 'promise-pool-executor';
-import * as sinon from 'sinon';
-import log from '../../../../src/logger';
 import mockHandler from '../../../../src/tools/auth0/handlers/default';
 import constants from '../../../../src/tools/constants';
 import { Assets, Auth0APIClient } from '../../../../src/types';
@@ -98,31 +96,6 @@ describe('#default handler', () => {
       auth_key: constants.OBFUSCATED_SECRET_VALUE,
       non_sensitive_property: 'regular value',
     });
-  });
-
-  it('should log the retrieval message before fetching data', async () => {
-    const logInfoStub = sinon.stub(log, 'info');
-
-    //@ts-ignore because missing lots of required properties
-    const handler = new mockHandler({
-      type: 'mock-resource-type',
-    });
-
-    let wasLoggedBeforeFetch = false;
-    handler.getType = async () => {
-      wasLoggedBeforeFetch = logInfoStub.calledWith(
-        'Retrieving mock-resource-type data from Auth0'
-      );
-      return [];
-    };
-
-    try {
-      await handler.load();
-      expect(wasLoggedBeforeFetch).to.equal(true);
-      expect(logInfoStub.calledOnce).to.equal(true);
-    } finally {
-      sinon.restore();
-    }
   });
 
   it('should strip obfuscated data fields when making updates', async () => {

@@ -83,6 +83,7 @@ export type Config = {
   AUTH0_EXPORT_IDENTIFIERS?: boolean;
   AUTH0_EXPORT_ORDERED?: boolean;
   AUTH0_EXPORT_SECRETS?: boolean;
+  AUTH0_EXPORT_CUSTOM_TEXT_LANGUAGES?: string[];
   AUTH0_CONNECTIONS_DIRECTORY?: string;
   AUTH0_DRY_RUN?: boolean | 'preview';
   AUTH0_DRY_RUN_INTERACTIVE?: boolean;
