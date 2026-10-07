@@ -46,7 +46,7 @@ roles: !include roles.yaml
   app_type: spa
 ```
 
-Included files are resolved on import and must live inside the config directory (the directory of the file passed to `-i`); a path that escapes it with `../` or an absolute path is rejected. Includes may be nested, keyword replacement still applies, and `a0deploy export` writes everything back into a single flattened `tenant.yaml`. See [Available Resource Config Formats](../../docs/available-resource-config-formats.md) for details. `!include` is a YAML-only feature and is not available in the directory format.
+Included files are resolved on import and must live inside the config root; a path that escapes it with `../` or an absolute path is rejected. Includes may be nested, keyword replacement still applies, and `a0deploy export` writes everything back into a single flattened `tenant.yaml`. See [Available Resource Config Formats](../../docs/available-resource-config-formats.md) for details. `!include` is a YAML-only feature and is not available in the directory format.
 
 # Usage
 

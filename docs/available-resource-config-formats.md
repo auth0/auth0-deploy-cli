@@ -33,7 +33,7 @@ Notes and restrictions:
 - Relative file references **inside** an included file (an action's `code:`, an email template body, and similar) still resolve from the config root, not from the included file's own directory. For example, an action split into `actions/actions.yaml` that points at `code.js` should reference it relative to the root (`actions/code.js`), not as a bare `code.js` sitting beside `actions.yaml`.
 - Includes may be nested (an included file may itself use `!include`). Circular includes are detected and reported rather than looping forever.
 - Keyword replacement (`@@KEY@@` / `##KEY##`) is applied to included files just as it is to the main file.
-- Export does not emit `!include`; `a0deploy export` writes a single flattened `tenant.yaml`.
+- Export does not emit `!include`; `a0deploy export` writes a single flattened `tenant.yaml`. Export to a separate folder if you keep a split config, otherwise the flattened `tenant.yaml` overwrites your entry file and the included files are left orphaned.
 
 ## Directory (JSON)
 

@@ -84,8 +84,11 @@ function resolveIncludes(
       let stat;
       try {
         stat = fs.statSync(filePath);
-      } catch {
-        throw new Error(`Include file not found: ${filePath}`);
+      } catch (err) {
+        if (err.code === 'ENOENT') {
+          throw new Error(`Include file not found: ${filePath}`);
+        }
+        throw err;
       }
       if (stat.isDirectory()) {
         throw new Error(`Include path is a directory, expected a file: ${filePath}`);
