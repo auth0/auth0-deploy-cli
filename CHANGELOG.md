@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.1.0] - 2026-10-07
+
 ### Added
 
 - Add support for the `auth_email_by_code` email template. [#1500]
@@ -24,12 +26,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [9.0.0] - 2026-09-18
 
-### Changed
-
-- **⚠️ Breaking changes:**
-  - **Config file handlers (import): path traversal is now a hard error.** A file reference that resolves outside the config directory now aborts the import with an error instead of logging a deprecation warning (the warning shipped in 8.43.0 and 8.44.0). This applies to every file-backed field in both directory and YAML formats: action `code`, rule/hook `script`, database `customScripts`, client `custom_login_page`, connection/email-template/branding `body`, prompt partials, and flow/form bodies. Move any out-of-tree references (`../` relative paths or absolute paths) inside your config directory. Blocked references fail with `Path traversal blocked: "<input>" resolves to "<resolved>" which is outside the config directory "<root>".` before any Management API call. `a0deploy export` is unaffected. [#1498]
-  - **`AUTH0_DOMAIN` environment variable: must now be a bare host.** The `node-auth0` v7 upgrade validates the domain more strictly and rejects values that include a scheme or a trailing slash (for example `https://tenant.auth0.com/`); use a bare host such as `tenant.us.auth0.com`. This Management-API-only release also moves token acquisition to the SDK's managed auth, which auto-refreshes tokens during long-running import/export runs while preserving the previous fail-fast behavior on bad credentials. See the [node-auth0 v7 migration guide](https://github.com/auth0/node-auth0/blob/master/v7_MIGRATION_GUIDE.md). [#1491]
-
 ### Added
 
 - Add handlers for MFA advanced factor configuration (phone/email OTP and Guardian settings). [#1497]
@@ -37,6 +33,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add anonymous sessions support to tenant, clients, and resource servers. [#1496]
 - Support `enforce_permission_ceiling` and `enforce_self_assignment_restriction` on `my_organization_configuration` (EA). [#1495]
 - Support tenants without the `riskAssessment` and `guardianPolicies` entitlement by handling `insufficient_entitlement` 403 responses gracefully instead of failing the run. [#1493]
+
+### Changed
+
+- **⚠️ Breaking changes:**
+  - **Config file handlers (import): path traversal is now a hard error.** A file reference that resolves outside the config directory now aborts the import with an error instead of logging a deprecation warning (the warning shipped in 8.43.0 and 8.44.0). This applies to every file-backed field in both directory and YAML formats: action `code`, rule/hook `script`, database `customScripts`, client `custom_login_page`, connection/email-template/branding `body`, prompt partials, and flow/form bodies. Move any out-of-tree references (`../` relative paths or absolute paths) inside your config directory. Blocked references fail with `Path traversal blocked: "<input>" resolves to "<resolved>" which is outside the config directory "<root>".` before any Management API call. `a0deploy export` is unaffected. [#1498]
+  - **`AUTH0_DOMAIN` environment variable: must now be a bare host.** The `node-auth0` v7 upgrade validates the domain more strictly and rejects values that include a scheme or a trailing slash (for example `https://tenant.auth0.com/`); use a bare host such as `tenant.us.auth0.com`. This Management-API-only release also moves token acquisition to the SDK's managed auth, which auto-refreshes tokens during long-running import/export runs while preserving the previous fail-fast behavior on bad credentials. See the [node-auth0 v7 migration guide](https://github.com/auth0/node-auth0/blob/master/v7_MIGRATION_GUIDE.md). [#1491]
 
 ### Fixed
 
@@ -1913,6 +1915,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1242]: https://github.com/auth0/auth0-deploy-cli/issues/1242
 [#1244]: https://github.com/auth0/auth0-deploy-cli/issues/1244
 [#1246]: https://github.com/auth0/auth0-deploy-cli/issues/1246
+[#1252]: https://github.com/auth0/auth0-deploy-cli/issues/1252
 [#1253]: https://github.com/auth0/auth0-deploy-cli/issues/1253
 [#1261]: https://github.com/auth0/auth0-deploy-cli/issues/1261
 [#1263]: https://github.com/auth0/auth0-deploy-cli/issues/1263
@@ -2015,6 +2018,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1481]: https://github.com/auth0/auth0-deploy-cli/issues/1481
 [#1482]: https://github.com/auth0/auth0-deploy-cli/issues/1482
 [#1483]: https://github.com/auth0/auth0-deploy-cli/issues/1483
+[#1485]: https://github.com/auth0/auth0-deploy-cli/issues/1485
 [#1486]: https://github.com/auth0/auth0-deploy-cli/issues/1486
 [#1487]: https://github.com/auth0/auth0-deploy-cli/issues/1487
 [#1489]: https://github.com/auth0/auth0-deploy-cli/issues/1489
@@ -2026,16 +2030,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1496]: https://github.com/auth0/auth0-deploy-cli/issues/1496
 [#1497]: https://github.com/auth0/auth0-deploy-cli/issues/1497
 [#1498]: https://github.com/auth0/auth0-deploy-cli/issues/1498
-[#1507]: https://github.com/auth0/auth0-deploy-cli/issues/1507
-[#1252]: https://github.com/auth0/auth0-deploy-cli/issues/1252
-[#1485]: https://github.com/auth0/auth0-deploy-cli/issues/1485
 [#1500]: https://github.com/auth0/auth0-deploy-cli/issues/1500
 [#1503]: https://github.com/auth0/auth0-deploy-cli/issues/1503
 [#1505]: https://github.com/auth0/auth0-deploy-cli/issues/1505
+[#1507]: https://github.com/auth0/auth0-deploy-cli/issues/1507
 [#1508]: https://github.com/auth0/auth0-deploy-cli/issues/1508
 [#1510]: https://github.com/auth0/auth0-deploy-cli/issues/1510
 [#1511]: https://github.com/auth0/auth0-deploy-cli/issues/1511
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v9.0.0...HEAD
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v9.1.0...HEAD
+[9.1.0]: https://github.com/auth0/auth0-deploy-cli/compare/v9.0.0...v9.1.0
 [9.0.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.45.0...v9.0.0
 [8.45.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.44.0...v8.45.0
 [8.44.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.43.0...v8.44.0
