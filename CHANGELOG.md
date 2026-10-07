@@ -7,8 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add support for the `auth_email_by_code` email template. [#1500]
+- Add support for phone provider protection (`phoneProviderProtection`) to the `attackProtection` resource. [#1503]
+- Support the `require_consent_non_repudiation` resource server property and the `my-account` client `async_approval_notification_channels` value (EA). [#1508]
+- Support `!include` directives in YAML config files, including nested includes, so a large `tenant.yaml` can be split across multiple files. [#1252]
+- Add `AUTH0_EXPORT_CUSTOM_TEXT_LANGUAGES` config to limit which languages' prompts custom text is fetched, shortening exports on tenants with many languages enabled. Behaviour is unchanged when not set. [#1511]
+
 ### Fixed
 
+- Speed up imports into large tenants by enriching connection `enabled_clients` only for connections in the local config and skipping the SCIM id map when SCIM is not enabled. [#1505]
+- Allow system resource servers other than the Auth0 My Account API (e.g. the Auth0 My Organization API) to be updated. [#1485]
+- Prevent roles from losing permissions on an interrupted import by diffing permissions instead of clearing and re-adding them, and retrying role updates on 429 responses. [#1510]
 - Reduce `deploy`/`import` memory use and startup time by defining the `prompts.customText` JSON schema once and referencing it per language and prompt, instead of expanding it for every language × prompt × screen combination. [#1507]
 
 ## [9.0.0] - 2026-09-18
@@ -2016,6 +2027,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1497]: https://github.com/auth0/auth0-deploy-cli/issues/1497
 [#1498]: https://github.com/auth0/auth0-deploy-cli/issues/1498
 [#1507]: https://github.com/auth0/auth0-deploy-cli/issues/1507
+[#1252]: https://github.com/auth0/auth0-deploy-cli/issues/1252
+[#1485]: https://github.com/auth0/auth0-deploy-cli/issues/1485
+[#1500]: https://github.com/auth0/auth0-deploy-cli/issues/1500
+[#1503]: https://github.com/auth0/auth0-deploy-cli/issues/1503
+[#1505]: https://github.com/auth0/auth0-deploy-cli/issues/1505
+[#1508]: https://github.com/auth0/auth0-deploy-cli/issues/1508
+[#1510]: https://github.com/auth0/auth0-deploy-cli/issues/1510
+[#1511]: https://github.com/auth0/auth0-deploy-cli/issues/1511
 [Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v9.0.0...HEAD
 [9.0.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.45.0...v9.0.0
 [8.45.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.44.0...v8.45.0
