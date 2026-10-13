@@ -690,6 +690,20 @@ rateLimitPolicies:
       limit: 10
       redirect_uri: https://example.com/rate-limited
 
+# Feature Flags are part of Experiment Center (Early Access). Only customer-defined flags are
+# managed; Auth0-managed built-in flags are excluded. A flag is created in 'draft'; activation
+# (which requires at least two variations) happens on a later update.
+featureFlags:
+  - name: checkout-experiment
+    description: Controls the checkout experience
+    parameters:
+      enabled:
+        type: boolean
+        value: false
+      variant_label:
+        type: string
+        value: control
+
 organizations:
   - name: my-organization
     display_name: My Organization

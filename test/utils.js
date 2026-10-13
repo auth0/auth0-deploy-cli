@@ -285,6 +285,16 @@ export function mockMgmtClient() {
           getNextPage: () => Promise.resolve({ data: [], hasNextPage: () => false }),
         }),
     },
+    experimentation: {
+      featureFlags: {
+        list: () =>
+          Promise.resolve({
+            data: [],
+            hasNextPage: () => false,
+            getNextPage: () => Promise.resolve({ data: [], hasNextPage: () => false }),
+          }),
+      },
+    },
   };
 }
 
