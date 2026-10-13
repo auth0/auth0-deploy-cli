@@ -234,6 +234,7 @@ const constants = {
   RATE_LIMIT_POLICIES_DIRECTORY: 'rate-limit-policies',
   EVENT_STREAMS_DIRECTORY: 'event-streams',
   FEATURE_FLAGS_DIRECTORY: 'feature-flags',
+  VARIATIONS_DIRECTORY: 'variations',
 };
 
 export default constants;

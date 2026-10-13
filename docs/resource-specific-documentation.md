@@ -2478,3 +2478,56 @@ Each feature flag is stored as a separate JSON file named after the flag (e.g. `
   }
 }
 ```
+
+## Feature Flag Variations
+
+> **Early Access.** Variations belong to the Experiment Center feature flags above and are only available on entitled tenants.
+
+A variation is a named override set on a feature flag. The baseline (control) variation overrides nothing (`overrides: {}`); other variations override one or more of the parent flag's parameters.
+
+Notes and guardrails:
+
+- **Each variation references its parent flag by name** (`feature_flag_name`), not by the tenant-specific id, so configuration is portable. On import the name is resolved to the flag id in the target tenant, so the parent flag must exist first.
+- **Names are unique only within a flag.** Two different flags may each have a variation named `control`, but a single flag cannot have two variations with the same name.
+- **Overrides must reference parameters that exist on the parent flag**, with matching types. The API rejects unknown or mistyped override keys.
+- Variations of Auth0-managed (`type: auth0`) flags are not managed.
+- `id`, `feature_flag_id`, `created_at` and `updated_at` are read-only and are ignored on create and update.
+
+### Schema Properties
+
+| Property            | Type     | Required | Description                                                                      |
+| ------------------- | -------- | -------- | -------------------------------------------------------------------------------- |
+| `feature_flag_name` | `string` | Yes      | Name of the parent feature flag. Resolved to the flag id on import.              |
+| `name`              | `string` | Yes      | Variation name. Unique within the parent flag.                                   |
+| `description`       | `string` | No       | Description of the variation.                                                    |
+| `overrides`         | `object` | Yes      | Parameter overrides. `{}` is the control/baseline. Keys must be flag parameters. |
+
+### YAML Example
+
+```yaml
+# Contents of ./tenant.yaml
+variations:
+  - feature_flag_name: checkout-experiment
+    name: control
+    overrides: {}
+  - feature_flag_name: checkout-experiment
+    name: variant-a
+    description: Enables the new checkout
+    overrides:
+      enabled: true
+```
+
+### Directory Example
+
+Folder: `./variations/`
+
+Each variation is stored as a separate JSON file named `<feature-flag-name>-<variation-name>.json` (e.g. `checkout-experiment-variant-a.json`):
+
+```json
+{
+  "feature_flag_name": "checkout-experiment",
+  "name": "variant-a",
+  "description": "Enables the new checkout",
+  "overrides": { "enabled": true }
+}
+```

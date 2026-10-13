@@ -46,6 +46,7 @@ import * as supplementalSignals from './supplementalSignals';
 import * as rateLimitPolicies from './rateLimitPolicies';
 import * as eventStreams from './eventStreams';
 import * as featureFlags from './featureFlags';
+import * as variations from './variations';
 import * as clientAuthCredentials from './clientAuthCredentials';
 import * as clientAuthCredentialsPre from './clientAuthCredentialsPre';
 
@@ -102,6 +103,7 @@ const auth0ApiHandlers: { [key in AssetTypes]: any } = {
   rateLimitPolicies,
   eventStreams,
   featureFlags,
+  variations,
   clientAuthCredentials,
   // clientAuthCredentialsPre is a deploy-only pre-pass handler (order 40) — not a user-facing
   // asset type so it is not in AssetTypes, but must be registered here to run during deploy.
