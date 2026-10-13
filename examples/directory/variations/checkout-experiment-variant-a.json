@@ -1,0 +1,6 @@
+{
+  "feature_flag_name": "checkout-experiment",
+  "name": "variant-a",
+  "description": "Enables the new checkout",
+  "overrides": { "enabled": true }
+}
