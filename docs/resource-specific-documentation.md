@@ -2587,3 +2587,62 @@ Each resource is a JSON file inside the `guardian` folder:
 ```
 
 For more details, see the [Management API documentation](https://auth0.com/docs/api/management/v2#!/Guardian).
+
+## Feature Flags
+
+> **Early Access.** Feature Flags are part of Auth0's Experiment Center and are only available on tenants entitled to the feature (`experiment_center_ea`). On tenants without the entitlement the resource is skipped.
+
+Feature Flags define the typed, configurable parameters that experiments vary. Each flag declares a set of parameters; experiment variations later override those parameters.
+
+Notes and guardrails:
+
+- **Only customer-defined flags are managed.** Auth0-managed built-in flags (`type: auth0`, e.g. the passkey enrollment flag) are provisioned automatically on entitled tenants and are excluded from export and from create/update/delete.
+- **`status` is managed through updates, not creation.** A flag is always created in `draft`. Transitions (`draft` → `active`, `draft`/`active` → `archived`) are applied on update. Activating a flag requires at least two variations, so a brand-new flag is activated on a later deploy once its variations exist.
+- **Archived is terminal.** An archived flag cannot be modified or reactivated.
+- `id`, `type`, `created_at` and `updated_at` are read-only and are ignored on create/update.
+
+### Schema Properties
+
+| Property                        | Type     | Required       | Description                                                                                           |
+| ------------------------------- | -------- | -------------- | ----------------------------------------------------------------------------------------------------- |
+| `name`                          | `string` | Yes            | Human-readable name. Unique per tenant; used as the matching key across tenants.                      |
+| `description`                   | `string` | No             | Description of what the flag controls.                                                                |
+| `parameters`                    | `object` | Yes            | Map of parameter name to definition. May be empty (`{}`). Each parameter requires `type` and `value`. |
+| `parameters.<name>.type`        | `string` | Yes            | One of `string`, `boolean`, `number`, `array`, `object`.                                              |
+| `parameters.<name>.value`       | any      | Yes            | Default value; must match the declared `type`.                                                        |
+| `parameters.<name>.description` | `string` | No             | Description of the parameter.                                                                         |
+| `status`                        | `string` | No             | `draft`, `active`, or `archived`. Not accepted on create (a flag is born `draft`).                    |
+| `type`                          | `string` | No (read-only) | `self` (customer-defined) or `auth0` (managed). Set by the API.                                       |
+
+### YAML Example
+
+```yaml
+# Contents of ./tenant.yaml
+featureFlags:
+  - name: checkout-experiment
+    description: Controls the checkout experience
+    parameters:
+      enabled:
+        type: boolean
+        value: false
+      variant_label:
+        type: string
+        value: control
+```
+
+### Directory Example
+
+Folder: `./feature-flags/`
+
+Each feature flag is stored as a separate JSON file named after the flag (e.g. `checkout-experiment.json`):
+
+```json
+{
+  "name": "checkout-experiment",
+  "description": "Controls the checkout experience",
+  "parameters": {
+    "enabled": { "type": "boolean", "value": false },
+    "variant_label": { "type": "string", "value": "control" }
+  }
+}
+```

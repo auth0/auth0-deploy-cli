@@ -24,6 +24,7 @@ import { RiskAssessment } from './tools/auth0/handlers/riskAssessment';
 import { SupplementalSignals } from './tools/auth0/handlers/supplementalSignals';
 import { RateLimitPolicy } from './tools/auth0/handlers/rateLimitPolicies';
 import { EventStream } from './tools/auth0/handlers/eventStreams';
+import { FeatureFlag } from './tools/auth0/handlers/featureFlags';
 
 type SharedPaginationParams = {
   checkpoint?: boolean;
@@ -177,6 +178,7 @@ export type Assets = Partial<{
   tokenExchangeProfiles: TokenExchangeProfile[] | null;
   rateLimitPolicies: RateLimitPolicy[] | null;
   eventStreams: EventStream[] | null;
+  featureFlags: FeatureFlag[] | null;
 }>;
 
 export type CalculatedChanges = {
@@ -250,6 +252,7 @@ export type AssetTypes =
   | 'supplementalSignals'
   | 'rateLimitPolicies'
   | 'eventStreams'
+  | 'featureFlags'
   | 'clientAuthCredentials';
 
 export type KeywordMappings = { [key: string]: (string | number)[] | string | number };

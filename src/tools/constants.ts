@@ -234,6 +234,7 @@ const constants = {
   SUPPLEMENTAL_SIGNALS_DIRECTORY: 'supplemental-signals',
   RATE_LIMIT_POLICIES_DIRECTORY: 'rate-limit-policies',
   EVENT_STREAMS_DIRECTORY: 'event-streams',
+  FEATURE_FLAGS_DIRECTORY: 'feature-flags',
 };
 
 export default constants;
