@@ -154,6 +154,28 @@ describe('#featureFlags handler', () => {
       expect(updatedData).to.not.have.property('updated_at');
     });
 
+    it('should send only status for an archived flag so re-import is idempotent', async () => {
+      let updatedData: any = null;
+      const archived = { ...sampleFlag, status: 'archived' };
+      const handler = new FeatureFlagsHandler({
+        client: makeClient({
+          list: () => Promise.resolve(makePage([archived])),
+          update: (id, data) => {
+            updatedData = data;
+            return Promise.resolve(data);
+          },
+        }),
+        config,
+      } as any);
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [{ featureFlags: [archived] }]);
+
+      // archived flags are immutable; only the status is sent (no parameters/name), avoiding
+      // feature_flag_archived on every re-import
+      expect(updatedData).to.deep.equal({ status: 'archived' });
+    });
+
     it('should delete a flag when AUTH0_ALLOW_DELETE is true', async () => {
       config.data.AUTH0_ALLOW_DELETE = true;
       let deletedId: string | null = null;
