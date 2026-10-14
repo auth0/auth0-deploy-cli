@@ -35,6 +35,10 @@ export default class VariationsHandler extends DefaultAPIHandler {
 
   private flagNameToId: { [name: string]: string } = {};
 
+  // Names of feature flags that are archived. An archived flag is immutable, and the API rejects
+  // modifying its variations (feature_flag_archived), so updates to those variations are skipped.
+  private archivedFlagNames: Set<string> = new Set();
+
   // Serializes writes targeting the same feature flag. The deploy pool runs variation writes
   // concurrently, but the API races when multiple variations on one flag are written at once,
   // so each flag's writes are chained while different flags still proceed in parallel.
@@ -96,6 +100,9 @@ export default class VariationsHandler extends DefaultAPIHandler {
       map[flag.name] = flag.id;
       return map;
     }, {});
+    this.archivedFlagNames = new Set(
+      flags.filter((flag) => flag.status === 'archived').map((flag) => flag.name)
+    );
     return flags;
   }
 
@@ -184,6 +191,15 @@ export default class VariationsHandler extends DefaultAPIHandler {
   async processChanges(assets: Assets): Promise<void> {
     const { variations } = assets;
     if (!variations) return;
-    await super.processChanges(assets, await this.calcChanges(assets));
+    // calcChanges runs getType, which populates archivedFlagNames from the flag list.
+    const changes = await this.calcChanges(assets);
+    // An archived parent flag is immutable; updating its variations is rejected with
+    // feature_flag_archived and would abort the whole deploy. Skip those updates so a config
+    // that still contains variations of an archived flag re-imports cleanly. (Deletes of such
+    // variations are allowed by the API and are left untouched.)
+    const update = changes.update.filter(
+      (variation) => !this.archivedFlagNames.has(variation.feature_flag_name)
+    );
+    await super.processChanges(assets, { ...changes, update });
   }
 }
