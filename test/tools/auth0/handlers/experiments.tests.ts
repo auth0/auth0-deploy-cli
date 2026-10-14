@@ -27,7 +27,7 @@ const apiExperiment = {
   allocation_strategy: 'percentage',
   status: 'draft',
   is_valid: true,
-  editable_fields: ['name'],
+  editable_fields: ['name', 'description', 'default_config', 'allocations', 'levels'],
   feature_flag_snapshot: { frozen: true },
   current_level: null,
   created_at: '2026-01-01T00:00:00.000Z',
@@ -237,6 +237,77 @@ describe('#experiments handler', () => {
       ]);
 
       expect(capture.update.body).to.not.have.property('status');
+    });
+
+    it('omits frozen fields when the experiment is active, so re-import is idempotent', async () => {
+      const capture: any = {};
+      const activeExperiment = {
+        ...apiExperiment,
+        status: 'active',
+        editable_fields: ['name', 'description'],
+      };
+      const handler = new ExperimentsHandler({
+        client: makeClient({ experiments: [activeExperiment], capture }),
+        config,
+      } as any);
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          experiments: [
+            {
+              id: 'exp_1',
+              name: 'checkout-test',
+              feature_flag_name: 'checkout',
+              authentication_flow: 'authentication',
+              status: 'active',
+              allocation_strategy: 'percentage',
+              allocations: [
+                { variation_name: 'control', is_control: true, weight: 50 },
+                { variation_name: 'variant-a', is_control: false, weight: 50 },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      // activated experiment is snapshot-frozen: the update sends only the status value (no field
+      // edits, which would 409), and the unchanged status is an accepted idempotent no-op.
+      expect(capture.update.body).to.not.have.property('allocations');
+      expect(capture.update.body).to.not.have.property('authentication_flow');
+      expect(capture.update.body).to.not.have.property('name');
+      expect(capture.update.body).to.deep.equal({ status: 'active' });
+    });
+
+    it('sends only a status transition for a non-draft experiment (active to paused)', async () => {
+      const capture: any = {};
+      const activeExperiment = {
+        ...apiExperiment,
+        status: 'active',
+        editable_fields: ['name', 'description'],
+      };
+      const handler = new ExperimentsHandler({
+        client: makeClient({ experiments: [activeExperiment], capture }),
+        config,
+      } as any);
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          experiments: [
+            {
+              id: 'exp_1',
+              name: 'checkout-test',
+              feature_flag_name: 'checkout',
+              authentication_flow: 'authentication',
+              status: 'paused',
+              allocations: [{ variation_name: 'control', is_control: true, weight: 100 }],
+            },
+          ],
+        },
+      ]);
+
+      expect(capture.update.body).to.deep.equal({ status: 'paused' });
     });
 
     it('throws a clear error when the referenced flag does not exist', async () => {

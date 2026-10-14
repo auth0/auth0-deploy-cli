@@ -78,6 +78,11 @@ export default class ExperimentsHandler extends DefaultAPIHandler {
 
   private variationNameToIdByFlag: { [flagId: string]: { [name: string]: string } } = {};
 
+  // Current server state per existing experiment, captured in getType. Used by the update path
+  // to only send fields the API still allows at the experiment's current lifecycle status
+  // (editable_fields is the API's own response-time computation of what is mutable).
+  private stateById: { [id: string]: { status: string; editableFields: string[] } } = {};
+
   constructor(config: DefaultAPIHandler) {
     super({
       ...config,
@@ -91,7 +96,7 @@ export default class ExperimentsHandler extends DefaultAPIHandler {
           );
         },
         update: async (id: string, data) => {
-          const payload = await this.toUpdatePayload(data);
+          const payload = await this.toUpdatePayload(id, data);
           return this.client.experimentation.experiments.update(
             id,
             payload as unknown as Management.UpdateExperimentRequestParameters
@@ -224,21 +229,45 @@ export default class ExperimentsHandler extends DefaultAPIHandler {
     return payload;
   }
 
-  private async toUpdatePayload(data: Asset): Promise<Asset> {
-    // feature_flag_id is immutable, but the flag is still needed to resolve allocation variations.
-    const flagId = await this.resolveFlagId(data.feature_flag_name);
+  private async toUpdatePayload(id: string, data: Asset): Promise<Asset> {
+    // `id` comes from the handler's update function (the base strips it from `data`).
+    const state = this.stateById[id];
+    const currentStatus = state?.status;
+
+    // Once an experiment is activated its configuration snapshot is frozen: the API rejects any
+    // field edit with experiment_snapshot_frozen ("clone it to make changes") and rejects an
+    // empty body, so the only accepted update is a status value. Send status alone, which also
+    // performs lifecycle transitions (e.g. active -> paused) and is an accepted no-op when the
+    // status is unchanged. Config and allocation edits to an activated experiment are not
+    // possible through this API (it requires cloning) and so are intentionally not sent.
+    if (currentStatus && currentStatus !== 'draft') {
+      const target = data.status && data.status !== 'draft' ? data.status : currentStatus;
+      return { status: target };
+    }
+
+    // Draft experiment (not yet frozen): field edits are allowed, gated by the API's
+    // editable_fields (which, notably, omits the create-only authentication_flow). A transition
+    // off draft is applied alongside the edits (the API applies edits first, then the transition).
+    const editable: string[] | null = state ? state.editableFields : null;
+    const canEdit = (field: string): boolean => !editable || editable.includes(field);
+
     const payload: Asset = {};
-    if (data.name !== undefined) payload.name = data.name;
-    if (data.description !== undefined) payload.description = data.description;
-    if (data.authentication_flow !== undefined)
+    if (data.name !== undefined && canEdit('name')) payload.name = data.name;
+    if (data.description !== undefined && canEdit('description'))
+      payload.description = data.description;
+    if (data.authentication_flow !== undefined && canEdit('authentication_flow'))
       payload.authentication_flow = data.authentication_flow;
-    if (data.default_config !== undefined) payload.default_config = data.default_config;
-    if (data.levels !== undefined) payload.levels = data.levels;
-    const allocations = await this.buildAllocations(flagId, data.allocations);
-    if (allocations !== undefined) payload.allocations = allocations;
-    // status on update is a lifecycle transition (active/paused/completed/archived). 'draft' is
-    // only a create-time state and is not a valid transition target, so it is not sent.
-    if (data.status !== undefined && data.status !== 'draft') payload.status = data.status;
+    if (data.default_config !== undefined && canEdit('default_config'))
+      payload.default_config = data.default_config;
+    if (data.levels !== undefined && canEdit('levels')) payload.levels = data.levels;
+    if (data.allocations !== undefined && canEdit('allocations')) {
+      // feature_flag_id is immutable, but the flag is still needed to resolve allocation variations.
+      const flagId = await this.resolveFlagId(data.feature_flag_name);
+      payload.allocations = await this.buildAllocations(flagId, data.allocations);
+    }
+    if (data.status !== undefined && data.status !== 'draft' && data.status !== currentStatus) {
+      payload.status = data.status;
+    }
     return payload;
   }
 
@@ -258,6 +287,12 @@ export default class ExperimentsHandler extends DefaultAPIHandler {
     // The API resolves feature_flag_name and allocation variation/segment names on read, so the
     // export just drops the tenant-specific ids and the copy-on-activate snapshots.
     this.existing = experiments.map((experiment) => {
+      // Capture the current lifecycle state before stripping, so the update path can gate fields
+      // on what the API still allows (editable_fields is stripped from the exported shape below).
+      this.stateById[experiment.id] = {
+        status: experiment.status,
+        editableFields: Array.isArray(experiment.editable_fields) ? experiment.editable_fields : [],
+      };
       const portable: Asset = { ...experiment };
       READ_ONLY_FIELDS.forEach((field) => delete portable[field]);
       if (Array.isArray(portable.allocations)) {
