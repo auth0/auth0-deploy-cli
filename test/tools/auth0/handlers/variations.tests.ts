@@ -190,6 +190,28 @@ describe('#variations handler', () => {
       config.data.AUTH0_ALLOW_DELETE = false;
     });
 
+    it('skips updating variations whose parent flag is archived', async () => {
+      const capture: any = {};
+      const archivedFlag = { ...selfFlag, status: 'archived' };
+      const handler = new VariationsHandler({
+        client: makeClient({
+          flags: [archivedFlag],
+          variationsByFlag: { flg_self: [controlVariation] },
+          capture,
+        }),
+        config,
+      } as any);
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      // Re-import the existing variation unchanged; the parent flag is archived, so the update
+      // is skipped rather than failing with feature_flag_archived.
+      await stageFn.apply(handler, [
+        { variations: [{ feature_flag_name: 'checkout', name: 'control', overrides: {} }] },
+      ]);
+
+      expect(capture.update).to.equal(undefined);
+    });
+
     it('throws a clear error when the referenced flag does not exist', async () => {
       const handler = new VariationsHandler({
         client: makeClient({ flags: [selfFlag], variationsByFlag: {} }),
