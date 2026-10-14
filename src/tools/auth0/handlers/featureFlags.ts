@@ -56,7 +56,17 @@ export default class FeatureFlagsHandler extends DefaultAPIHandler {
       stripUpdateFields: ['created_at', 'updated_at', 'type'],
       functions: {
         create: (data) => this.client.experimentation.featureFlags.create(data),
-        update: (id: string, data) => this.client.experimentation.featureFlags.update(id, data),
+        update: (id: string, data) => {
+          // An archived flag is terminal and immutable: the API rejects any field edit with
+          // feature_flag_archived. Since deploy-cli issues an update for every matched asset,
+          // re-importing a config that still contains an archived flag would fail on every run.
+          // Send only the status (an accepted idempotent no-op) so re-imports stay clean.
+          const existing = (this.existing || []).find((flag) => flag.id === id);
+          if (existing && existing.status === 'archived') {
+            return this.client.experimentation.featureFlags.update(id, { status: 'archived' });
+          }
+          return this.client.experimentation.featureFlags.update(id, data);
+        },
         delete: (id: string) => this.client.experimentation.featureFlags.delete(id),
       },
     });

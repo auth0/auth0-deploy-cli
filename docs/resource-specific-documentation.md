@@ -2597,7 +2597,7 @@ Feature Flags define the typed, configurable parameters that experiments vary. E
 Notes and guardrails:
 
 - **Only customer-defined flags are managed.** Auth0-managed built-in flags (`type: auth0`, e.g. the passkey enrollment flag) are provisioned automatically on entitled tenants and are excluded from export and from create/update/delete.
-- **`status` is managed through updates, not creation.** A flag is always created in `draft`. Transitions (`draft` → `active`, `draft`/`active` → `archived`) are applied on update. Activating a flag requires at least two variations, so a brand-new flag is activated on a later deploy once its variations exist.
+- **`status` is managed through updates, not creation.** A flag is always created in `draft`. Transitions (`draft` → `active`, `draft`/`active` → `archived`) are applied on update. Activating a flag requires at least two variations, so a brand-new flag is activated on a later deploy once its variations exist. An archived flag is terminal and immutable: the API rejects edits to its parameters or other fields, so the deploy CLI only re-sends the status for an archived flag, keeping a re-import of a config that still contains it a clean no-op rather than a failure.
 - **Archived is terminal.** An archived flag cannot be modified or reactivated.
 - `id`, `type`, `created_at` and `updated_at` are read-only and are ignored on create/update.
 
