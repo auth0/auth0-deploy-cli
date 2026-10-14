@@ -46,6 +46,7 @@ import rateLimitPolicies from './rateLimitPolicies';
 import eventStreams from './eventStreams';
 import featureFlags from './featureFlags';
 import variations from './variations';
+import segments from './segments';
 import clientAuthCredentials from './clientAuthCredentials';
 
 import DirectoryContext from '..';
@@ -109,6 +110,7 @@ const directoryHandlers: {
   eventStreams,
   featureFlags,
   variations,
+  segments,
   clientAuthCredentials,
 };
 
