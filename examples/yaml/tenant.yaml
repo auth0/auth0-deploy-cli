@@ -704,6 +704,18 @@ featureFlags:
         type: string
         value: control
 
+# Variations belong to a feature flag, referenced by name. The control variation overrides
+# nothing; other variations override one or more of the parent flag's parameters.
+variations:
+  - feature_flag_name: checkout-experiment
+    name: control
+    overrides: {}
+  - feature_flag_name: checkout-experiment
+    name: variant-a
+    description: Enables the new checkout
+    overrides:
+      enabled: true
+
 organizations:
   - name: my-organization
     display_name: My Organization
