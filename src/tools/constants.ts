@@ -236,6 +236,7 @@ const constants = {
   FEATURE_FLAGS_DIRECTORY: 'feature-flags',
   VARIATIONS_DIRECTORY: 'variations',
   SEGMENTS_DIRECTORY: 'segments',
+  EXPERIMENTS_DIRECTORY: 'experiments',
 };
 
 export default constants;

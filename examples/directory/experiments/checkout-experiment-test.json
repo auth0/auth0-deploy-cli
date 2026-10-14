@@ -1,0 +1,10 @@
+{
+  "name": "checkout-experiment-test",
+  "feature_flag_name": "checkout-experiment",
+  "authentication_flow": "authentication",
+  "allocation_strategy": "percentage",
+  "allocations": [
+    { "variation_name": "control", "is_control": true, "weight": 50 },
+    { "variation_name": "variant-a", "is_control": false, "weight": 50 }
+  ]
+}

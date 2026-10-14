@@ -2581,3 +2581,68 @@ Each segment is stored as a separate JSON file named after the segment (e.g. `us
   "rules": [{ "match": { "country": ["US"] } }]
 }
 ```
+
+## Experiments
+
+> **Early Access.** Experiments are part of Experiment Center and are only available on entitled tenants.
+
+An experiment runs a feature flag against a chosen authentication flow, splitting traffic across the flag's variations (optionally by segment). Experiments are the top of the Experiment Center dependency chain: the feature flag, its variations, and any referenced segments must exist first.
+
+Notes and guardrails:
+
+- **References are by name.** `feature_flag_name`, `allocations[].variation_name`, and `allocations[].segment_name` are resolved to the tenant's ids on import, so configuration is portable. The referenced flag, variations, and segments must exist in the target tenant first.
+- **`status` is managed through updates, not creation.** An experiment is created `draft`. Lifecycle transitions (`active`, `paused`, `completed`, `archived`) are applied on update. `draft` is a create-only state and is never sent as a transition. Activating an experiment requires it to be valid, which in turn requires its feature flag to be active (and a flag needs at least two variations to activate).
+- **Allocations.** Exactly one allocation must be the control (`is_control: true`). Percentage-strategy allocations carry a `weight`; segment-strategy allocations carry a `segment_name` and `priority`, with the control acting as the fallback (`is_fallback: true`, no segment).
+- **`default_config`** (`tenant` or `flag`) applies only to Auth0-managed flags and is rejected for customer-defined flags.
+- `id`, `feature_flag_id`, `is_valid`, `editable_fields`, `current_level`, `started_at`, `ended_at`, the copy-on-activate snapshots, and the per-allocation ids/snapshots are read-only and are not written back on import.
+
+### Schema Properties
+
+| Property              | Type     | Required | Description                                                                                                                           |
+| --------------------- | -------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                | `string` | Yes      | Human-readable name. Unique per tenant; used as the matching key.                                                                     |
+| `feature_flag_name`   | `string` | Yes      | Name of the feature flag this experiment is based on. Resolved to its id on import.                                                   |
+| `authentication_flow` | `string` | Yes      | One of `authentication`, `mfa_enrollment`, `mfa_challenge`, `password_reset`, `passkey_enrollment`, `all`.                            |
+| `description`         | `string` | No       | Description of the experiment.                                                                                                        |
+| `allocation_strategy` | `string` | No       | `percentage` or `segment`.                                                                                                            |
+| `allocations`         | `array`  | No       | Traffic allocations. Each has `variation_name` and `is_control`, plus `weight` (percentage) or `segment_name` + `priority` (segment). |
+| `default_config`      | `string` | No       | `tenant` or `flag`. Auth0-managed flags only.                                                                                         |
+| `levels`              | `array`  | No       | Gradual-rollout ramp percentages, a strictly increasing list of integers in [0, 100].                                                 |
+| `status`              | `string` | No       | `draft`, `active`, `paused`, `completed`, `archived`. Not accepted on create.                                                         |
+
+### YAML Example
+
+```yaml
+# Contents of ./tenant.yaml
+experiments:
+  - name: checkout-experiment-test
+    feature_flag_name: checkout-experiment
+    authentication_flow: authentication
+    allocation_strategy: percentage
+    allocations:
+      - variation_name: control
+        is_control: true
+        weight: 50
+      - variation_name: variant-a
+        is_control: false
+        weight: 50
+```
+
+### Directory Example
+
+Folder: `./experiments/`
+
+Each experiment is stored as a separate JSON file named after the experiment (e.g. `checkout-experiment-test.json`):
+
+```json
+{
+  "name": "checkout-experiment-test",
+  "feature_flag_name": "checkout-experiment",
+  "authentication_flow": "authentication",
+  "allocation_strategy": "percentage",
+  "allocations": [
+    { "variation_name": "control", "is_control": true, "weight": 50 },
+    { "variation_name": "variant-a", "is_control": false, "weight": 50 }
+  ]
+}
+```
