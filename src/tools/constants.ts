@@ -235,6 +235,7 @@ const constants = {
   EVENT_STREAMS_DIRECTORY: 'event-streams',
   FEATURE_FLAGS_DIRECTORY: 'feature-flags',
   VARIATIONS_DIRECTORY: 'variations',
+  SEGMENTS_DIRECTORY: 'segments',
 };
 
 export default constants;

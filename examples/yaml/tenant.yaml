@@ -716,6 +716,15 @@ variations:
     overrides:
       enabled: true
 
+# Segments are reusable audiences defined by match rules; experiments can target them.
+segments:
+  - name: us-visitors
+    description: Visitors from the US
+    rules:
+      - match:
+          country:
+            - US
+
 organizations:
   - name: my-organization
     display_name: My Organization
