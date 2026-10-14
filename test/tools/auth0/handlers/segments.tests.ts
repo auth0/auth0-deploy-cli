@@ -145,6 +145,28 @@ describe('#segments handler', () => {
       expect(updatedData).to.not.have.property('type');
     });
 
+    it('should send only status for an archived segment so re-import is idempotent', async () => {
+      let updatedData: any = null;
+      const archived = { ...sampleSegment, status: 'archived' };
+      const handler = new SegmentsHandler({
+        client: makeClient({
+          list: () => Promise.resolve(makePage([archived])),
+          update: (id, data) => {
+            updatedData = data;
+            return Promise.resolve(data);
+          },
+        }),
+        config,
+      } as any);
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [{ segments: [archived] }]);
+
+      // archived segments are immutable; only the status is sent (no rules/name), avoiding
+      // segment_archived on every re-import
+      expect(updatedData).to.deep.equal({ status: 'archived' });
+    });
+
     it('should delete a segment when AUTH0_ALLOW_DELETE is true', async () => {
       config.data.AUTH0_ALLOW_DELETE = true;
       let deletedId: string | null = null;

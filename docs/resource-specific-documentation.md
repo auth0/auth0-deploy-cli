@@ -2541,7 +2541,7 @@ A segment is a named, reusable audience defined by match rules. Experiments can 
 Notes and guardrails:
 
 - **Only customer-defined segments are managed.** Auth0-managed (`type: auth0`) segments are provisioned automatically and are excluded from export and from create/update/delete.
-- **`status` is managed through updates, not creation.** A segment is created `active`. Archiving happens on update and is terminal (an archived segment cannot return to active).
+- **`status` is managed through updates, not creation.** A segment is created `active`. Archiving happens on update and is terminal (an archived segment cannot return to active). An archived segment is also immutable: the API rejects edits to its rules or other fields, so the deploy CLI only re-sends the status for an archived segment, which keeps re-importing a config that still contains it a clean no-op rather than a failure. A segment authored `archived` from the start is created `active` and archived on the next import.
 - `rules` is an ordered list; a segment matches if any rule matches. Each rule carries `match` and/or `not_match` conditions.
 - `id`, `type`, `created_at` and `updated_at` are read-only and are ignored on create and update.
 

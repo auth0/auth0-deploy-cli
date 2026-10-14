@@ -44,7 +44,17 @@ export default class SegmentsHandler extends DefaultAPIHandler {
       stripUpdateFields: ['created_at', 'updated_at', 'type'],
       functions: {
         create: (data) => this.client.experimentation.segments.create(data),
-        update: (id: string, data) => this.client.experimentation.segments.update(id, data),
+        update: (id: string, data) => {
+          // An archived segment is terminal and immutable: the API rejects any field edit with
+          // segment_archived. Since deploy-cli issues an update for every matched asset,
+          // re-importing a config that still contains an archived segment would fail on every run.
+          // Send only the status (an accepted idempotent no-op) so re-imports stay clean.
+          const existing = (this.existing || []).find((segment) => segment.id === id);
+          if (existing && existing.status === 'archived') {
+            return this.client.experimentation.segments.update(id, { status: 'archived' });
+          }
+          return this.client.experimentation.segments.update(id, data);
+        },
         delete: (id: string) => this.client.experimentation.segments.delete(id),
       },
     });
