@@ -300,6 +300,14 @@ export function mockMgmtClient() {
           list: () => Promise.resolve({ variations: [] }),
         },
       },
+      segments: {
+        list: () =>
+          Promise.resolve({
+            data: [],
+            hasNextPage: () => false,
+            getNextPage: () => Promise.resolve({ data: [], hasNextPage: () => false }),
+          }),
+      },
     },
   };
 }

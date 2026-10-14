@@ -2699,3 +2699,53 @@ Each variation is stored under a per-flag subfolder as `<feature-flag-name>/<var
   "overrides": { "enabled": true }
 }
 ```
+
+## Segments
+
+> **Early Access.** Segments are part of Experiment Center and are only available on entitled tenants.
+
+A segment is a named, reusable audience defined by match rules. Experiments can target a segment to assign a variation to the users it matches.
+
+Notes and guardrails:
+
+- **Only customer-defined segments are managed.** Auth0-managed (`type: auth0`) segments are provisioned automatically and are excluded from export and from create/update/delete.
+- **`status` is managed through updates, not creation.** A segment is created `active`. Archiving happens on update and is terminal (an archived segment cannot return to active).
+- `rules` is an ordered list; a segment matches if any rule matches. Each rule carries `match` and/or `not_match` conditions.
+- `id`, `type`, `created_at` and `updated_at` are read-only and are ignored on create and update.
+
+### Schema Properties
+
+| Property      | Type     | Required       | Description                                                                                                                                                                                                                             |
+| ------------- | -------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`        | `string` | Yes            | Human-readable name. Unique per tenant; used as the matching key.                                                                                                                                                                       |
+| `description` | `string` | No             | Description of the segment.                                                                                                                                                                                                             |
+| `rules`       | `array`  | Yes            | Ordered list of `{ match, not_match }` rule objects. A segment matches if any rule matches. Each condition keys off a known attribute (country, device_type, browser, connection, and so on) whose value is an array of allowed values. |
+| `status`      | `string` | No             | `active` or `archived`. Not accepted on create (a segment is born `active`).                                                                                                                                                            |
+| `type`        | `string` | No (read-only) | `self` (customer-defined) or `auth0` (managed). Set by the API.                                                                                                                                                                         |
+
+### YAML Example
+
+```yaml
+# Contents of ./tenant.yaml
+segments:
+  - name: us-visitors
+    description: Visitors from the US
+    rules:
+      - match:
+          country:
+            - US
+```
+
+### Directory Example
+
+Folder: `./segments/`
+
+Each segment is stored as a separate JSON file named after the segment (e.g. `us-visitors.json`):
+
+```json
+{
+  "name": "us-visitors",
+  "description": "Visitors from the US",
+  "rules": [{ "match": { "country": ["US"] } }]
+}
+```
