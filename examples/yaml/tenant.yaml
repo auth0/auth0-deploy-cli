@@ -725,6 +725,21 @@ segments:
           country:
             - US
 
+# Experiments split traffic across a feature flag's variations. The referenced feature flag,
+# its variations, and any segments must exist first.
+experiments:
+  - name: checkout-experiment-test
+    feature_flag_name: checkout-experiment
+    authentication_flow: authentication
+    allocation_strategy: percentage
+    allocations:
+      - variation_name: control
+        is_control: true
+        weight: 50
+      - variation_name: variant-a
+        is_control: false
+        weight: 50
+
 organizations:
   - name: my-organization
     display_name: My Organization
