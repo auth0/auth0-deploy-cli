@@ -1126,7 +1126,7 @@ The Deploy CLI supports configuring Client ID Metadata Document (CIMD) support v
 Behavior notes:
 
 - Setting `client_id_metadata_document_dynamic_registration_supported: true` together with `client_id_metadata_document_supported: false` fails validation before any API call is made.
-- If the configuration sets only one of the two, it is checked against the tenant's current value. Enabling dynamic registration while CIMD support is off on the tenant, or disabling CIMD support while dynamic registration is on, fails with an error before any tenant settings are written. Set both values in the same configuration to change them together.
+- If the configuration sets only one of the two, it is checked against the tenant's current value. Enabling dynamic registration while CIMD support is off on the tenant fails with an error before any tenant settings are written. Disabling CIMD support while dynamic registration is on is reported by `--dry-run`; on import, the Auth0 API rejects the tenant settings update. Set both values in the same configuration to change them together.
 - Tenants with the `dynamic_cimd` flag export `client_id_metadata_document_dynamic_registration_supported: false` by default. When importing into a tenant without the flag, a `false` value is dropped automatically so the configuration can be deployed across environments. A `true` value is still sent, and the API's error is reported.
 
 **YAML Example**

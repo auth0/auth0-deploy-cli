@@ -348,7 +348,7 @@ describe('#tenant handler', () => {
         ]);
       });
 
-      it('should reject disabling CIMD support while dynamic registration is on', async () => {
+      it('should reject disabling CIMD support while dynamic registration is on in dry run', async () => {
         const { auth0, calls } = buildClient({
           client_id_metadata_document_supported: true,
           client_id_metadata_document_dynamic_registration_supported: true,
@@ -356,15 +356,33 @@ describe('#tenant handler', () => {
         // @ts-ignore
         const handler = new tenantHandler({ client: auth0 });
 
-        const err = await processAndCatch(handler, {
-          client_id_metadata_document_supported: false,
-        });
+        let err = null;
+        try {
+          await handler.dryRunChanges({ tenant: { client_id_metadata_document_supported: false } });
+        } catch (e) {
+          err = e;
+        }
 
         expect(err).to.not.equal(null);
         expect(err.message).to.include(
           'cannot be disabled while client_id_metadata_document_dynamic_registration_supported is enabled'
         );
         expect(calls.update).to.deep.equal([]);
+      });
+
+      it('should not fetch tenant settings when importing only client_id_metadata_document_supported: false', async () => {
+        // Every export contains this value, so a fetch here would add a request to every deploy.
+        const { auth0, calls } = buildClient({});
+        // @ts-ignore
+        const handler = new tenantHandler({ client: auth0 });
+
+        const err = await processAndCatch(handler, {
+          client_id_metadata_document_supported: false,
+        });
+
+        expect(err).to.equal(null);
+        expect(calls.get).to.equal(0);
+        expect(calls.update).to.deep.equal([{ client_id_metadata_document_supported: false }]);
       });
 
       it('should allow disabling both CIMD settings together', async () => {

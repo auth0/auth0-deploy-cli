@@ -264,13 +264,21 @@ export default class TenantHandler extends DefaultHandler {
 
   // Checks the CIMD settings in the config against the tenant's current values. Shared by
   // dryRunChanges and processChanges so the dry run preview reports the same errors.
-  async applyCimdSettingsRules(tenant: Asset): Promise<Asset> {
+  // `checkCimdDisable` is off for imports: every export contains
+  // client_id_metadata_document_supported: false, so fetching the tenant for it would add a
+  // request to almost every deploy; the API's 400 for that conflict is already descriptive.
+  async applyCimdSettingsRules(
+    tenant: Asset,
+    { checkCimdDisable }: { checkCimdDisable: boolean }
+  ): Promise<Asset> {
     const cimdSupported = tenant.client_id_metadata_document_supported;
     const dynamicRegistration = tenant.client_id_metadata_document_dynamic_registration_supported;
+    const disablesCimdOnly =
+      checkCimdDisable && cimdSupported === false && dynamicRegistration === undefined;
     const dependsOnExistingCimd =
       dynamicRegistration === false ||
       (dynamicRegistration === true && cimdSupported === undefined) ||
-      (cimdSupported === false && dynamicRegistration === undefined);
+      disablesCimdOnly;
 
     if (dependsOnExistingCimd) {
       if (!this.existing) await this.getType();
@@ -299,8 +307,7 @@ export default class TenantHandler extends DefaultHandler {
         );
       }
       if (
-        cimdSupported === false &&
-        dynamicRegistration === undefined &&
+        disablesCimdOnly &&
         this.existing.client_id_metadata_document_dynamic_registration_supported === true
       ) {
         throw new ValidationError(
@@ -315,7 +322,7 @@ export default class TenantHandler extends DefaultHandler {
   async dryRunChanges(assets: Assets): Promise<CalculatedChanges> {
     if (!assets.tenant) return super.dryRunChanges(assets);
 
-    const tenant = await this.applyCimdSettingsRules(assets.tenant);
+    const tenant = await this.applyCimdSettingsRules(assets.tenant, { checkCimdDisable: true });
     return super.dryRunChanges({ ...assets, tenant });
   }
 
@@ -327,7 +334,7 @@ export default class TenantHandler extends DefaultHandler {
     // Do nothing if not set
     if (!tenant) return;
 
-    tenant = await this.applyCimdSettingsRules(tenant);
+    tenant = await this.applyCimdSettingsRules(tenant, { checkCimdDisable: false });
 
     if (isDryRun(this.config)) {
       const { update } = await this.calcChanges({ ...assets, tenant });
