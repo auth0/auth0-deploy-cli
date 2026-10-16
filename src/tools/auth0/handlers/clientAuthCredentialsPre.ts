@@ -3,6 +3,7 @@ import { Assets, Auth0APIClient, CalculatedChanges } from '../../../types';
 import { ConfigFunction } from '../../../configFactory';
 import { paginate } from '../client';
 import log from '../../../logger';
+import { Client, excludeDynamicCimdClients } from './clients';
 
 export const schema = {
   type: 'array',
@@ -75,11 +76,13 @@ export default class ClientAuthCredentialsPreHandler {
     const needsNameResolution = deletionCandidates.some((c) => !c.client_id);
     let clientIdByName = new Map<string, string>();
     if (needsNameResolution) {
-      const existingClients = await paginate(this.client.clients.list, {
+      const existingClients = await paginate<Client>(this.client.clients.list, {
         paginate: true,
         is_global: false,
       });
-      clientIdByName = new Map(existingClients.map((c: any) => [c.name, c.client_id]));
+      clientIdByName = new Map(
+        excludeDynamicCimdClients(existingClients).map((c: any) => [c.name, c.client_id])
+      );
     }
 
     for (const client of deletionCandidates) {

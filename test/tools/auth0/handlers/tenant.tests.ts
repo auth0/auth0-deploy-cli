@@ -28,6 +28,48 @@ describe('#tenant handler', () => {
         expect(err.message).to.include('Pages should be set separately');
       }
     });
+
+    it('should not allow dynamic CIMD registration when CIMD support is disabled', async () => {
+      // @ts-ignore
+      const handler = new tenantHandler({ client: {} });
+      const stageFn = Object.getPrototypeOf(handler).validate;
+
+      let error;
+      try {
+        await stageFn.apply(handler, [
+          {
+            tenant: {
+              client_id_metadata_document_supported: false,
+              client_id_metadata_document_dynamic_registration_supported: true,
+            },
+          },
+        ]);
+      } catch (err) {
+        error = err;
+      }
+      expect(error).to.be.an('object');
+      expect(error.message).to.include(
+        'client_id_metadata_document_dynamic_registration_supported cannot be enabled'
+      );
+    });
+
+    it('should allow dynamic CIMD registration when CIMD support is enabled or unset', async () => {
+      // @ts-ignore
+      const handler = new tenantHandler({ client: {} });
+      const stageFn = Object.getPrototypeOf(handler).validate;
+
+      await stageFn.apply(handler, [
+        {
+          tenant: {
+            client_id_metadata_document_supported: true,
+            client_id_metadata_document_dynamic_registration_supported: true,
+          },
+        },
+      ]);
+      await stageFn.apply(handler, [
+        { tenant: { client_id_metadata_document_dynamic_registration_supported: true } },
+      ]);
+    });
   });
 
   it('should get tenant', async () => {
@@ -123,6 +165,229 @@ describe('#tenant handler', () => {
 
       expect(updatedData).to.not.be.null;
       expect(updatedData.dynamic_client_registration_security_mode).to.equal('strict');
+    });
+
+    describe('client_id_metadata_document_dynamic_registration_supported', () => {
+      const buildClient = (existing: Record<string, unknown>) => {
+        const calls = { get: 0, update: [] as any[] };
+        const auth0 = {
+          tenants: {
+            settings: {
+              get: () => {
+                calls.get += 1;
+                return Promise.resolve({ ...existing });
+              },
+              update: (data) => {
+                calls.update.push(data);
+                return Promise.resolve(data);
+              },
+            },
+          },
+        };
+        return { auth0, calls };
+      };
+
+      it('should send both CIMD settings when enabling dynamic registration', async () => {
+        const { auth0, calls } = buildClient({});
+        // @ts-ignore
+        const handler = new tenantHandler({ client: auth0 });
+        const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+        await stageFn.apply(handler, [
+          {
+            tenant: {
+              client_id_metadata_document_supported: true,
+              client_id_metadata_document_dynamic_registration_supported: true,
+            },
+          },
+        ]);
+
+        expect(calls.get).to.equal(0);
+        expect(calls.update).to.deep.equal([
+          {
+            client_id_metadata_document_supported: true,
+            client_id_metadata_document_dynamic_registration_supported: true,
+          },
+        ]);
+      });
+
+      it('should send false when the tenant has the dynamic_cimd feature flag', async () => {
+        // Flag active: GET defaults the property to false rather than omitting it.
+        const { auth0, calls } = buildClient({
+          client_id_metadata_document_dynamic_registration_supported: true,
+        });
+        // @ts-ignore
+        const handler = new tenantHandler({ client: auth0 });
+        const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+        await stageFn.apply(handler, [
+          { tenant: { client_id_metadata_document_dynamic_registration_supported: false } },
+        ]);
+
+        expect(calls.update).to.deep.equal([
+          { client_id_metadata_document_dynamic_registration_supported: false },
+        ]);
+      });
+
+      it('should drop false when the tenant lacks the dynamic_cimd feature flag', async () => {
+        // Flag inactive: GET omits the property, and PATCH would return 403 not_entitled.
+        const { auth0, calls } = buildClient({ friendly_name: 'Test' });
+        // @ts-ignore
+        const handler = new tenantHandler({ client: auth0 });
+        const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+        await stageFn.apply(handler, [
+          {
+            tenant: {
+              friendly_name: 'Updated',
+              client_id_metadata_document_dynamic_registration_supported: false,
+            },
+          },
+        ]);
+
+        expect(calls.update).to.deep.equal([{ friendly_name: 'Updated' }]);
+      });
+
+      it('should skip the PATCH entirely when the dropped setting was the only change', async () => {
+        const { auth0, calls } = buildClient({});
+        // @ts-ignore
+        const handler = new tenantHandler({ client: auth0 });
+        const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+        await stageFn.apply(handler, [
+          { tenant: { client_id_metadata_document_dynamic_registration_supported: false } },
+        ]);
+
+        expect(calls.update).to.deep.equal([]);
+      });
+
+      it('should still send true when the tenant lacks the flag so the API reports the error', async () => {
+        const { auth0, calls } = buildClient({});
+        // @ts-ignore
+        const handler = new tenantHandler({ client: auth0 });
+        const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+        await stageFn.apply(handler, [
+          { tenant: { client_id_metadata_document_dynamic_registration_supported: true } },
+        ]);
+
+        expect(calls.get).to.equal(1);
+        expect(calls.update).to.deep.equal([
+          { client_id_metadata_document_dynamic_registration_supported: true },
+        ]);
+      });
+
+      const processAndCatch = async (handler, tenant) => {
+        const stageFn = Object.getPrototypeOf(handler).processChanges;
+        try {
+          await stageFn.apply(handler, [{ tenant }]);
+        } catch (err) {
+          return err;
+        }
+        return null;
+      };
+
+      it('should reject enabling dynamic registration when CIMD support is off on the tenant', async () => {
+        const { auth0, calls } = buildClient({
+          client_id_metadata_document_supported: false,
+          client_id_metadata_document_dynamic_registration_supported: false,
+        });
+        // @ts-ignore
+        const handler = new tenantHandler({ client: auth0 });
+
+        const err = await processAndCatch(handler, {
+          client_id_metadata_document_dynamic_registration_supported: true,
+        });
+
+        expect(err).to.not.equal(null);
+        expect(err.message).to.include(
+          'client_id_metadata_document_supported is false on the tenant'
+        );
+        expect(calls.update).to.deep.equal([]);
+      });
+
+      it('should report the CIMD conflict in the dry run preview', async () => {
+        const { auth0, calls } = buildClient({
+          client_id_metadata_document_supported: false,
+          client_id_metadata_document_dynamic_registration_supported: false,
+        });
+        // @ts-ignore
+        const handler = new tenantHandler({ client: auth0 });
+
+        let err = null;
+        try {
+          await handler.dryRunChanges({
+            tenant: { client_id_metadata_document_dynamic_registration_supported: true },
+          });
+        } catch (e) {
+          err = e;
+        }
+
+        expect(err).to.not.equal(null);
+        expect(err.message).to.include(
+          'client_id_metadata_document_supported is false on the tenant'
+        );
+        expect(calls.update).to.deep.equal([]);
+      });
+
+      it('should allow enabling dynamic registration when CIMD support is already on', async () => {
+        const { auth0, calls } = buildClient({
+          client_id_metadata_document_supported: true,
+          client_id_metadata_document_dynamic_registration_supported: false,
+        });
+        // @ts-ignore
+        const handler = new tenantHandler({ client: auth0 });
+
+        const err = await processAndCatch(handler, {
+          client_id_metadata_document_dynamic_registration_supported: true,
+        });
+
+        expect(err).to.equal(null);
+        expect(calls.update).to.deep.equal([
+          { client_id_metadata_document_dynamic_registration_supported: true },
+        ]);
+      });
+
+      it('should reject disabling CIMD support while dynamic registration is on', async () => {
+        const { auth0, calls } = buildClient({
+          client_id_metadata_document_supported: true,
+          client_id_metadata_document_dynamic_registration_supported: true,
+        });
+        // @ts-ignore
+        const handler = new tenantHandler({ client: auth0 });
+
+        const err = await processAndCatch(handler, {
+          client_id_metadata_document_supported: false,
+        });
+
+        expect(err).to.not.equal(null);
+        expect(err.message).to.include(
+          'cannot be disabled while client_id_metadata_document_dynamic_registration_supported is enabled'
+        );
+        expect(calls.update).to.deep.equal([]);
+      });
+
+      it('should allow disabling both CIMD settings together', async () => {
+        const { auth0, calls } = buildClient({
+          client_id_metadata_document_supported: true,
+          client_id_metadata_document_dynamic_registration_supported: true,
+        });
+        // @ts-ignore
+        const handler = new tenantHandler({ client: auth0 });
+
+        const err = await processAndCatch(handler, {
+          client_id_metadata_document_supported: false,
+          client_id_metadata_document_dynamic_registration_supported: false,
+        });
+
+        expect(err).to.equal(null);
+        expect(calls.update).to.deep.equal([
+          {
+            client_id_metadata_document_supported: false,
+            client_id_metadata_document_dynamic_registration_supported: false,
+          },
+        ]);
+      });
     });
 
     it('should update tenant with country_codes', async () => {
