@@ -15,7 +15,7 @@ import { paginate } from '../client';
 import ScimHandler from './scimHandler';
 import log from '../../../logger';
 import ValidationError from '../../validationError';
-import { Client } from './clients';
+import { Client, excludeDynamicCimdClients } from './clients';
 
 const connectionOptionsSchema = {
   type: 'object',
@@ -901,12 +901,20 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     // Prepare an id map. We'll use this map later to get the `strategy` and SCIM enable status of the connections.
     await this.scimHandler.createIdMap(existingConnections);
 
+    // Dynamic CIMD clients are not managed by deploy-cli, so names must not resolve to them.
+    const managedClients = excludeDynamicCimdClients(clients);
+
     const formatted = connections.map((connection) => {
-      const enabledClients = getEnabledClients(assets, connection, existingConnections, clients);
+      const enabledClients = getEnabledClients(
+        assets,
+        connection,
+        existingConnections,
+        managedClients
+      );
 
       return {
         ...connection,
-        ...this.getFormattedOptions(connection, clients),
+        ...this.getFormattedOptions(connection, managedClients),
         ...(enabledClients !== undefined && { enabled_clients: enabledClients }),
       };
     });
@@ -949,12 +957,20 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
 
     await this.scimHandler.createIdMap(existingConnections);
 
+    // Dynamic CIMD clients are not managed by deploy-cli, so names must not resolve to them.
+    const managedClients = excludeDynamicCimdClients(clients);
+
     const formatted = connections.map((connection) => {
-      const enabledClients = getEnabledClients(assets, connection, existingConnections, clients);
+      const enabledClients = getEnabledClients(
+        assets,
+        connection,
+        existingConnections,
+        managedClients
+      );
 
       return {
         ...connection,
-        ...this.getFormattedOptions(connection, clients),
+        ...this.getFormattedOptions(connection, managedClients),
         ...(enabledClients !== undefined && { enabled_clients: enabledClients }),
       };
     });

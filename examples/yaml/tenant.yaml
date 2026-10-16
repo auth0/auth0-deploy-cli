@@ -3,6 +3,10 @@
 tenant:
   # Any tenant settings can go here https://auth0.com/docs/api/management/v2#!/Tenants/get_settings
   friendly_name: 'Auth0 Deploy Example'
+  # Advertise CIMD support in the authorization server metadata (see "My CIMD Client" below)
+  client_id_metadata_document_supported: true
+  # Early Access: requires the `dynamic_cimd` feature flag on the tenant
+  # client_id_metadata_document_dynamic_registration_supported: true
 
 pages:
   - name: "login"

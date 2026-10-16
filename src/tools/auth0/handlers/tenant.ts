@@ -5,7 +5,7 @@ import ValidationError from '../../validationError';
 import DefaultHandler, { order } from './default';
 import { supportedPages, pageNameMap } from './pages';
 import { convertJsonToString, isDryRun } from '../../utils';
-import { Asset, Assets } from '../../../types';
+import { Asset, Assets, CalculatedChanges } from '../../../types';
 import log from '../../../logger';
 import sessionDurationsToMinutes from '../../../sessionDurationsToMinutes';
 
@@ -42,6 +42,11 @@ export const schema = {
       type: 'boolean',
       description:
         'Whether the authorization server supports retrieving client metadata from a client_id URL.',
+    },
+    client_id_metadata_document_dynamic_registration_supported: {
+      type: 'boolean',
+      description:
+        'Whether the authorization server supports dynamic registration of CIMD clients during the authorization flow. Requires client_id_metadata_document_supported to be enabled and the `dynamic_cimd` feature flag on the tenant.',
     },
     default_token_quota: {
       type: 'object',
@@ -246,6 +251,79 @@ export default class TenantHandler extends DefaultHandler {
         )} were found in tenant settings. Pages should be set separately. Please refer to the documentation.`
       );
     }
+
+    if (
+      tenant.client_id_metadata_document_dynamic_registration_supported === true &&
+      tenant.client_id_metadata_document_supported === false
+    ) {
+      throw new ValidationError(
+        'client_id_metadata_document_dynamic_registration_supported cannot be enabled when client_id_metadata_document_supported is false.'
+      );
+    }
+  }
+
+  // Checks the CIMD settings in the config against the tenant's current values. Shared by
+  // dryRunChanges and processChanges so the dry run preview reports the same errors.
+  // `checkCimdDisable` is off for imports: every export contains
+  // client_id_metadata_document_supported: false, so fetching the tenant for it would add a
+  // request to almost every deploy; the API's 400 for that conflict is already descriptive.
+  async applyCimdSettingsRules(
+    tenant: Asset,
+    { checkCimdDisable }: { checkCimdDisable: boolean }
+  ): Promise<Asset> {
+    const cimdSupported = tenant.client_id_metadata_document_supported;
+    const dynamicRegistration = tenant.client_id_metadata_document_dynamic_registration_supported;
+    const disablesCimdOnly =
+      checkCimdDisable && cimdSupported === false && dynamicRegistration === undefined;
+    const dependsOnExistingCimd =
+      dynamicRegistration === false ||
+      (dynamicRegistration === true && cimdSupported === undefined) ||
+      disablesCimdOnly;
+
+    if (dependsOnExistingCimd) {
+      if (!this.existing) await this.getType();
+
+      // client_id_metadata_document_dynamic_registration_supported is gated by the dynamic_cimd
+      // feature flag: GET omits it on tenants without the flag, and PATCH rejects it with 403
+      // even when false. Drop a `false` value (the API default) for those tenants so configs
+      // exported from an entitled tenant still import elsewhere.
+      if (
+        dynamicRegistration === false &&
+        !('client_id_metadata_document_dynamic_registration_supported' in this.existing)
+      ) {
+        tenant = omit(tenant, 'client_id_metadata_document_dynamic_registration_supported');
+      }
+
+      // Dynamic registration requires CIMD support. When the config sets only one of the two,
+      // check it against the tenant's current value so the conflict surfaces here (and in dry
+      // run) instead of as a 400 that fails the whole tenant settings update.
+      if (
+        dynamicRegistration === true &&
+        cimdSupported === undefined &&
+        this.existing.client_id_metadata_document_supported === false
+      ) {
+        throw new ValidationError(
+          'client_id_metadata_document_dynamic_registration_supported cannot be enabled because client_id_metadata_document_supported is false on the tenant. Set client_id_metadata_document_supported: true in the same config.'
+        );
+      }
+      if (
+        disablesCimdOnly &&
+        this.existing.client_id_metadata_document_dynamic_registration_supported === true
+      ) {
+        throw new ValidationError(
+          'client_id_metadata_document_supported cannot be disabled while client_id_metadata_document_dynamic_registration_supported is enabled on the tenant. Set client_id_metadata_document_dynamic_registration_supported: false in the same config.'
+        );
+      }
+    }
+
+    return tenant;
+  }
+
+  async dryRunChanges(assets: Assets): Promise<CalculatedChanges> {
+    if (!assets.tenant) return super.dryRunChanges(assets);
+
+    const tenant = await this.applyCimdSettingsRules(assets.tenant, { checkCimdDisable: true });
+    return super.dryRunChanges({ ...assets, tenant });
   }
 
   // Run after other updates so objected can be referenced such as default directory
@@ -256,8 +334,10 @@ export default class TenantHandler extends DefaultHandler {
     // Do nothing if not set
     if (!tenant) return;
 
+    tenant = await this.applyCimdSettingsRules(tenant, { checkCimdDisable: false });
+
     if (isDryRun(this.config)) {
-      const { update } = await this.calcChanges(assets);
+      const { update } = await this.calcChanges({ ...assets, tenant });
 
       if (update.length === 0) {
         return;

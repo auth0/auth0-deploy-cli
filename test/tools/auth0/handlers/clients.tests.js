@@ -357,6 +357,269 @@ describe('#clients handler', () => {
       ]);
     });
 
+    it('should exclude dynamic CIMD clients and strip external_metadata_status on getType', async () => {
+      const auth0 = {
+        clients: {
+          list: (params) =>
+            mockPagedData(params, 'clients', [
+              {
+                client_id: 'dynamic1',
+                name: 'Example Agent',
+                external_client_id: 'https://agent.example.com/client-metadata.json',
+                external_metadata_type: 'cimd',
+                external_metadata_created_by: 'client',
+                external_metadata_status: 'unavailable',
+              },
+              {
+                client_id: 'manual1',
+                name: 'Manual CIMD Client',
+                external_client_id: 'https://mcpserver.example.com/client.json',
+                external_metadata_type: 'cimd',
+                external_metadata_created_by: 'admin',
+                external_metadata_status: 'available',
+              },
+              {
+                client_id: 'dcr1',
+                name: 'DCR Client',
+                external_metadata_type: 'dcr',
+                external_metadata_created_by: 'client',
+              },
+              { client_id: 'regular1', name: 'My Regular App', app_type: 'spa' },
+            ]),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const result = await handler.getType();
+
+      expect(result.map((c) => c.client_id)).to.deep.equal(['manual1', 'dcr1', 'regular1']);
+      result.forEach((c) => expect(c).to.not.have.property('external_metadata_status'));
+      expect(result[0].external_metadata_created_by).to.equal('admin');
+    });
+
+    it('should not delete, update or register dynamic CIMD clients', async () => {
+      const registeredRequests = [];
+      const updatedClients = [];
+      const deletedClients = [];
+
+      const auth0 = {
+        clients: {
+          create: () => Promise.resolve({ data: [] }),
+          update: (clientId, data) => {
+            updatedClients.push({ clientId, data });
+            return Promise.resolve({ data });
+          },
+          delete: (clientId) => {
+            deletedClients.push(clientId);
+            return Promise.resolve({ data: [] });
+          },
+          list: (params) =>
+            mockPagedData(params, 'clients', [
+              {
+                client_id: 'dynamic1',
+                name: 'Example Agent',
+                external_client_id: 'https://agent.example.com/client-metadata.json',
+                external_metadata_type: 'cimd',
+                external_metadata_created_by: 'client',
+                external_metadata_status: 'available',
+              },
+            ]),
+          registerCimdClient: ({ external_client_id }) => {
+            registeredRequests.push(external_client_id);
+            return Promise.resolve({ client_id: 'new', mapped_fields: {}, validation: {} });
+          },
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      // Config from an older export that still contains a dynamic CIMD client.
+      // AUTH0_ALLOW_DELETE is true, and the existing dynamic client is absent from config.
+      await stageFn.apply(handler, [
+        {
+          clients: [
+            {
+              name: 'Other Agent',
+              external_client_id: 'https://other-agent.example.com/client-metadata.json',
+              external_metadata_type: 'cimd',
+              external_metadata_created_by: 'client',
+              external_metadata_status: 'available',
+            },
+          ],
+        },
+      ]);
+
+      expect(registeredRequests).to.deep.equal([]);
+      expect(updatedClients).to.deep.equal([]);
+      expect(deletedClients).to.deep.equal([]);
+    });
+
+    it('should skip a manual CIMD client whose URL is already registered dynamically', async () => {
+      const registeredRequests = [];
+      const createdClients = [];
+
+      const auth0 = {
+        clients: {
+          create: (data) => {
+            createdClients.push(data);
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) =>
+            mockPagedData(params, 'clients', [
+              {
+                client_id: 'dynamic1',
+                name: 'Example Agent',
+                external_client_id: 'https://agent.example.com/client-metadata.json',
+                external_metadata_type: 'cimd',
+                external_metadata_created_by: 'client',
+              },
+            ]),
+          registerCimdClient: ({ external_client_id }) => {
+            registeredRequests.push(external_client_id);
+            return Promise.resolve({ client_id: 'new', mapped_fields: {}, validation: {} });
+          },
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      // Registering the first client would fail with 409 dynamic_client_already_registered.
+      await stageFn.apply(handler, [
+        {
+          clients: [
+            {
+              name: 'Example Agent',
+              external_client_id: 'https://agent.example.com/client-metadata.json',
+              external_metadata_type: 'cimd',
+            },
+            {
+              name: 'Other Agent',
+              external_client_id: 'https://other-agent.example.com/client-metadata.json',
+              external_metadata_type: 'cimd',
+            },
+          ],
+        },
+      ]);
+
+      expect(registeredRequests).to.deep.equal([
+        'https://other-agent.example.com/client-metadata.json',
+      ]);
+      expect(createdClients).to.deep.equal([]);
+    });
+
+    it('should leave skipped CIMD clients out of dry run changes', async () => {
+      const auth0 = {
+        clients: {
+          list: (params) =>
+            mockPagedData(params, 'clients', [
+              {
+                client_id: 'dynamic1',
+                name: 'Example Agent',
+                external_client_id: 'https://agent.example.com/client-metadata.json',
+                external_metadata_type: 'cimd',
+                external_metadata_created_by: 'client',
+              },
+            ]),
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+
+      const changes = await handler.dryRunChanges({
+        clients: [
+          {
+            name: 'Example Agent',
+            external_client_id: 'https://agent.example.com/client-metadata.json',
+            external_metadata_type: 'cimd',
+          },
+          {
+            name: 'Old Export Agent',
+            external_client_id: 'https://old.example.com/client-metadata.json',
+            external_metadata_type: 'cimd',
+            external_metadata_created_by: 'client',
+          },
+          {
+            name: 'Other Agent',
+            external_client_id: 'https://other-agent.example.com/client-metadata.json',
+            external_metadata_type: 'cimd',
+          },
+        ],
+      });
+
+      expect(changes.create.map((c) => c.name)).to.deep.equal(['Other Agent']);
+      expect(changes.update).to.deep.equal([]);
+    });
+
+    it('should not send external_metadata_status when registering a manual CIMD client', async () => {
+      const registeredRequests = [];
+      const createdClients = [];
+
+      const auth0 = {
+        clients: {
+          create: (data) => {
+            createdClients.push(data);
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) => mockPagedData(params, 'clients', []),
+          registerCimdClient: (data) => {
+            registeredRequests.push(data);
+            return Promise.resolve({ client_id: 'manual1', mapped_fields: {}, validation: {} });
+          },
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          clients: [
+            {
+              name: 'Manual CIMD Client',
+              external_client_id: 'https://mcpserver.example.com/client.json',
+              external_metadata_type: 'cimd',
+              external_metadata_created_by: 'admin',
+              external_metadata_status: 'available',
+            },
+            { name: 'Regular Client', external_metadata_status: 'available' },
+          ],
+        },
+      ]);
+
+      expect(registeredRequests).to.deep.equal([
+        { external_client_id: 'https://mcpserver.example.com/client.json' },
+      ]);
+      expect(createdClients).to.have.lengthOf(1);
+      expect(createdClients[0]).to.not.have.property('external_metadata_status');
+    });
+
     it('should create client', async () => {
       const auth0 = {
         clients: {

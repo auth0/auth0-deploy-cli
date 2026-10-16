@@ -3,6 +3,7 @@ import { Assets, Auth0APIClient, CalculatedChanges } from '../../../types';
 import { ConfigFunction } from '../../../configFactory';
 import { paginate } from '../client';
 import log from '../../../logger';
+import { Client, excludeDynamicCimdClients, isDynamicCimdClient } from './clients';
 
 export const schema = {
   type: 'array',
@@ -58,18 +59,24 @@ export default class ClientAuthCredentialsHandler {
     // Only process clients that have client_authentication_methods in config.
     // Full deletion (absent field) is handled by ClientAuthCredentialsPreHandler at order 40,
     // before clients.ts runs. This handler only manages create and partial delete.
-    const clientsWithCam = clients.filter((c) => c.client_authentication_methods !== undefined);
+    // Dynamic CIMD clients resolve their keys from the jwks_uri of their metadata document;
+    // the API rejects credential writes for them.
+    const clientsWithCam = clients.filter(
+      (c) => c.client_authentication_methods !== undefined && !isDynamicCimdClient(c)
+    );
     if (clientsWithCam.length === 0) return;
 
     // In directory mode client_id is stripped. Resolve names for PKI clients only.
     const needsNameResolution = clientsWithCam.some((c) => !c.client_id);
     let clientIdByName = new Map<string, string>();
     if (needsNameResolution) {
-      const existingClients = await paginate(this.client.clients.list, {
+      const existingClients = await paginate<Client>(this.client.clients.list, {
         paginate: true,
         is_global: false,
       });
-      clientIdByName = new Map(existingClients.map((c: any) => [c.name, c.client_id]));
+      clientIdByName = new Map(
+        excludeDynamicCimdClients(existingClients).map((c: any) => [c.name, c.client_id])
+      );
     }
 
     for (const client of clientsWithCam) {
