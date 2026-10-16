@@ -23,6 +23,7 @@ export const schema = {
           'all',
         ],
       },
+      // Required on create (POST /experiments): the API no longer defaults it.
       allocation_strategy: { type: 'string', enum: ['percentage', 'segment'] },
       // Applies only to Auth0-managed flags; rejected for customer-defined flags.
       default_config: { type: 'string', enum: ['tenant', 'flag'] },
@@ -52,7 +53,7 @@ export const schema = {
       created_at: { type: 'string' },
       updated_at: { type: 'string' },
     },
-    required: ['name', 'feature_flag_name', 'authentication_flow'],
+    required: ['name', 'feature_flag_name', 'authentication_flow', 'allocation_strategy'],
   },
 };
 
