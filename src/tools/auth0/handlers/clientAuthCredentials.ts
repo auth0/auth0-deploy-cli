@@ -72,6 +72,10 @@ export default class ClientAuthCredentialsHandler {
       clientIdByName = new Map(existingClients.map((c: any) => [c.name, c.client_id]));
     }
 
+    // Failures are collected so the remaining clients are still processed, then thrown together
+    // after the loop so the import exits non-zero instead of reporting success.
+    const failures: string[] = [];
+
     for (const client of clientsWithCam) {
       const clientId = client.client_id || (client.name && clientIdByName.get(client.name));
       if (!clientId) continue;
@@ -120,9 +124,7 @@ export default class ClientAuthCredentialsHandler {
       try {
         existing = (await this.client.clients.credentials.list(clientId)) as any[];
       } catch (err) {
-        log.warn(
-          `clientAuthCredentials: failed to list credentials for client "${clientName}": ${err}`
-        );
+        failures.push(`failed to list credentials for client "${clientName}": ${err}`);
         continue;
       }
 
@@ -150,6 +152,7 @@ export default class ClientAuthCredentialsHandler {
       // Creates first — Auth0 allows max 2 credentials; both must exist simultaneously during rotation
       // Track name→id so we can correctly attribute each created credential to its method later.
       const createdIdByName = new Map<string, string>();
+      let createFailed = false;
       for (const cred of toCreate) {
         try {
           // Forward all API-accepted fields. `!= null` drops unset (undefined) and empty
@@ -174,11 +177,17 @@ export default class ClientAuthCredentialsHandler {
           );
           createdIdByName.set(cred.name, created.id);
         } catch (err) {
-          log.warn(
-            `clientAuthCredentials: failed to create credential "${cred.name}" on client "${clientName}": ${err}`
+          createFailed = true;
+          failures.push(
+            `failed to create credential "${cred.name}" on client "${clientName}": ${err}`
           );
         }
       }
+
+      // Leave the client untouched if any create failed: re-wiring without the missing credential
+      // can clear client_authentication_methods and fall the client back to client_secret_post.
+      // Credentials created above are matched by name and wired in on the next run.
+      if (createFailed) continue;
 
       // Re-wire client_authentication_methods with final IDs (kept + newly created).
       // This must happen BEFORE deletes — Auth0 rejects deleting a credential that
@@ -230,9 +239,11 @@ export default class ClientAuthCredentialsHandler {
             `clientAuthCredentials: updated client_authentication_methods on client "${clientName}"`
           );
         } catch (err) {
-          log.warn(
-            `clientAuthCredentials: failed to update client_authentication_methods on client "${clientName}": ${err}`
+          // Skip deletes — the credentials are still referenced, so Auth0 would reject them.
+          failures.push(
+            `failed to update client_authentication_methods on client "${clientName}": ${err}`
           );
+          continue;
         }
       }
 
@@ -259,6 +270,14 @@ export default class ClientAuthCredentialsHandler {
           }
         }
       }
+    }
+
+    if (failures.length > 0) {
+      throw new Error(
+        `clientAuthCredentials: ${failures.length} operation(s) failed:\n${failures
+          .map((f) => `  - ${f}`)
+          .join('\n')}`
+      );
     }
   }
 
