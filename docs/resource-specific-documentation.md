@@ -2212,6 +2212,90 @@ Each rate limit policy is stored as a separate JSON file named after its `consum
 
 For more details, see the [Management API documentation](https://auth0.com/docs/api/management/v2/rate-limit-policies/get-rate-limit-policies).
 
+## Client Profiles
+
+Client Profiles (Application Profiles) define a runtime policy that Auth0 applies to dynamically registered clients that match the profile's `apply_policy`. Currently the only supported match is Client ID Metadata Document (CIMD) clients registered by the client itself. Each `client_configuration` setting takes a `default_value`; omit a setting to keep the client's own value.
+
+> ⚠️ **NOTE:** Client Profiles is an Early Access feature. A tenant can have at most one client profile. The Deploy CLI client needs the `read:client_profiles`, `create:client_profiles`, `update:client_profiles` and `delete:client_profiles` scopes. If the feature isn't enabled for the tenant, client profiles are skipped on export.
+
+`client_configuration` is replaced as a whole on update, so always provide the complete configuration.
+
+Client profiles are matched by `name`. Renaming a profile replaces it (delete, then create), which requires `AUTH0_ALLOW_DELETE=true` because of the one-profile limit.
+
+### Schema Properties
+
+| Property                                                 | Type             | Required | Description                                                                                                                                                           |
+| -------------------------------------------------------- | ---------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                                   | `string`         | Yes      | Display name of the profile.                                                                                                                                          |
+| `description`                                            | `string \| null` | No       | Optional description.                                                                                                                                                 |
+| `client_configuration.refresh_token.token_lifetime`      | `object`         | No       | `{ default_value: integer }`: absolute refresh token lifetime in seconds.                                                                                             |
+| `client_configuration.refresh_token.idle_token_lifetime` | `object`         | No       | `{ default_value: integer }`: idle refresh token lifetime in seconds.                                                                                                 |
+| `client_configuration.refresh_token.leeway`              | `object`         | No       | `{ default_value: integer }`: grace period in seconds for refresh token rotation overlap.                                                                             |
+| `client_configuration.organization_usage`                | `object`         | No       | `{ default_value: "deny" \| "allow" \| "require" }`: whether clients may use organizations.                                                                           |
+| `client_configuration.organization_require_behavior`     | `object`         | No       | `{ default_value: "no_prompt" \| "pre_login_prompt" \| "post_login_prompt" }`: organization prompt behavior.                                                          |
+| `client_configuration.organization_discovery_methods`    | `object`         | No       | `{ default_value: ("email" \| "organization_name")[] }`: how the organization is discovered. Only allowed when `organization_require_behavior` is `pre_login_prompt`. |
+| `client_configuration.require_proof_of_possession`       | `object`         | No       | `{ default_value: boolean }`: when `true`, governed clients must provide a DPoP proof.                                                                                |
+| `apply_policy.external_metadata_type`                    | `string`         | Yes      | Registration type to match. Currently only `cimd`.                                                                                                                    |
+| `apply_policy.external_metadata_created_by`              | `string`         | Yes      | How the client was registered. Currently only `client`.                                                                                                               |
+
+### YAML Example
+
+```yaml
+# Contents of ./tenant.yaml
+clientProfiles:
+  - name: CIMD Client Profile
+    description: Runtime policy for CIMD clients
+    client_configuration:
+      refresh_token:
+        token_lifetime:
+          default_value: 2592000
+        idle_token_lifetime:
+          default_value: 1296000
+        leeway:
+          default_value: 0
+      organization_usage:
+        default_value: allow
+      organization_require_behavior:
+        default_value: pre_login_prompt
+      organization_discovery_methods:
+        default_value:
+          - email
+          - organization_name
+      require_proof_of_possession:
+        default_value: true
+    apply_policy:
+      external_metadata_type: cimd
+      external_metadata_created_by: client
+```
+
+### Directory Example
+
+Folder: `./client-profiles/`
+
+Each client profile is stored as a separate JSON file named after its `name` (e.g. `CIMD Client Profile.json`):
+
+```json
+{
+  "name": "CIMD Client Profile",
+  "description": "Runtime policy for CIMD clients",
+  "client_configuration": {
+    "refresh_token": {
+      "token_lifetime": { "default_value": 2592000 },
+      "idle_token_lifetime": { "default_value": 1296000 },
+      "leeway": { "default_value": 0 }
+    },
+    "organization_usage": { "default_value": "allow" },
+    "organization_require_behavior": { "default_value": "pre_login_prompt" },
+    "organization_discovery_methods": { "default_value": ["email", "organization_name"] },
+    "require_proof_of_possession": { "default_value": true }
+  },
+  "apply_policy": {
+    "external_metadata_type": "cimd",
+    "external_metadata_created_by": "client"
+  }
+}
+```
+
 ## Client Credentials (Private Key JWT / mTLS)
 
 The Deploy CLI supports managing client authentication credentials for Private Key JWT and mTLS. Credentials are child resources of clients, managed via the `/clients/{id}/credentials` API.

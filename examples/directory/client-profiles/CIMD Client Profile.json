@@ -1,0 +1,33 @@
+{
+  "name": "CIMD Client Profile",
+  "description": "Runtime policy for CIMD clients",
+  "client_configuration": {
+    "refresh_token": {
+      "token_lifetime": {
+        "default_value": 2592000
+      },
+      "idle_token_lifetime": {
+        "default_value": 1296000
+      },
+      "leeway": {
+        "default_value": 0
+      }
+    },
+    "organization_usage": {
+      "default_value": "allow"
+    },
+    "organization_require_behavior": {
+      "default_value": "pre_login_prompt"
+    },
+    "organization_discovery_methods": {
+      "default_value": ["email", "organization_name"]
+    },
+    "require_proof_of_possession": {
+      "default_value": true
+    }
+  },
+  "apply_policy": {
+    "external_metadata_type": "cimd",
+    "external_metadata_created_by": "client"
+  }
+}
