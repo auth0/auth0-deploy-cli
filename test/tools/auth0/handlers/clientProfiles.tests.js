@@ -409,4 +409,112 @@ describe('#clientProfiles handler', () => {
       await stageFn.apply(handler, [{}]);
     });
   });
+  describe('#clientProfiles dryRunChanges', () => {
+    const dryRun = async (localProfiles, existing, overrides = {}) => {
+      const handler = new clientProfiles.default({
+        client: pageClient(
+          mockClient(
+            {
+              create: () => Promise.reject(new Error('create should not be called in dry run')),
+              update: () => Promise.reject(new Error('update should not be called in dry run')),
+              delete: () => Promise.reject(new Error('delete should not be called in dry run')),
+              ...overrides,
+            },
+            existing
+          )
+        ),
+        config,
+      });
+      // dry run backfills remote ids onto local assets, so pass copies to keep fixtures untouched
+      return handler.dryRunChanges({
+        clientProfiles: localProfiles && JSON.parse(JSON.stringify(localProfiles)),
+      });
+    };
+
+    const names = (items) => items.map((i) => i.name);
+
+    it('should return no changes when clientProfiles is not set', async () => {
+      const changes = await dryRun(undefined, [existingProfile]);
+      expect(changes).to.deep.equal({ del: [], create: [], conflicts: [], update: [] });
+    });
+
+    it('should report CREATE for a new profile', async () => {
+      const changes = await dryRun([sampleProfile], []);
+      expect(names(changes.create)).to.deep.equal(['CIMD Profile']);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+    });
+
+    it('should report no changes when local matches remote apart from read-only fields', async () => {
+      const changes = await dryRun([sampleProfile], [existingProfile]);
+      expect(changes.create).to.have.length(0);
+      expect(changes.update).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+    });
+
+    it('should report UPDATE when client_configuration changes', async () => {
+      const changed = {
+        ...sampleProfile,
+        client_configuration: {
+          ...sampleProfile.client_configuration,
+          require_proof_of_possession: { default_value: false },
+        },
+      };
+      const changes = await dryRun([changed], [existingProfile]);
+      expect(names(changes.update)).to.deep.equal(['CIMD Profile']);
+      expect(changes.create).to.have.length(0);
+      expect(changes.del).to.have.length(0);
+    });
+
+    it('should report UPDATE when description is cleared', async () => {
+      const changes = await dryRun([{ ...sampleProfile, description: null }], [existingProfile]);
+      expect(names(changes.update)).to.deep.equal(['CIMD Profile']);
+    });
+
+    it('should report DELETE when the profile is removed locally', async () => {
+      const changes = await dryRun([], [existingProfile]);
+      expect(names(changes.del)).to.deep.equal(['CIMD Profile']);
+      expect(changes.create).to.have.length(0);
+    });
+
+    it('should report DELETE and CREATE for a rename when AUTH0_ALLOW_DELETE is true', async () => {
+      const changes = await dryRun([{ ...sampleProfile, name: 'Renamed' }], [existingProfile]);
+      expect(names(changes.del)).to.deep.equal(['CIMD Profile']);
+      expect(names(changes.create)).to.deep.equal(['Renamed']);
+    });
+
+    it('should fail for a rename when AUTH0_ALLOW_DELETE is false, matching the real import', async () => {
+      config.data = { AUTH0_ALLOW_DELETE: false };
+      let error;
+      try {
+        await dryRun([{ ...sampleProfile, name: 'Renamed' }], [existingProfile]);
+      } catch (err) {
+        error = err;
+      }
+      expect(error).to.be.an('error');
+      expect(error.message).to.include('at most 1 client profile');
+    });
+
+    it('should fail when more than one profile is configured', async () => {
+      let error;
+      try {
+        await dryRun([sampleProfile, { ...sampleProfile, name: 'Second' }], []);
+      } catch (err) {
+        error = err;
+      }
+      expect(error).to.be.an('error');
+      expect(error.message).to.include('at most 1 client profile');
+    });
+
+    it('should report CREATE when the feature is unavailable on the tenant', async () => {
+      const changes = await dryRun([sampleProfile], [], {
+        list: () => {
+          const error = new Error('Forbidden');
+          error.statusCode = 403;
+          return Promise.reject(error);
+        },
+      });
+      expect(names(changes.create)).to.deep.equal(['CIMD Profile']);
+    });
+  });
 });

@@ -1,5 +1,5 @@
 import { Management } from 'auth0';
-import { Assets, Auth0APIClient } from '../../../types';
+import { Asset, Assets, Auth0APIClient, CalculatedChanges } from '../../../types';
 import DefaultAPIHandler from './default';
 import { paginate } from '../client';
 import log from '../../../logger';
@@ -130,6 +130,33 @@ export default class ClientProfilesHandler extends DefaultAPIHandler {
     return this.existing;
   }
 
+  // Fail before calling the API if creates would exceed the per-tenant limit,
+  // e.g. a renamed profile while AUTH0_ALLOW_DELETE is off keeps the old one around.
+  private assertWithinTenantLimit(del: Asset[], create: Asset[]): void {
+    if (create.length === 0) return;
+
+    const allowDelete =
+      this.config('AUTH0_ALLOW_DELETE') === 'true' || this.config('AUTH0_ALLOW_DELETE') === true;
+    const existingCount = (this.existing || []).length;
+    const remainingCount = existingCount - (allowDelete ? del.length : 0) + create.length;
+    if (remainingCount > MAX_CLIENT_PROFILES_PER_TENANT) {
+      throw new Error(
+        `Cannot create client profile(s) ${create
+          .map((p) => `"${p.name}"`)
+          .join(
+            ', '
+          )}: a tenant can have at most ${MAX_CLIENT_PROFILES_PER_TENANT} client profile(s) and ${existingCount} already exist(s). Keep the existing profile name to update it, or set AUTH0_ALLOW_DELETE=true to replace it.`
+      );
+    }
+  }
+
+  // Run the same limit check in dry run so the preview doesn't succeed for an import that would fail
+  async dryRunChanges(assets: Assets): Promise<CalculatedChanges> {
+    const changes = await super.dryRunChanges(assets);
+    this.assertWithinTenantLimit(changes.del, changes.create);
+    return changes;
+  }
+
   async processChanges(assets: Assets): Promise<void> {
     const { clientProfiles } = assets;
 
@@ -138,23 +165,7 @@ export default class ClientProfilesHandler extends DefaultAPIHandler {
 
     const { del, update, create, conflicts } = await this.calcChanges(assets);
 
-    // Fail before calling the API if creates would exceed the per-tenant limit,
-    // e.g. a renamed profile while AUTH0_ALLOW_DELETE is off keeps the old one around.
-    if (create.length > 0) {
-      const allowDelete =
-        this.config('AUTH0_ALLOW_DELETE') === 'true' || this.config('AUTH0_ALLOW_DELETE') === true;
-      const existingCount = (this.existing || []).length;
-      const remainingCount = existingCount - (allowDelete ? del.length : 0) + create.length;
-      if (remainingCount > MAX_CLIENT_PROFILES_PER_TENANT) {
-        throw new Error(
-          `Cannot create client profile(s) ${create
-            .map((p) => `"${p.name}"`)
-            .join(
-              ', '
-            )}: a tenant can have at most ${MAX_CLIENT_PROFILES_PER_TENANT} client profile(s) and ${existingCount} already exist(s). Keep the existing profile name to update it, or set AUTH0_ALLOW_DELETE=true to replace it.`
-        );
-      }
-    }
+    this.assertWithinTenantLimit(del, create);
 
     const changes = {
       del: del,
