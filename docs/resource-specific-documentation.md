@@ -2773,7 +2773,7 @@ Notes and guardrails:
 | `feature_flag_name`   | `string` | Yes      | Name of the feature flag this experiment is based on. Resolved to its id on import.                                                   |
 | `authentication_flow` | `string` | Yes      | One of `authentication`, `mfa_enrollment`, `mfa_challenge`, `password_reset`, `passkey_enrollment`, `all`.                            |
 | `description`         | `string` | No       | Description of the experiment.                                                                                                        |
-| `allocation_strategy` | `string` | No       | `percentage` or `segment`.                                                                                                            |
+| `allocation_strategy` | `string` | Yes      | `percentage` or `segment`.                                                                                                            |
 | `allocations`         | `array`  | No       | Traffic allocations. Each has `variation_name` and `is_control`, plus `weight` (percentage) or `segment_name` + `priority` (segment). |
 | `default_config`      | `string` | No       | `tenant` or `flag`. Auth0-managed flags only.                                                                                         |
 | `levels`              | `array`  | No       | Gradual-rollout ramp percentages, a strictly increasing list of integers in [0, 100].                                                 |

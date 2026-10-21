@@ -1,6 +1,8 @@
 import { Management } from 'auth0';
+import { isEqual } from 'lodash';
 import DefaultAPIHandler, { order } from './default';
 import { Asset, Assets } from '../../../types';
+import log from '../../../logger';
 
 export const schema = {
   type: 'array',
@@ -57,9 +59,29 @@ export const schema = {
   },
 };
 
-export type Experiment = Management.GetExperimentResponseContent;
+// On disk an experiment references its parent flag, variations and segments by portable name
+// rather than the tenant-specific ids, and the copy-on-activate snapshots are dropped. This is
+// the shape written to and read from config, not the raw API response.
+export type PortableAllocation = {
+  variation_name: string;
+  segment_name?: string;
+  is_control: boolean;
+  weight?: number;
+  priority?: number;
+  is_fallback?: boolean;
+};
 
-// Read-only / tenant-specific fields removed from the exported config.
+export type Experiment = Omit<
+  Management.GetExperimentResponseContent,
+  'feature_flag_id' | 'feature_flag_snapshot' | 'allocations'
+> & {
+  feature_flag_name: string;
+  allocations?: PortableAllocation[];
+};
+
+// Read-only / tenant-specific / API-generated fields removed from the exported config.
+// created_at/updated_at are stripped for the same reason as the sibling handlers: they churn
+// users' config on every export and show up as phantom diffs in dry-run.
 const READ_ONLY_FIELDS = [
   'feature_flag_id',
   'feature_flag_snapshot',
@@ -68,6 +90,8 @@ const READ_ONLY_FIELDS = [
   'current_level',
   'started_at',
   'ended_at',
+  'created_at',
+  'updated_at',
 ];
 
 export default class ExperimentsHandler extends DefaultAPIHandler {
@@ -79,10 +103,14 @@ export default class ExperimentsHandler extends DefaultAPIHandler {
 
   private variationNameToIdByFlag: { [flagId: string]: { [name: string]: string } } = {};
 
-  // Current server state per existing experiment, captured in getType. Used by the update path
-  // to only send fields the API still allows at the experiment's current lifecycle status
-  // (editable_fields is the API's own response-time computation of what is mutable).
-  private stateById: { [id: string]: { status: string; editableFields: string[] } } = {};
+  // Current server state per existing experiment, captured in getType. Used by the update path to
+  // only send fields the API still allows at the experiment's current lifecycle status
+  // (editable_fields is the API's own response-time computation of what is mutable) and to warn
+  // when the config diverges from what the API will accept. editableFields is null when the
+  // response did not carry it, meaning "no restriction known" rather than "nothing editable".
+  private stateById: {
+    [id: string]: { status: string; editableFields: string[] | null; existing: Asset };
+  } = {};
 
   constructor(config: DefaultAPIHandler) {
     super({
@@ -230,10 +258,20 @@ export default class ExperimentsHandler extends DefaultAPIHandler {
     return payload;
   }
 
+  // Config fields that are dropped for a frozen (non-draft) experiment. Used only to warn.
+  private static readonly FROZEN_CONFIG_FIELDS = [
+    'name',
+    'description',
+    'default_config',
+    'levels',
+    'allocations',
+  ];
+
   private async toUpdatePayload(id: string, data: Asset): Promise<Asset> {
     // `id` comes from the handler's update function (the base strips it from `data`).
     const state = this.stateById[id];
     const currentStatus = state?.status;
+    const existing = state?.existing;
 
     // Once an experiment is activated its configuration snapshot is frozen: the API rejects any
     // field edit with experiment_snapshot_frozen ("clone it to make changes") and rejects an
@@ -242,8 +280,33 @@ export default class ExperimentsHandler extends DefaultAPIHandler {
     // status is unchanged. Config and allocation edits to an activated experiment are not
     // possible through this API (it requires cloning) and so are intentionally not sent.
     if (currentStatus && currentStatus !== 'draft') {
+      // Those dropped edits are otherwise invisible (the run still logs "Updated"), so warn when
+      // the config actually diverges from the frozen experiment.
+      if (
+        existing &&
+        ExperimentsHandler.FROZEN_CONFIG_FIELDS.some(
+          (field) => data[field] !== undefined && !isEqual(data[field], existing[field])
+        )
+      ) {
+        log.warn(
+          `Experiment "${data.name}" is frozen in status "${currentStatus}"; configuration changes (allocations, levels, default_config, name, description) are ignored. Clone it to make changes.`
+        );
+      }
       const target = data.status && data.status !== 'draft' ? data.status : currentStatus;
       return { status: target };
+    }
+
+    // allocation_strategy is create-only (it is on CreateExperimentRequestContent but not the
+    // update parameters), so a change to it on an existing draft cannot be applied. Warn rather
+    // than silently sending allocations that no longer match the stored strategy.
+    if (
+      existing &&
+      data.allocation_strategy !== undefined &&
+      data.allocation_strategy !== existing.allocation_strategy
+    ) {
+      log.warn(
+        `Experiment "${data.name}" allocation_strategy is create-only and cannot be changed from "${existing.allocation_strategy}" to "${data.allocation_strategy}" on an existing experiment; the change is ignored. Recreate the experiment to change it.`
+      );
     }
 
     // Draft experiment (not yet frozen): field edits are allowed, gated by the API's
@@ -274,41 +337,78 @@ export default class ExperimentsHandler extends DefaultAPIHandler {
 
   // --- export ------------------------------------------------------------------------------
 
-  async getType(): Promise<Asset[]> {
+  async getType(): Promise<Asset[] | null> {
     if (this.existing) return this.existing;
 
-    const experiments: Asset[] = [];
-    let page = await this.client.experimentation.experiments.list();
-    experiments.push(...page.data);
-    while (page.hasNextPage()) {
-      page = await page.getNextPage();
+    try {
+      const experiments: Asset[] = [];
+      let page = await this.client.experimentation.experiments.list();
       experiments.push(...page.data);
-    }
-
-    // The API resolves feature_flag_name and allocation variation/segment names on read, so the
-    // export just drops the tenant-specific ids and the copy-on-activate snapshots.
-    this.existing = experiments.map((experiment) => {
-      // Capture the current lifecycle state before stripping, so the update path can gate fields
-      // on what the API still allows (editable_fields is stripped from the exported shape below).
-      this.stateById[experiment.id] = {
-        status: experiment.status,
-        editableFields: Array.isArray(experiment.editable_fields) ? experiment.editable_fields : [],
-      };
-      const portable: Asset = { ...experiment };
-      READ_ONLY_FIELDS.forEach((field) => delete portable[field]);
-      if (Array.isArray(portable.allocations)) {
-        portable.allocations = portable.allocations.map((allocation) => {
-          const next = { ...allocation };
-          delete next.variation_id;
-          delete next.segment_id;
-          delete next.variation_snapshot;
-          delete next.segment_snapshot;
-          return next;
-        });
+      while (page.hasNextPage()) {
+        page = await page.getNextPage();
+        experiments.push(...page.data);
       }
-      return portable;
+
+      // The API resolves feature_flag_name and allocation variation/segment names on read, so the
+      // export just drops the tenant-specific ids and the copy-on-activate snapshots.
+      this.existing = experiments.map((experiment) => {
+        const portable: Asset = { ...experiment };
+        READ_ONLY_FIELDS.forEach((field) => delete portable[field]);
+        if (Array.isArray(portable.allocations)) {
+          portable.allocations = portable.allocations.map((allocation) => {
+            const next = { ...allocation };
+            delete next.variation_id;
+            delete next.segment_id;
+            delete next.variation_snapshot;
+            delete next.segment_snapshot;
+            return next;
+          });
+        }
+        // The portable export carries only names (the ids are dropped above). If the list response
+        // did not resolve a name, the exported experiment could not be re-imported, so fail loudly
+        // here rather than writing a silently broken config.
+        this.assertPortable(experiment, portable);
+        // Capture the pre-strip state so the update path can gate edits on what the API allows and
+        // warn when the config diverges. editableFields is null (not []) when absent, so the
+        // update path treats a missing list as "no restriction" instead of "nothing editable".
+        this.stateById[experiment.id] = {
+          status: experiment.status,
+          editableFields: Array.isArray(experiment.editable_fields)
+            ? experiment.editable_fields
+            : null,
+          existing: portable,
+        };
+        return portable;
+      });
+      return this.existing;
+    } catch (err) {
+      // Experiment Center is entitlement-gated. On a tenant without the entitlement the endpoints
+      // answer 403/404 (or 501 where unimplemented); treat that as "no experiments to manage" and
+      // skip the resource rather than failing the whole export/import.
+      if (err.statusCode === 403 || err.statusCode === 404 || err.statusCode === 501) {
+        log.debug('Experiment Center is not enabled for this tenant; skipping experiments.');
+        return null;
+      }
+      throw err;
+    }
+  }
+
+  // Guards that the list response resolved the names the portable export depends on. A missing
+  // feature_flag_name or allocation variation_name would export an experiment that cannot be
+  // re-imported (the ids are dropped and the schema requires the names), so surface it clearly.
+  private assertPortable(experiment: Asset, portable: Asset): void {
+    if (!portable.feature_flag_name) {
+      throw new Error(
+        `Experiment "${experiment.name}" was returned without feature_flag_name; cannot produce a portable export. This usually means the tenant is missing the Experiment Center entitlement or the API did not resolve the name.`
+      );
+    }
+    (portable.allocations || []).forEach((allocation) => {
+      if (!allocation.variation_name) {
+        throw new Error(
+          `Experiment "${experiment.name}" has an allocation without variation_name; cannot produce a portable export.`
+        );
+      }
     });
-    return this.existing;
   }
 
   @order('82')

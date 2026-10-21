@@ -1,8 +1,10 @@
 import { PromisePoolExecutor } from 'promise-pool-executor';
 import { expect } from 'chai';
+import sinon from 'sinon';
 
 import ExperimentsHandler from '../../../../src/tools/auth0/handlers/experiments';
 import pageClient from '../../../../src/tools/auth0/client';
+import log from '../../../../src/logger';
 
 const pool = new PromisePoolExecutor({
   concurrencyLimit: 3,
@@ -99,6 +101,11 @@ describe('#experiments handler', () => {
   };
   config.data = { AUTH0_ALLOW_DELETE: false };
 
+  afterEach(() => {
+    sinon.restore();
+    config.data.AUTH0_ALLOW_DELETE = false;
+  });
+
   describe('#experiments getType', () => {
     it('strips tenant-specific ids and snapshots, keeps resolved names', async () => {
       const handler = new ExperimentsHandler({
@@ -112,10 +119,41 @@ describe('#experiments handler', () => {
       expect(exp).to.not.have.property('feature_flag_snapshot');
       expect(exp).to.not.have.property('is_valid');
       expect(exp).to.not.have.property('editable_fields');
+      expect(exp).to.not.have.property('created_at');
+      expect(exp).to.not.have.property('updated_at');
       expect(exp.allocations[0].variation_name).to.equal('control');
       expect(exp.allocations[0]).to.not.have.property('variation_id');
       expect(exp.allocations[0]).to.not.have.property('variation_snapshot');
       expect(exp.allocations[0].weight).to.equal(50);
+    });
+
+    it('returns null on 403 (tenant without the Experiment Center entitlement)', async () => {
+      const client = pageClient({
+        experimentation: {
+          experiments: {
+            list: () => Promise.reject(Object.assign(new Error('forbidden'), { statusCode: 403 })),
+          },
+        },
+        pool,
+      } as any);
+      const handler = new ExperimentsHandler({ client, config } as any);
+      const data = await handler.getType();
+      expect(data).to.equal(null);
+    });
+
+    it('throws a clear error when the list omits feature_flag_name (not re-importable)', async () => {
+      const noName = { ...apiExperiment };
+      delete (noName as any).feature_flag_name;
+      const handler = new ExperimentsHandler({
+        client: makeClient({ experiments: [noName] }),
+        config,
+      } as any);
+      try {
+        await handler.getType();
+        expect.fail('Should have thrown');
+      } catch (err: any) {
+        expect(err.message).to.include('feature_flag_name');
+      }
     });
   });
 
@@ -308,6 +346,104 @@ describe('#experiments handler', () => {
       ]);
 
       expect(capture.update.body).to.deep.equal({ status: 'paused' });
+    });
+
+    it('warns when a frozen (non-draft) experiment has config changes that are dropped', async () => {
+      const logWarn = sinon.stub(log, 'warn');
+      const capture: any = {};
+      const activeExperiment = {
+        ...apiExperiment,
+        status: 'active',
+        editable_fields: ['name', 'description'],
+      };
+      const handler = new ExperimentsHandler({
+        client: makeClient({ experiments: [activeExperiment], capture }),
+        config,
+      } as any);
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          experiments: [
+            {
+              id: 'exp_1',
+              name: 'checkout-test',
+              feature_flag_name: 'checkout',
+              authentication_flow: 'authentication',
+              status: 'active',
+              allocation_strategy: 'percentage',
+              // weights changed from 50/50; frozen, so this edit is dropped
+              allocations: [
+                { variation_name: 'control', is_control: true, weight: 80 },
+                { variation_name: 'variant-a', is_control: false, weight: 20 },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      expect(capture.update.body).to.deep.equal({ status: 'active' });
+      expect(logWarn.calledOnce).to.equal(true);
+      expect(logWarn.firstCall.args[0]).to.include('frozen');
+    });
+
+    it('warns when allocation_strategy is changed on an existing draft (create-only)', async () => {
+      const logWarn = sinon.stub(log, 'warn');
+      const capture: any = {};
+      const handler = new ExperimentsHandler({
+        client: makeClient({ experiments: [apiExperiment], capture }),
+        config,
+      } as any);
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          experiments: [
+            {
+              id: 'exp_1',
+              name: 'checkout-test',
+              feature_flag_name: 'checkout',
+              authentication_flow: 'authentication',
+              // apiExperiment is 'percentage'; switching to 'segment' cannot be applied
+              allocation_strategy: 'segment',
+              allocations: [{ variation_name: 'control', is_control: true, weight: 100 }],
+            },
+          ],
+        },
+      ]);
+
+      expect(logWarn.calledOnce).to.equal(true);
+      expect(logWarn.firstCall.args[0]).to.include('allocation_strategy');
+    });
+
+    it('allows all draft field edits when the response carries no editable_fields', async () => {
+      const capture: any = {};
+      const draftNoEditable = { ...apiExperiment };
+      delete (draftNoEditable as any).editable_fields;
+      const handler = new ExperimentsHandler({
+        client: makeClient({ experiments: [draftNoEditable], capture }),
+        config,
+      } as any);
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          experiments: [
+            {
+              id: 'exp_1',
+              name: 'renamed',
+              feature_flag_name: 'checkout',
+              authentication_flow: 'authentication',
+              allocation_strategy: 'percentage',
+              allocations: [{ variation_name: 'control', is_control: true, weight: 100 }],
+            },
+          ],
+        },
+      ]);
+
+      // null editable_fields means "no restriction", so edits are sent rather than an empty body
+      expect(capture.update.body.name).to.equal('renamed');
+      expect(capture.update.body.allocations[0].variation_id).to.equal('var_c');
     });
 
     it('throws a clear error when the referenced flag does not exist', async () => {
