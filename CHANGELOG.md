@@ -11,10 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Add support for Experiment Center feature flags with the new `featureFlags` resource. [#1517]
-- Add support for Experiment Center feature flag variations. [#1518]
-- Add support for Experiment Center segments. [#1519]
-- Add support for Experiment Center experiments. [#1520]
+- Add Experiment Center support with the new `featureFlags`, `variations`, `segments`, and `experiments` resources. [#1517] [#1518] [#1519] [#1520]
 - Add support for client profiles (application profiles). [#1526]
 - Support dynamic CIMD client registration on `clients` and `tenant`. [#1522]
 
