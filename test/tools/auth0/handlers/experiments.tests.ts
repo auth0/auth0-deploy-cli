@@ -1,10 +1,19 @@
 import { PromisePoolExecutor } from 'promise-pool-executor';
 import { expect } from 'chai';
 import sinon from 'sinon';
+import { ManagementError } from 'auth0';
 
 import ExperimentsHandler from '../../../../src/tools/auth0/handlers/experiments';
 import pageClient from '../../../../src/tools/auth0/client';
 import log from '../../../../src/logger';
+
+// A real not-entitled error as the auth0 v7 SDK throws it: the API code lives on `body.errorCode`.
+const notEntitledError = () =>
+  new ManagementError({
+    message: 'feature not entitled',
+    statusCode: 403,
+    body: { errorCode: 'feature_not_entitled' },
+  });
 
 const pool = new PromisePoolExecutor({
   concurrencyLimit: 3,
@@ -456,19 +465,13 @@ describe('#experiments handler', () => {
       expect(capture.update.body).to.not.have.property('allocations');
     });
 
-    it('skips (warns, does not abort) when create returns a feature_not_entitled 403', async () => {
+    it('skips (warns, does not abort, no created count) when create returns feature_not_entitled', async () => {
       const logWarn = sinon.stub(log, 'warn');
       const client = pageClient({
         experimentation: {
           experiments: {
             list: () => Promise.resolve(makePage([])),
-            create: () =>
-              Promise.reject(
-                Object.assign(new Error('not entitled'), {
-                  statusCode: 403,
-                  errorCode: 'feature_not_entitled',
-                })
-              ),
+            create: () => Promise.reject(notEntitledError()),
           },
           featureFlags: {
             list: () => Promise.resolve(makePage([flag])),
@@ -500,6 +503,53 @@ describe('#experiments handler', () => {
 
       expect(logWarn.called).to.equal(true);
       expect(logWarn.firstCall.args[0]).to.include('not entitled');
+      // the skipped create must not count toward the run summary
+      expect(handler.created).to.equal(0);
+    });
+
+    it('skips (warns, no updated count) when update returns feature_not_entitled', async () => {
+      const logWarn = sinon.stub(log, 'warn');
+      const client = pageClient({
+        experimentation: {
+          experiments: {
+            list: () => Promise.resolve(makePage([apiExperiment])),
+            update: () => Promise.reject(notEntitledError()),
+          },
+          featureFlags: {
+            list: () => Promise.resolve(makePage([flag])),
+            variations: { list: () => Promise.resolve({ variations }) },
+          },
+          segments: { list: () => Promise.resolve(makePage([segment])) },
+        },
+        pool,
+      } as any);
+      const handler = new ExperimentsHandler({ client, config } as any);
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      // Re-import the existing draft experiment with a changed level, which the tenant is not
+      // entitled to: the update 403s, the experiment is skipped with a warning, and the deploy
+      // summary must not report an update that never happened.
+      await stageFn.apply(handler, [
+        {
+          experiments: [
+            {
+              id: 'exp_1',
+              name: 'checkout-test',
+              feature_flag_name: 'checkout',
+              authentication_flow: 'authentication',
+              allocation_strategy: 'percentage',
+              levels: [10, 50, 100],
+              allocations: [
+                { variation_name: 'control', is_control: true, weight: 50 },
+                { variation_name: 'variant-a', is_control: false, weight: 50 },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      expect(logWarn.called).to.equal(true);
+      expect(handler.updated).to.equal(0);
     });
 
     it('rethrows a create error that is not feature_not_entitled', async () => {

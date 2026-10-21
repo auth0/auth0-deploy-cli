@@ -142,11 +142,10 @@ export default class ExperimentsHandler extends DefaultAPIHandler {
 
   // Whether an error is the API's "the tenant is not entitled to a feature this experiment uses"
   // 403 (feature_not_entitled). The most common cause is advanced ramp: an experiment with
-  // `levels` set on a tenant that is not entitled to it. The code lives at a couple of shapes
-  // depending on how the SDK surfaces it, so check both.
+  // `levels` set on a tenant that is not entitled to it. The auth0 v7 ManagementError puts the
+  // API code on `err.body.errorCode` (same place isInsufficientEntitlementError reads it).
   private isNotEntitledError(err: any): boolean {
-    const errorCode = err?.errorCode || err?.originalError?.response?.body?.errorCode;
-    return err?.statusCode === 403 && errorCode === 'feature_not_entitled';
+    return err?.statusCode === 403 && err?.body?.errorCode === 'feature_not_entitled';
   }
 
   // Runs a create/update and, if the tenant is not entitled to a feature the experiment uses,
@@ -186,7 +185,12 @@ export default class ExperimentsHandler extends DefaultAPIHandler {
   }
 
   didUpdate(item: Asset): void {
-    if (item && item.__experimentSkipped) return;
+    // The base increments the updated count right after this, so undo it for a skip to keep the
+    // run summary accurate (same as didCreate above).
+    if (item && item.__experimentSkipped) {
+      this.updated -= 1;
+      return;
+    }
     super.didUpdate(item);
   }
 
