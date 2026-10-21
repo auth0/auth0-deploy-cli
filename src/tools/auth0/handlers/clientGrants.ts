@@ -4,7 +4,7 @@ import { convertClientNamesToIds, shouldExcludeThirdPartyClients } from '../../u
 import { Assets, CalculatedChanges } from '../../../types';
 import DefaultAPIHandler from './default';
 import { paginate } from '../client';
-import { Client } from './clients';
+import { Client, excludeDynamicCimdClients } from './clients';
 
 export const schema = {
   type: 'array',
@@ -158,10 +158,12 @@ export default class ClientGrantsHandler extends DefaultHandler {
     const excludedClientsByNames = (assets.exclude && assets.exclude.clients) || [];
     const excludedClients = convertClientNamesToIds(excludedClientsByNames, clients);
 
-    // Convert clients by name to the id
+    // Convert clients by name to the id. Dynamic CIMD clients are not managed by deploy-cli,
+    // so a name must not resolve to them.
+    const managedClients = excludeDynamicCimdClients(clients);
     const formatted = clientGrants.map((clientGrant) => {
       const grant = { ...clientGrant };
-      const found = clients.find((c) => c.name === grant.client_id);
+      const found = managedClients.find((c) => c.name === grant.client_id);
       if (found) grant.client_id = found.client_id;
       return grant;
     });

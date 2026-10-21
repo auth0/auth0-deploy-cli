@@ -570,6 +570,44 @@ describe('#databases handler', () => {
       }
     });
 
+    it('should not resolve client names to dynamic CIMD clients', async () => {
+      const auth0 = {
+        connections: {
+          list: (params) => mockPagedData(params, 'connections', []),
+        },
+        clients: {
+          list: (params) =>
+            mockPagedData(params, 'clients', [
+              {
+                name: 'My App',
+                client_id: 'dynamic1',
+                external_metadata_type: 'cimd',
+                external_metadata_created_by: 'client',
+              },
+              { name: 'My App', client_id: 'managed1' },
+            ]),
+        },
+        actions: {
+          list: (params) => mockPagedData(params, 'actions', []),
+        },
+        pool,
+      };
+
+      const handler = new databases.default({ client: pageClient(auth0), config });
+      const assets = {
+        databases: [{ name: 'someDatabase', enabled_clients: ['My App', 'dynamic1'] }],
+      };
+
+      // A raw dynamic client_id still passes through unchanged.
+      for (const changes of [
+        await handler.calcChanges(assets),
+        await handler.dryRunChanges(assets),
+      ]) {
+        expect(changes.create).to.have.lengthOf(1);
+        expect(changes.create[0].enabled_clients).to.have.members(['managed1', 'dynamic1']);
+      }
+    });
+
     it('should successfully create database with email.unique false and valid configuration', async () => {
       const auth0 = {
         connections: {

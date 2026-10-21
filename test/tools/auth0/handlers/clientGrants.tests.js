@@ -179,6 +179,44 @@ describe('#clientGrants handler', () => {
       await stageFn.apply(handler, [{ clientGrants: data }]);
     });
 
+    it('should not resolve a client name to a dynamic CIMD client', async () => {
+      const createdGrants = [];
+      const auth0 = {
+        clientGrants: {
+          create: (data) => {
+            createdGrants.push(data);
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) => mockPagedData(params, 'client_grants', []),
+        },
+        clients: {
+          list: (params) =>
+            mockPagedData(params, 'clients', [
+              {
+                client_id: 'dynamic1',
+                name: 'My App',
+                external_metadata_type: 'cimd',
+                external_metadata_created_by: 'client',
+              },
+              { client_id: 'managed1', name: 'My App' },
+            ]),
+        },
+        pool,
+      };
+
+      const handler = new clientGrants.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        { clientGrants: [{ client_id: 'My App', audience: 'https://api.example.com', scope: [] }] },
+      ]);
+
+      expect(createdGrants).to.have.lengthOf(1);
+      expect(createdGrants[0].client_id).to.equal('managed1');
+    });
+
     it('should create client grants with allow_all_scopes', async () => {
       const auth0 = {
         clientGrants: {

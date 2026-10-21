@@ -1579,6 +1579,23 @@ describe('#organizations handler', () => {
       expect(createdClients).to.deep.equal([{ client_id: 'abc_123', use_for_member_access: true }]);
     });
 
+    it('should resolve org client names to managed clients and dynamic CIMD clients by id', async () => {
+      const handler = new organizations.default({ client: pageClient({}), config });
+      handler.allClients = [
+        {
+          client_id: 'dynamic1',
+          name: 'My App',
+          external_metadata_type: 'cimd',
+          external_metadata_created_by: 'client',
+        },
+        { client_id: 'managed1', name: 'My App' },
+      ];
+
+      expect(handler.getClientIdByClientName('My App')).to.equal('managed1');
+      expect(handler.getClientIdByClientName('dynamic1')).to.equal('dynamic1');
+      expect(handler.getClientIdByClientName('managed1')).to.equal('');
+    });
+
     it('should add, update, and remove org-client associations on update', async () => {
       const existingOrgClientFromApi = {
         client_id: 'xyz_123',
