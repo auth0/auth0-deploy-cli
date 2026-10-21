@@ -229,10 +229,15 @@ const constants = {
   NETWORK_ACL_KEYS_DIRECTORY: 'network-acl-keys',
   USER_ATTRIBUTE_PROFILES_DIRECTORY: 'user-attribute-profiles',
   CONNECTION_PROFILES_DIRECTORY: 'connection-profiles',
+  CLIENT_PROFILES_DIRECTORY: 'client-profiles',
   TOKEN_EXCHANGE_PROFILES_DIRECTORY: 'token-exchange-profiles',
   SUPPLEMENTAL_SIGNALS_DIRECTORY: 'supplemental-signals',
   RATE_LIMIT_POLICIES_DIRECTORY: 'rate-limit-policies',
   EVENT_STREAMS_DIRECTORY: 'event-streams',
+  FEATURE_FLAGS_DIRECTORY: 'feature-flags',
+  VARIATIONS_DIRECTORY: 'variations',
+  SEGMENTS_DIRECTORY: 'segments',
+  EXPERIMENTS_DIRECTORY: 'experiments',
 };
 
 export default constants;

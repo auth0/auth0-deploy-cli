@@ -41,10 +41,15 @@ import * as networkACLKeys from './networkACLKeys';
 import * as networkACLs from './networkACLs';
 import * as userAttributeProfiles from './userAttributeProfiles';
 import * as connectionProfiles from './connectionProfiles';
+import * as clientProfiles from './clientProfiles';
 import * as tokenExchangeProfiles from './tokenExchangeProfiles';
 import * as supplementalSignals from './supplementalSignals';
 import * as rateLimitPolicies from './rateLimitPolicies';
 import * as eventStreams from './eventStreams';
+import * as featureFlags from './featureFlags';
+import * as variations from './variations';
+import * as segments from './segments';
+import * as experiments from './experiments';
 import * as clientAuthCredentials from './clientAuthCredentials';
 import * as clientAuthCredentialsPre from './clientAuthCredentialsPre';
 
@@ -96,10 +101,15 @@ const auth0ApiHandlers: { [key in AssetTypes]: any } = {
   networkACLs,
   userAttributeProfiles,
   connectionProfiles,
+  clientProfiles,
   tokenExchangeProfiles,
   supplementalSignals,
   rateLimitPolicies,
   eventStreams,
+  featureFlags,
+  variations,
+  segments,
+  experiments,
   clientAuthCredentials,
   // clientAuthCredentialsPre is a deploy-only pre-pass handler (order 40) — not a user-facing
   // asset type so it is not in AssetTypes, but must be registered here to run during deploy.

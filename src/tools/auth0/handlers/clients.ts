@@ -161,6 +161,11 @@ export const schema = {
         description:
           'Indicates who created the external metadata client: admin for Management API, client for dynamic registration.',
       },
+      external_metadata_status: {
+        type: 'string',
+        description:
+          'Read-only. Whether the metadata document of a CIMD client is resolvable (available or unavailable). Never sent to the API.',
+      },
       jwks_uri: {
         type: 'string',
         description: 'JSON Web Key Set endpoint associated with the client.',
@@ -564,6 +569,16 @@ export const schema = {
 
 export type Client = Management.Client;
 
+// Dynamic CIMD clients register themselves during the authorization flow; they are not
+// managed by the Deploy CLI.
+export const isDynamicCimdClient = (client: Client): boolean =>
+  client.external_metadata_type === 'cimd' && client.external_metadata_created_by === 'client';
+
+// A dynamic CIMD client's name comes from an external metadata document, so it can collide
+// with a managed client's name. Exclude them from name-based client lookups.
+export const excludeDynamicCimdClients = (clients: Client[]): Client[] =>
+  clients.filter((client) => !isDynamicCimdClient(client));
+
 type ClientSanitizerChain = {
   sanitizeOidcLogout(): ClientSanitizerChain;
   sanitizeCrossOriginAuth(warn?: boolean): ClientSanitizerChain;
@@ -683,6 +698,8 @@ const stripTokenVaultPrivilegedAccessOnWrite = (client: Client): Client => {
 export default class ClientHandler extends DefaultAPIHandler {
   existing: Client[];
 
+  existingDynamicCimd: Client[];
+
   constructor(config: DefaultAPIHandler) {
     super({
       ...config,
@@ -690,7 +707,12 @@ export default class ClientHandler extends DefaultAPIHandler {
       id: 'client_id',
       identifiers: ['client_id', 'name'],
       objectFields: ['client_metadata'],
-      stripCreateFields: ['external_metadata_type', 'external_metadata_created_by', 'jwks_uri'],
+      stripCreateFields: [
+        'external_metadata_type',
+        'external_metadata_created_by',
+        'external_metadata_status',
+        'jwks_uri',
+      ],
       stripUpdateFields: [
         // Fields not allowed during updates
         'callback_url_template',
@@ -701,6 +723,7 @@ export default class ClientHandler extends DefaultAPIHandler {
         'resource_server_identifier',
         'external_metadata_type',
         'external_metadata_created_by',
+        'external_metadata_status',
         'jwks_uri',
         // third_party_security_mode is immutable after creation; PATCH returns 400
         'third_party_security_mode',
@@ -719,6 +742,53 @@ export default class ClientHandler extends DefaultAPIHandler {
     return super.objString({ name: item.name, client_id: item.client_id });
   }
 
+  // Config clients the Deploy CLI can manage. Requires getType() to have run so
+  // existingDynamicCimd is populated.
+  private getManagedConfigClients(clients: Client[]): Client[] {
+    // Dynamic CIMD clients are registered by the client itself during the authorization
+    // flow, so they cannot be created or managed from config (register returns 409).
+    const dynamicCimdClients = clients.filter((c: Client) => isDynamicCimdClient(c));
+    if (dynamicCimdClients.length > 0) {
+      log.warn(
+        `Skipping dynamically registered CIMD clients (external_metadata_created_by: client), ` +
+          `which are not managed by the Deploy CLI: ${dynamicCimdClients
+            .map((c: Client) => c.name || c.external_client_id)
+            .join(', ')}. These can be removed from the config.`
+      );
+    }
+    const managedClients = excludeDynamicCimdClients(clients);
+
+    // A CIMD client whose external_client_id is already registered dynamically on the tenant
+    // cannot also be registered manually (register returns 409).
+    const dynamicExternalIds = new Set(
+      (this.existingDynamicCimd || []).map((c: Client) => c.external_client_id)
+    );
+    const conflictingCimdClients = managedClients.filter(
+      (c: Client) => this.isCimdClient(c) && dynamicExternalIds.has(c.external_client_id)
+    );
+    if (conflictingCimdClients.length > 0) {
+      log.warn(
+        `Skipping CIMD clients whose external_client_id is already registered as a dynamic ` +
+          `CIMD client on the tenant: ${conflictingCimdClients
+            .map((c: Client) => c.name || c.external_client_id)
+            .join(', ')}. Delete the dynamic client in Auth0 to manage it from config.`
+      );
+    }
+
+    return managedClients.filter((c: Client) => !conflictingCimdClients.includes(c));
+  }
+
+  async dryRunChanges(assets: Assets): Promise<CalculatedChanges> {
+    const clients = assets[this.type];
+
+    if (!clients) {
+      return { del: [], create: [], conflicts: [], update: [] };
+    }
+
+    await this.getType();
+    return super.dryRunChanges({ ...assets, clients: this.getManagedConfigClients(clients) });
+  }
+
   async calcChanges(assets: Assets): Promise<CalculatedChanges> {
     const clients = assets[this.type];
 
@@ -729,10 +799,11 @@ export default class ClientHandler extends DefaultAPIHandler {
     const existing = await this.getType();
     const allowDelete = !!this.config('AUTH0_ALLOW_DELETE');
 
-    const cimdClients = clients.filter((c: Client) => this.isCimdClient(c));
+    const managedClients = this.getManagedConfigClients(clients);
+    const cimdClients = managedClients.filter((c: Client) => this.isCimdClient(c));
     const existingCimd = (existing || []).filter((c: Client) => this.isCimdClient(c));
 
-    const regularClients = clients.filter((c: Client) => !this.isCimdClient(c));
+    const regularClients = managedClients.filter((c: Client) => !this.isCimdClient(c));
     const existingRegular = (existing || []).filter((c: Client) => !this.isCimdClient(c));
 
     const regularChanges = calculateChanges({
@@ -855,12 +926,19 @@ export default class ClientHandler extends DefaultAPIHandler {
       ...(shouldExcludeThirdPartyClients(this.config) && { is_first_party: true }),
     });
 
-    const sanitized = createClientSanitizer(clients)
+    // Dynamic CIMD clients are registered at runtime by the client itself, not by config.
+    // Never export, update or delete them.
+    this.existingDynamicCimd = clients.filter(isDynamicCimdClient);
+    const managedClients = excludeDynamicCimdClients(clients);
+
+    const sanitized = createClientSanitizer(managedClients)
       .sanitizeCrossOriginAuth(false)
       .get()
       // token_vault_privileged_access.credentials are returned as tenant-specific
       // ids — strip them so they are never exported to disk.
-      .map(stripTokenVaultCredentialsOnExport);
+      .map(stripTokenVaultCredentialsOnExport)
+      // external_metadata_status is read-only runtime state, not configuration.
+      .map((client) => omit(client, 'external_metadata_status') as Client);
 
     // Enrich credential stubs with name and credential_type for export.
     // Auth0 does not return pem on read — it is never exported.

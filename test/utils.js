@@ -260,6 +260,9 @@ export function mockMgmtClient() {
     connectionProfiles: {
       list: (params) => mockPagedData(params, 'connectionProfiles', []),
     },
+    clientProfiles: {
+      list: (params) => mockPagedData(params, 'clientProfiles', []),
+    },
     tokenExchangeProfiles: {
       list: (params) => mockPagedData(params, 'tokenExchangeProfiles', []),
     },
@@ -284,6 +287,35 @@ export function mockMgmtClient() {
           hasNextPage: () => false,
           getNextPage: () => Promise.resolve({ data: [], hasNextPage: () => false }),
         }),
+    },
+    experimentation: {
+      featureFlags: {
+        list: () =>
+          Promise.resolve({
+            data: [],
+            hasNextPage: () => false,
+            getNextPage: () => Promise.resolve({ data: [], hasNextPage: () => false }),
+          }),
+        variations: {
+          list: () => Promise.resolve({ variations: [] }),
+        },
+      },
+      segments: {
+        list: () =>
+          Promise.resolve({
+            data: [],
+            hasNextPage: () => false,
+            getNextPage: () => Promise.resolve({ data: [], hasNextPage: () => false }),
+          }),
+      },
+      experiments: {
+        list: () =>
+          Promise.resolve({
+            data: [],
+            hasNextPage: () => false,
+            getNextPage: () => Promise.resolve({ data: [], hasNextPage: () => false }),
+          }),
+      },
     },
   };
 }
