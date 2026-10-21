@@ -129,6 +129,12 @@ export default class FeatureFlagsHandler extends DefaultAPIHandler {
         });
       return this.existing;
     } catch (err) {
+      // A missing-scope 403 ("Insufficient scope") is handled by the base load() wrapper
+      // (detectInsufficientScopeError), which surfaces a clear "missing scopes" warning naming the
+      // required scope. Let it propagate instead of masking it as a missing entitlement.
+      if (err.statusCode === 403 && err.message?.includes('Insufficient scope')) {
+        throw err;
+      }
       // Experiment Center is entitlement-gated. featureFlags is the first EC handler to run, so a
       // tenant without the entitlement would otherwise abort the whole export/import here. Treat a
       // 403/404 (or 501 where unimplemented) as "no flags to manage" and skip the resource.
