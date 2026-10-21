@@ -141,6 +141,44 @@ describe('#experiments handler', () => {
       expect(data).to.equal(null);
     });
 
+    it('returns null on 404', async () => {
+      const client = pageClient({
+        experimentation: {
+          experiments: {
+            list: () => Promise.reject(Object.assign(new Error('not found'), { statusCode: 404 })),
+          },
+        },
+        pool,
+      } as any);
+      const handler = new ExperimentsHandler({ client, config } as any);
+      const data = await handler.getType();
+      expect(data).to.equal(null);
+    });
+
+    it('rethrows a missing-scope 403 so the base scope warning still fires', async () => {
+      const client = pageClient({
+        experimentation: {
+          experiments: {
+            list: () =>
+              Promise.reject(
+                Object.assign(
+                  new Error('Insufficient scope, expected any of: read:experimentation'),
+                  { statusCode: 403 }
+                )
+              ),
+          },
+        },
+        pool,
+      } as any);
+      const handler = new ExperimentsHandler({ client, config } as any);
+      try {
+        await handler.getType();
+        expect.fail('Should have rethrown the insufficient-scope error');
+      } catch (err: any) {
+        expect(err.message).to.include('Insufficient scope');
+      }
+    });
+
     it('throws a clear error when the list omits feature_flag_name (not re-importable)', async () => {
       const noName = { ...apiExperiment };
       delete (noName as any).feature_flag_name;
@@ -414,6 +452,8 @@ describe('#experiments handler', () => {
 
       expect(logWarn.calledOnce).to.equal(true);
       expect(logWarn.firstCall.args[0]).to.include('allocation_strategy');
+      // the mismatched allocations are not sent, so "the change is ignored" actually holds
+      expect(capture.update.body).to.not.have.property('allocations');
     });
 
     it('allows all draft field edits when the response carries no editable_fields', async () => {

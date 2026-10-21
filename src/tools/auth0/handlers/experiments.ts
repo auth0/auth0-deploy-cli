@@ -297,15 +297,16 @@ export default class ExperimentsHandler extends DefaultAPIHandler {
     }
 
     // allocation_strategy is create-only (it is on CreateExperimentRequestContent but not the
-    // update parameters), so a change to it on an existing draft cannot be applied. Warn rather
-    // than silently sending allocations that no longer match the stored strategy.
-    if (
+    // update parameters), so a change to it on an existing draft cannot be applied. Warn, and skip
+    // the allocations edit too: the new allocations are shaped for the new strategy and would be
+    // rejected or misapplied against the unchanged one, so sending them would not match the warning.
+    const strategyChangeIgnored =
       existing &&
       data.allocation_strategy !== undefined &&
-      data.allocation_strategy !== existing.allocation_strategy
-    ) {
+      data.allocation_strategy !== existing.allocation_strategy;
+    if (strategyChangeIgnored) {
       log.warn(
-        `Experiment "${data.name}" allocation_strategy is create-only and cannot be changed from "${existing.allocation_strategy}" to "${data.allocation_strategy}" on an existing experiment; the change is ignored. Recreate the experiment to change it.`
+        `Experiment "${data.name}" allocation_strategy is create-only and cannot be changed from "${existing.allocation_strategy}" to "${data.allocation_strategy}" on an existing experiment; the change and its allocations are ignored. Recreate the experiment to change it.`
       );
     }
 
@@ -324,7 +325,7 @@ export default class ExperimentsHandler extends DefaultAPIHandler {
     if (data.default_config !== undefined && canEdit('default_config'))
       payload.default_config = data.default_config;
     if (data.levels !== undefined && canEdit('levels')) payload.levels = data.levels;
-    if (data.allocations !== undefined && canEdit('allocations')) {
+    if (data.allocations !== undefined && canEdit('allocations') && !strategyChangeIgnored) {
       // feature_flag_id is immutable, but the flag is still needed to resolve allocation variations.
       const flagId = await this.resolveFlagId(data.feature_flag_name);
       payload.allocations = await this.buildAllocations(flagId, data.allocations);
@@ -382,6 +383,12 @@ export default class ExperimentsHandler extends DefaultAPIHandler {
       });
       return this.existing;
     } catch (err) {
+      // A missing-scope 403 ("Insufficient scope") is handled by the base load() wrapper
+      // (detectInsufficientScopeError), which surfaces a clear "missing scopes" warning naming the
+      // required scope. Let it propagate instead of masking it as a missing entitlement.
+      if (err.statusCode === 403 && err.message?.includes('Insufficient scope')) {
+        throw err;
+      }
       // Experiment Center is entitlement-gated. On a tenant without the entitlement the endpoints
       // answer 403/404 (or 501 where unimplemented); treat that as "no experiments to manage" and
       // skip the resource rather than failing the whole export/import.
