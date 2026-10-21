@@ -2689,7 +2689,7 @@ variations:
 
 Folder: `./variations/`
 
-Each variation is stored as a separate JSON file named `<feature-flag-name>-<variation-name>.json` (e.g. `checkout-experiment-variant-a.json`):
+Each variation is stored under a per-flag subfolder as `<feature-flag-name>/<variation-name>.json` (e.g. `checkout-experiment/variant-a.json`). A variation name is unique only within its flag, so the subfolder keeps the flag boundary unambiguous:
 
 ```json
 {

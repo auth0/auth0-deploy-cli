@@ -5,10 +5,12 @@ import {
   getFiles,
   existsMustBeDir,
   isDirectory,
+  isFile,
   dumpJSON,
   loadJSON,
   sanitize,
 } from '../../../utils';
+import log from '../../../logger';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 import { Asset, ParsedAsset } from '../../../types';
@@ -19,12 +21,23 @@ function parse(context: DirectoryContext): ParsedVariations {
   const variationsDirectory = path.join(context.filePath, constants.VARIATIONS_DIRECTORY);
   if (!existsMustBeDir(variationsDirectory)) return { variations: null };
 
-  // Variations are stored one subfolder per flag (variations/<flag>/<variation>.json), so walk
-  // each flag subfolder and collect its variation files.
-  const flagFolders = fs
+  const entries = fs
     .readdirSync(variationsDirectory)
-    .map((entry) => path.join(variationsDirectory, entry))
-    .filter((entry) => isDirectory(entry));
+    .map((entry) => path.join(variationsDirectory, entry));
+
+  // Variations are stored one subfolder per flag (variations/<flag>/<variation>.json). Warn about
+  // any .json sitting directly under variations/, which is the old flat layout: it would be
+  // skipped here, and silently reading it as "no variations" could delete tenant variations when
+  // AUTH0_ALLOW_DELETE is on.
+  const flatFiles = entries.filter((entry) => isFile(entry) && path.extname(entry) === '.json');
+  if (flatFiles.length > 0) {
+    log.warn(
+      `Ignoring ${flatFiles.length} variation file(s) directly under ${constants.VARIATIONS_DIRECTORY}/. Variations are now stored per flag as ${constants.VARIATIONS_DIRECTORY}/<flag>/<variation>.json; move these files into their flag's subfolder.`
+    );
+  }
+
+  // Walk each flag subfolder and collect its variation files.
+  const flagFolders = entries.filter((entry) => isDirectory(entry));
 
   const variations = flagFolders
     .flatMap((folder) => getFiles(folder, ['.json']))

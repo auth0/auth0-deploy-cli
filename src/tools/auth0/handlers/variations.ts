@@ -1,4 +1,5 @@
 import { Management } from 'auth0';
+import { isEqual } from 'lodash';
 import DefaultAPIHandler, { order } from './default';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
 import ValidationError from '../../validationError';
@@ -191,6 +192,12 @@ export default class VariationsHandler extends DefaultAPIHandler {
       this.existing = variations;
       return this.existing;
     } catch (err) {
+      // A missing-scope 403 ("Insufficient scope") is handled by the base load() wrapper
+      // (detectInsufficientScopeError), which surfaces a clear "missing scopes" warning naming the
+      // required scope. Let it propagate instead of masking it as a missing entitlement.
+      if (err.statusCode === 403 && err.message?.includes('Insufficient scope')) {
+        throw err;
+      }
       // Experiment Center is entitlement-gated. On a tenant without the entitlement the
       // endpoints answer 403/404 (or 501 where unimplemented); treat that as "no variations to
       // manage" and skip the resource rather than failing the whole export/import.
@@ -204,6 +211,22 @@ export default class VariationsHandler extends DefaultAPIHandler {
     }
   }
 
+  // Whether a desired variation differs from the one already on the tenant. Only used to decide
+  // whether to warn that an update to an archived flag's variation is ignored, so a clean
+  // re-import (every matched variation lands in changes.update, even unchanged ones) stays quiet.
+  private variationHasIgnoredChanges(desired: Asset): boolean {
+    const existing = (this.existing || []).find(
+      (variation) =>
+        variation.feature_flag_name === desired.feature_flag_name && variation.name === desired.name
+    );
+    if (!existing) return true;
+    if (desired.description !== undefined && desired.description !== existing.description)
+      return true;
+    if (desired.overrides !== undefined && !isEqual(desired.overrides, existing.overrides))
+      return true;
+    return false;
+  }
+
   // An archived parent flag is immutable: the API rejects creating or modifying its variations
   // (feature_flag_archived) and that would abort the whole deploy. Drop create and update changes
   // targeting an archived flag so a config still referencing them applies cleanly, and warn so the
@@ -212,11 +235,23 @@ export default class VariationsHandler extends DefaultAPIHandler {
   private filterArchivedFlagChanges(changes: CalculatedChanges): CalculatedChanges {
     const isOnArchivedFlag = (variation: Asset): boolean =>
       this.archivedFlagNames.has(variation.feature_flag_name);
-    [...changes.create, ...changes.update].filter(isOnArchivedFlag).forEach((variation) => {
+    // A create on an archived flag is always an ignored change worth warning about. An update
+    // only is when the config actually diverges, since every matched variation (even unchanged)
+    // lands in changes.update, so warning unconditionally would fire on every clean re-import.
+    changes.create.filter(isOnArchivedFlag).forEach((variation) => {
       log.warn(
-        `Feature flag "${variation.feature_flag_name}" is archived and immutable; changes to its variation "${variation.name}" are ignored.`
+        `Feature flag "${variation.feature_flag_name}" is archived and immutable; the new variation "${variation.name}" cannot be created.`
       );
     });
+    changes.update
+      .filter(
+        (variation) => isOnArchivedFlag(variation) && this.variationHasIgnoredChanges(variation)
+      )
+      .forEach((variation) => {
+        log.warn(
+          `Feature flag "${variation.feature_flag_name}" is archived and immutable; changes to its variation "${variation.name}" are ignored.`
+        );
+      });
     return {
       ...changes,
       create: changes.create.filter((variation) => !isOnArchivedFlag(variation)),

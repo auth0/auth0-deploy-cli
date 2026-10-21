@@ -69,7 +69,11 @@ describe('#variations handler', () => {
   };
   config.data = { AUTH0_ALLOW_DELETE: false };
 
-  afterEach(() => sinon.restore());
+  afterEach(() => {
+    sinon.restore();
+    // Reset here rather than inline so a failing assertion cannot leak the flag into later tests.
+    config.data.AUTH0_ALLOW_DELETE = false;
+  });
 
   describe('#variations validate', () => {
     it('allows the same variation name under different flags', async () => {
@@ -209,7 +213,7 @@ describe('#variations handler', () => {
 
       expect(capture.delete.flagId).to.equal('flg_self');
       expect(capture.delete.vid).to.equal('var_control');
-      config.data.AUTH0_ALLOW_DELETE = false;
+      // AUTH0_ALLOW_DELETE is reset in afterEach so a failure here cannot leak into later tests.
     });
 
     it('skips updating variations whose parent flag is archived and warns', async () => {
@@ -235,6 +239,54 @@ describe('#variations handler', () => {
       expect(capture.update).to.equal(undefined);
       expect(logWarn.calledOnce).to.equal(true);
       expect(logWarn.firstCall.args[0]).to.include('checkout');
+    });
+
+    it('does not warn when re-importing an unchanged variation of an archived flag', async () => {
+      const logWarn = sinon.stub(log, 'warn');
+      const capture: any = {};
+      const archivedFlag = { ...selfFlag, status: 'archived' };
+      const handler = new VariationsHandler({
+        client: makeClient({
+          flags: [archivedFlag],
+          variationsByFlag: { flg_self: [controlVariation] },
+          capture,
+        }),
+        config,
+      } as any);
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      // controlVariation has overrides {}, so re-importing it unchanged is a clean no-op: the
+      // update is still skipped, but there is nothing ignored to warn about.
+      await stageFn.apply(handler, [
+        { variations: [{ feature_flag_name: 'checkout', name: 'control', overrides: {} }] },
+      ]);
+
+      expect(capture.update).to.equal(undefined);
+      expect(logWarn.called).to.equal(false);
+    });
+
+    it('rethrows a missing-scope 403 so the base scope warning still fires', async () => {
+      const client = pageClient({
+        experimentation: {
+          featureFlags: {
+            list: () =>
+              Promise.reject(
+                Object.assign(
+                  new Error('Insufficient scope, expected any of: read:experimentation'),
+                  { statusCode: 403 }
+                )
+              ),
+          },
+        },
+        pool,
+      } as any);
+      const handler = new VariationsHandler({ client, config } as any);
+      try {
+        await handler.getType();
+        expect.fail('Should have rethrown the insufficient-scope error');
+      } catch (err: any) {
+        expect(err.message).to.include('Insufficient scope');
+      }
     });
 
     it('skips creating a variation on an archived flag and warns', async () => {
