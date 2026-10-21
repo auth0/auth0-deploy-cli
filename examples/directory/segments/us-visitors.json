@@ -1,0 +1,5 @@
+{
+  "name": "us-visitors",
+  "description": "Visitors from the US",
+  "rules": [{ "match": { "country": ["US"] } }]
+}

@@ -26,6 +26,7 @@ import { RateLimitPolicy } from './tools/auth0/handlers/rateLimitPolicies';
 import { EventStream } from './tools/auth0/handlers/eventStreams';
 import { FeatureFlag } from './tools/auth0/handlers/featureFlags';
 import { Variation } from './tools/auth0/handlers/variations';
+import { Segment } from './tools/auth0/handlers/segments';
 
 type SharedPaginationParams = {
   checkpoint?: boolean;
@@ -181,6 +182,7 @@ export type Assets = Partial<{
   eventStreams: EventStream[] | null;
   featureFlags: FeatureFlag[] | null;
   variations: Variation[] | null;
+  segments: Segment[] | null;
 }>;
 
 export type CalculatedChanges = {
@@ -256,6 +258,7 @@ export type AssetTypes =
   | 'eventStreams'
   | 'featureFlags'
   | 'variations'
+  | 'segments'
   | 'clientAuthCredentials';
 
 export type KeywordMappings = { [key: string]: (string | number)[] | string | number };
