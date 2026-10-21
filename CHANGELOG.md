@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.2.0] - 2026-10-21
+
 ### Added
 
 - Add support for Experiment Center feature flags with the new `featureFlags` resource. [#1517]
@@ -2046,8 +2048,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1500]: https://github.com/auth0/auth0-deploy-cli/issues/1500
 [#1503]: https://github.com/auth0/auth0-deploy-cli/issues/1503
 [#1505]: https://github.com/auth0/auth0-deploy-cli/issues/1505
-[#1509]: https://github.com/auth0/auth0-deploy-cli/issues/1509
 [#1508]: https://github.com/auth0/auth0-deploy-cli/issues/1508
+[#1509]: https://github.com/auth0/auth0-deploy-cli/issues/1509
 [#1510]: https://github.com/auth0/auth0-deploy-cli/issues/1510
 [#1511]: https://github.com/auth0/auth0-deploy-cli/issues/1511
 [#1517]: https://github.com/auth0/auth0-deploy-cli/issues/1517
@@ -2057,7 +2059,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1522]: https://github.com/auth0/auth0-deploy-cli/issues/1522
 [#1524]: https://github.com/auth0/auth0-deploy-cli/issues/1524
 [#1526]: https://github.com/auth0/auth0-deploy-cli/issues/1526
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v9.1.0...HEAD
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v9.2.0...HEAD
+[9.2.0]: https://github.com/auth0/auth0-deploy-cli/compare/v9.1.0...v9.2.0
 [9.1.0]: https://github.com/auth0/auth0-deploy-cli/compare/v9.0.0...v9.1.0
 [9.0.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.45.0...v9.0.0
 [8.45.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.44.0...v8.45.0
