@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add support for Experiment Center feature flags with the new `featureFlags` resource. [#1517]
+- Add support for Experiment Center feature flag variations. [#1518]
+- Add support for Experiment Center segments. [#1519]
+- Add support for Experiment Center experiments. [#1520]
+- Add support for client profiles (application profiles). [#1526]
+- Support dynamic CIMD client registration on `clients` and `tenant`. [#1522]
+
+### Fixed
+
+- Fail the import on `clientAuthCredentials` credential errors and stop the `private_key_jwt` downgrade when credential creation fails. [#1524]
+
 ## [9.1.0] - 2026-10-07
 
 ### Added
@@ -2037,6 +2050,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1508]: https://github.com/auth0/auth0-deploy-cli/issues/1508
 [#1510]: https://github.com/auth0/auth0-deploy-cli/issues/1510
 [#1511]: https://github.com/auth0/auth0-deploy-cli/issues/1511
+[#1517]: https://github.com/auth0/auth0-deploy-cli/issues/1517
+[#1518]: https://github.com/auth0/auth0-deploy-cli/issues/1518
+[#1519]: https://github.com/auth0/auth0-deploy-cli/issues/1519
+[#1520]: https://github.com/auth0/auth0-deploy-cli/issues/1520
+[#1522]: https://github.com/auth0/auth0-deploy-cli/issues/1522
+[#1524]: https://github.com/auth0/auth0-deploy-cli/issues/1524
+[#1526]: https://github.com/auth0/auth0-deploy-cli/issues/1526
 [Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v9.1.0...HEAD
 [9.1.0]: https://github.com/auth0/auth0-deploy-cli/compare/v9.0.0...v9.1.0
 [9.0.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.45.0...v9.0.0
