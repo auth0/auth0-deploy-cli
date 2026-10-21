@@ -2587,3 +2587,231 @@ Each resource is a JSON file inside the `guardian` folder:
 ```
 
 For more details, see the [Management API documentation](https://auth0.com/docs/api/management/v2#!/Guardian).
+
+## Feature Flags
+
+> **Early Access.** Feature Flags are part of Auth0's Experiment Center and are only available on tenants entitled to the feature (`experiment_center_ea`). On tenants without the entitlement the resource is skipped.
+
+Feature Flags define the typed, configurable parameters that experiments vary. Each flag declares a set of parameters; experiment variations later override those parameters.
+
+Notes and guardrails:
+
+- **Only customer-defined flags are managed.** Auth0-managed built-in flags (`type: auth0`, e.g. the passkey enrollment flag) are provisioned automatically on entitled tenants and are excluded from export and from create/update/delete.
+- **`status` is managed through updates, not creation.** A flag is always created in `draft`. Transitions (`draft` → `active`, `draft`/`active` → `archived`) are applied on update. Activating a flag requires at least two variations, so a brand-new flag is activated on a later deploy once its variations exist. An archived flag is terminal and immutable: the API rejects edits to its parameters or other fields, so the deploy CLI only re-sends the status for an archived flag, keeping a re-import of a config that still contains it a clean no-op rather than a failure.
+- **Archived is terminal.** An archived flag cannot be modified or reactivated.
+- `id`, `type`, `created_at` and `updated_at` are read-only and are ignored on create/update.
+
+### Schema Properties
+
+| Property                        | Type     | Required       | Description                                                                                           |
+| ------------------------------- | -------- | -------------- | ----------------------------------------------------------------------------------------------------- |
+| `name`                          | `string` | Yes            | Human-readable name. Unique per tenant; used as the matching key across tenants.                      |
+| `description`                   | `string` | No             | Description of what the flag controls.                                                                |
+| `parameters`                    | `object` | Yes            | Map of parameter name to definition. May be empty (`{}`). Each parameter requires `type` and `value`. |
+| `parameters.<name>.type`        | `string` | Yes            | One of `string`, `boolean`, `number`, `array`, `object`.                                              |
+| `parameters.<name>.value`       | any      | Yes            | Default value; must match the declared `type`.                                                        |
+| `parameters.<name>.description` | `string` | No             | Description of the parameter.                                                                         |
+| `status`                        | `string` | No             | `draft`, `active`, or `archived`. Not accepted on create (a flag is born `draft`).                    |
+| `type`                          | `string` | No (read-only) | `self` (customer-defined) or `auth0` (managed). Set by the API.                                       |
+
+### YAML Example
+
+```yaml
+# Contents of ./tenant.yaml
+featureFlags:
+  - name: checkout-experiment
+    description: Controls the checkout experience
+    parameters:
+      enabled:
+        type: boolean
+        value: false
+      variant_label:
+        type: string
+        value: control
+```
+
+### Directory Example
+
+Folder: `./feature-flags/`
+
+Each feature flag is stored as a separate JSON file named after the flag (e.g. `checkout-experiment.json`):
+
+```json
+{
+  "name": "checkout-experiment",
+  "description": "Controls the checkout experience",
+  "parameters": {
+    "enabled": { "type": "boolean", "value": false },
+    "variant_label": { "type": "string", "value": "control" }
+  }
+}
+```
+
+## Feature Flag Variations
+
+> **Early Access.** Variations belong to the Experiment Center feature flags above and are only available on entitled tenants.
+
+A variation is a named override set on a feature flag. The baseline (control) variation overrides nothing (`overrides: {}`); other variations override one or more of the parent flag's parameters.
+
+Notes and guardrails:
+
+- **Each variation references its parent flag by name** (`feature_flag_name`), not by the tenant-specific id, so configuration is portable. On import the name is resolved to the flag id in the target tenant, so the parent flag must exist first.
+- **Names are unique only within a flag.** Two different flags may each have a variation named `control`, but a single flag cannot have two variations with the same name.
+- **Overrides must reference parameters that exist on the parent flag**, with matching types. The API rejects unknown or mistyped override keys.
+- Variations of Auth0-managed (`type: auth0`) flags are not managed.
+- `id`, `feature_flag_id`, `created_at` and `updated_at` are read-only and are ignored on create and update.
+
+### Schema Properties
+
+| Property            | Type     | Required | Description                                                                      |
+| ------------------- | -------- | -------- | -------------------------------------------------------------------------------- |
+| `feature_flag_name` | `string` | Yes      | Name of the parent feature flag. Resolved to the flag id on import.              |
+| `name`              | `string` | Yes      | Variation name. Unique within the parent flag.                                   |
+| `description`       | `string` | No       | Description of the variation.                                                    |
+| `overrides`         | `object` | Yes      | Parameter overrides. `{}` is the control/baseline. Keys must be flag parameters. |
+
+### YAML Example
+
+```yaml
+# Contents of ./tenant.yaml
+variations:
+  - feature_flag_name: checkout-experiment
+    name: control
+    overrides: {}
+  - feature_flag_name: checkout-experiment
+    name: variant-a
+    description: Enables the new checkout
+    overrides:
+      enabled: true
+```
+
+### Directory Example
+
+Folder: `./variations/`
+
+Each variation is stored under a per-flag subfolder as `<feature-flag-name>/<variation-name>.json` (e.g. `checkout-experiment/variant-a.json`). A variation name is unique only within its flag, so the subfolder keeps the flag boundary unambiguous:
+
+```json
+{
+  "feature_flag_name": "checkout-experiment",
+  "name": "variant-a",
+  "description": "Enables the new checkout",
+  "overrides": { "enabled": true }
+}
+```
+
+## Segments
+
+> **Early Access.** Segments are part of Experiment Center and are only available on entitled tenants.
+
+A segment is a named, reusable audience defined by match rules. Experiments can target a segment to assign a variation to the users it matches.
+
+Notes and guardrails:
+
+- **Only customer-defined segments are managed.** Auth0-managed (`type: auth0`) segments are provisioned automatically and are excluded from export and from create/update/delete.
+- **`status` is managed through updates, not creation.** A segment is created `active`. Archiving happens on update and is terminal (an archived segment cannot return to active). An archived segment is also immutable: the API rejects edits to its rules or other fields, so the deploy CLI only re-sends the status for an archived segment, which keeps re-importing a config that still contains it a clean no-op rather than a failure. A segment authored `archived` from the start is created `active` and archived on the next import.
+- `rules` is an ordered list; a segment matches if any rule matches. Each rule carries `match` and/or `not_match` conditions.
+- `id`, `type`, `created_at` and `updated_at` are read-only and are ignored on create and update.
+
+### Schema Properties
+
+| Property      | Type     | Required       | Description                                                                                                                                                                                                                             |
+| ------------- | -------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`        | `string` | Yes            | Human-readable name. Unique per tenant; used as the matching key.                                                                                                                                                                       |
+| `description` | `string` | No             | Description of the segment.                                                                                                                                                                                                             |
+| `rules`       | `array`  | Yes            | Ordered list of `{ match, not_match }` rule objects. A segment matches if any rule matches. Each condition keys off a known attribute (country, device_type, browser, connection, and so on) whose value is an array of allowed values. |
+| `status`      | `string` | No             | `active` or `archived`. Not accepted on create (a segment is born `active`).                                                                                                                                                            |
+| `type`        | `string` | No (read-only) | `self` (customer-defined) or `auth0` (managed). Set by the API.                                                                                                                                                                         |
+
+### YAML Example
+
+```yaml
+# Contents of ./tenant.yaml
+segments:
+  - name: us-visitors
+    description: Visitors from the US
+    rules:
+      - match:
+          country:
+            - US
+```
+
+### Directory Example
+
+Folder: `./segments/`
+
+Each segment is stored as a separate JSON file named after the segment (e.g. `us-visitors.json`):
+
+```json
+{
+  "name": "us-visitors",
+  "description": "Visitors from the US",
+  "rules": [{ "match": { "country": ["US"] } }]
+}
+```
+
+## Experiments
+
+> **Early Access.** Experiments are part of Experiment Center and are only available on entitled tenants.
+
+An experiment runs a feature flag against a chosen authentication flow, splitting traffic across the flag's variations (optionally by segment). Experiments are the top of the Experiment Center dependency chain: the feature flag, its variations, and any referenced segments must exist first.
+
+Notes and guardrails:
+
+- **References are by name.** `feature_flag_name`, `allocations[].variation_name`, and `allocations[].segment_name` are resolved to the tenant's ids on import, so configuration is portable. The referenced flag, variations, and segments must exist in the target tenant first.
+- **`status` is managed through updates, not creation.** An experiment is created `draft`. Lifecycle transitions (`active`, `paused`, `completed`, `archived`) are applied on update. `draft` is a create-only state and is never sent as a transition. Activating an experiment requires it to be valid, which in turn requires its feature flag to be active (and a flag needs at least two variations to activate). Because a brand-new experiment is created in the same run, reaching `active` on a fresh tenant takes a second import (the first creates it as `draft`, the next transitions it).
+- **An activated experiment is configuration-frozen.** Once an experiment leaves `draft` its configuration snapshot is frozen, and the API rejects edits to its allocations, levels, `default_config`, or other fields (it requires cloning the experiment to change them). The deploy CLI therefore only applies `status` transitions to a non-draft experiment and does not attempt to push config or allocation edits, so re-importing an active experiment is a clean no-op rather than a failure. To change an activated experiment's configuration, clone it (via the dashboard or Management API).
+- **Allocations.** Exactly one allocation must be the control (`is_control: true`). Percentage-strategy allocations carry a `weight`; segment-strategy allocations carry a `segment_name` and `priority`, with the control acting as the fallback (`is_fallback: true`, no segment).
+- **`default_config`** (`tenant` or `flag`) applies only to Auth0-managed flags and is rejected for customer-defined flags.
+- `id`, `feature_flag_id`, `is_valid`, `editable_fields`, `current_level`, `started_at`, `ended_at`, the copy-on-activate snapshots, and the per-allocation ids/snapshots are read-only and are not written back on import.
+
+### Schema Properties
+
+| Property              | Type     | Required | Description                                                                                                                           |
+| --------------------- | -------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                | `string` | Yes      | Human-readable name. Unique per tenant; used as the matching key.                                                                     |
+| `feature_flag_name`   | `string` | Yes      | Name of the feature flag this experiment is based on. Resolved to its id on import.                                                   |
+| `authentication_flow` | `string` | Yes      | One of `authentication`, `mfa_enrollment`, `mfa_challenge`, `password_reset`, `passkey_enrollment`, `all`.                            |
+| `description`         | `string` | No       | Description of the experiment.                                                                                                        |
+| `allocation_strategy` | `string` | Yes      | `percentage` or `segment`.                                                                                                            |
+| `allocations`         | `array`  | No       | Traffic allocations. Each has `variation_name` and `is_control`, plus `weight` (percentage) or `segment_name` + `priority` (segment). |
+| `default_config`      | `string` | No       | `tenant` or `flag`. Auth0-managed flags only.                                                                                         |
+| `levels`              | `array`  | No       | Gradual-rollout ramp percentages, a strictly increasing list of integers in [0, 100].                                                 |
+| `status`              | `string` | No       | `draft`, `active`, `paused`, `completed`, `archived`. Not accepted on create.                                                         |
+
+### YAML Example
+
+```yaml
+# Contents of ./tenant.yaml
+experiments:
+  - name: checkout-experiment-test
+    feature_flag_name: checkout-experiment
+    authentication_flow: authentication
+    allocation_strategy: percentage
+    allocations:
+      - variation_name: control
+        is_control: true
+        weight: 50
+      - variation_name: variant-a
+        is_control: false
+        weight: 50
+```
+
+### Directory Example
+
+Folder: `./experiments/`
+
+Each experiment is stored as a separate JSON file named after the experiment (e.g. `checkout-experiment-test.json`):
+
+```json
+{
+  "name": "checkout-experiment-test",
+  "feature_flag_name": "checkout-experiment",
+  "authentication_flow": "authentication",
+  "allocation_strategy": "percentage",
+  "allocations": [
+    { "variation_name": "control", "is_control": true, "weight": 50 },
+    { "variation_name": "variant-a", "is_control": false, "weight": 50 }
+  ]
+}
+```

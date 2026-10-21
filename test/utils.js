@@ -288,6 +288,35 @@ export function mockMgmtClient() {
           getNextPage: () => Promise.resolve({ data: [], hasNextPage: () => false }),
         }),
     },
+    experimentation: {
+      featureFlags: {
+        list: () =>
+          Promise.resolve({
+            data: [],
+            hasNextPage: () => false,
+            getNextPage: () => Promise.resolve({ data: [], hasNextPage: () => false }),
+          }),
+        variations: {
+          list: () => Promise.resolve({ variations: [] }),
+        },
+      },
+      segments: {
+        list: () =>
+          Promise.resolve({
+            data: [],
+            hasNextPage: () => false,
+            getNextPage: () => Promise.resolve({ data: [], hasNextPage: () => false }),
+          }),
+      },
+      experiments: {
+        list: () =>
+          Promise.resolve({
+            data: [],
+            hasNextPage: () => false,
+            getNextPage: () => Promise.resolve({ data: [], hasNextPage: () => false }),
+          }),
+      },
+    },
   };
 }
 
