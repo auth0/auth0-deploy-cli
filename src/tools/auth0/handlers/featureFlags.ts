@@ -99,34 +99,45 @@ export default class FeatureFlagsHandler extends DefaultAPIHandler {
     return false;
   }
 
-  async getType(): Promise<Asset[]> {
+  async getType(): Promise<Asset[] | null> {
     if (this.existing) return this.existing;
 
-    const featureFlags: Asset[] = [];
-    let page = await this.client.experimentation.featureFlags.list();
-    featureFlags.push(...page.data);
-    while (page.hasNextPage()) {
-      page = await page.getNextPage();
+    try {
+      const featureFlags: Asset[] = [];
+      let page = await this.client.experimentation.featureFlags.list();
       featureFlags.push(...page.data);
-    }
+      while (page.hasNextPage()) {
+        page = await page.getNextPage();
+        featureFlags.push(...page.data);
+      }
 
-    // Auth0-managed built-in flags (type 'auth0', e.g. the passkey enrollment flag) are
-    // provisioned automatically on entitled tenants and cannot be created, updated or deleted
-    // through the API, so exclude them from management. Only customer-defined ('self') flags
-    // are synced.
-    this.existing = featureFlags
-      .filter((flag) => flag.type !== 'auth0')
-      .map((flag) => {
-        // Drop read-only / API-generated fields from the exported shape so they do not land in
-        // users' config repos, churn on every export, or surface as phantom diffs in dry-run.
-        // type is always 'self' here (managed flags are filtered out above) and is read-only.
-        const portable: Asset = { ...flag };
-        delete portable.created_at;
-        delete portable.updated_at;
-        delete portable.type;
-        return portable;
-      });
-    return this.existing;
+      // Auth0-managed built-in flags (type 'auth0', e.g. the passkey enrollment flag) are
+      // provisioned automatically on entitled tenants and cannot be created, updated or deleted
+      // through the API, so exclude them from management. Only customer-defined ('self') flags
+      // are synced.
+      this.existing = featureFlags
+        .filter((flag) => flag.type !== 'auth0')
+        .map((flag) => {
+          // Drop read-only / API-generated fields from the exported shape so they do not land in
+          // users' config repos, churn on every export, or surface as phantom diffs in dry-run.
+          // type is always 'self' here (managed flags are filtered out above) and is read-only.
+          const portable: Asset = { ...flag };
+          delete portable.created_at;
+          delete portable.updated_at;
+          delete portable.type;
+          return portable;
+        });
+      return this.existing;
+    } catch (err) {
+      // Experiment Center is entitlement-gated. featureFlags is the first EC handler to run, so a
+      // tenant without the entitlement would otherwise abort the whole export/import here. Treat a
+      // 403/404 (or 501 where unimplemented) as "no flags to manage" and skip the resource.
+      if (err.statusCode === 403 || err.statusCode === 404 || err.statusCode === 501) {
+        log.debug('Experiment Center is not enabled for this tenant; skipping feature flags.');
+        return null;
+      }
+      throw err;
+    }
   }
 
   @order('80')

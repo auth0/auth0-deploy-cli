@@ -118,12 +118,34 @@ describe('#featureFlags handler', () => {
         config,
       } as any);
       const data = await handler.getType();
-      expect(data[0]).to.not.have.property('type');
-      expect(data[0]).to.not.have.property('created_at');
-      expect(data[0]).to.not.have.property('updated_at');
+      expect(data![0]).to.not.have.property('type');
+      expect(data![0]).to.not.have.property('created_at');
+      expect(data![0]).to.not.have.property('updated_at');
       // user-facing fields are preserved
-      expect(data[0].name).to.equal(sampleFlag.name);
-      expect(data[0].parameters).to.deep.equal(sampleFlag.parameters);
+      expect(data![0].name).to.equal(sampleFlag.name);
+      expect(data![0].parameters).to.deep.equal(sampleFlag.parameters);
+    });
+
+    it('returns null on 403 (tenant without the Experiment Center entitlement)', async () => {
+      const handler = new FeatureFlagsHandler({
+        client: makeClient({
+          list: () => Promise.reject(Object.assign(new Error('forbidden'), { statusCode: 403 })),
+        }),
+        config,
+      } as any);
+      const data = await handler.getType();
+      expect(data).to.equal(null);
+    });
+
+    it('returns null on 404', async () => {
+      const handler = new FeatureFlagsHandler({
+        client: makeClient({
+          list: () => Promise.reject(Object.assign(new Error('not found'), { statusCode: 404 })),
+        }),
+        config,
+      } as any);
+      const data = await handler.getType();
+      expect(data).to.equal(null);
     });
   });
 
