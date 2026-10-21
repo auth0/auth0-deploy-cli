@@ -40,6 +40,7 @@ import networkACLKeys from './networkACLKeys';
 import networkACLs from './networkACLs';
 import userAttributeProfiles from './userAttributeProfiles';
 import connectionProfiles from './connectionProfiles';
+import clientProfiles from './clientProfiles';
 import tokenExchangeProfiles from './tokenExchangeProfiles';
 import supplementalSignals from './supplementalSignals';
 import rateLimitPolicies from './rateLimitPolicies';
@@ -101,6 +102,7 @@ const directoryHandlers: {
   networkACLs,
   userAttributeProfiles,
   connectionProfiles,
+  clientProfiles,
   tokenExchangeProfiles,
   supplementalSignals,
   rateLimitPolicies,

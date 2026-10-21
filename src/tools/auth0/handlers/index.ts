@@ -41,6 +41,7 @@ import * as networkACLKeys from './networkACLKeys';
 import * as networkACLs from './networkACLs';
 import * as userAttributeProfiles from './userAttributeProfiles';
 import * as connectionProfiles from './connectionProfiles';
+import * as clientProfiles from './clientProfiles';
 import * as tokenExchangeProfiles from './tokenExchangeProfiles';
 import * as supplementalSignals from './supplementalSignals';
 import * as rateLimitPolicies from './rateLimitPolicies';
@@ -96,6 +97,7 @@ const auth0ApiHandlers: { [key in AssetTypes]: any } = {
   networkACLs,
   userAttributeProfiles,
   connectionProfiles,
+  clientProfiles,
   tokenExchangeProfiles,
   supplementalSignals,
   rateLimitPolicies,
