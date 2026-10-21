@@ -40,6 +40,8 @@ repository =>
   resource-servers
     resource_server1.json
     resource_server2.json
+  client-profiles
+    CIMD Client Profile.json
   token-exchange-profiles
     profile1.json
     profile2.json

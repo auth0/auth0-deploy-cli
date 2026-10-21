@@ -173,6 +173,7 @@ export type Assets = Partial<{
   userAttributeProfiles: UserAttributeProfile[] | null;
   userAttributeProfilesWithId: UserAttributeProfile[] | null;
   connectionProfiles: Asset[] | null;
+  clientProfiles: Asset[] | null;
   tokenExchangeProfiles: TokenExchangeProfile[] | null;
   rateLimitPolicies: RateLimitPolicy[] | null;
   eventStreams: EventStream[] | null;
@@ -244,6 +245,7 @@ export type AssetTypes =
   | 'networkACLs'
   | 'userAttributeProfiles'
   | 'connectionProfiles'
+  | 'clientProfiles'
   | 'tokenExchangeProfiles'
   | 'supplementalSignals'
   | 'rateLimitPolicies'
