@@ -1,6 +1,8 @@
 import { Management } from 'auth0';
+import { isEqual } from 'lodash';
 import DefaultAPIHandler, { order } from './default';
 import { Asset, Assets } from '../../../types';
+import log from '../../../logger';
 
 export const schema = {
   type: 'array',
@@ -51,6 +53,14 @@ export default class SegmentsHandler extends DefaultAPIHandler {
           // Send only the status (an accepted idempotent no-op) so re-imports stay clean.
           const existing = (this.existing || []).find((segment) => segment.id === id);
           if (existing && existing.status === 'archived') {
+            // Those skipped edits are otherwise invisible (the run still logs "Updated"), so warn
+            // when the config actually diverges from the archived segment, including an attempt to
+            // un-archive it, which the API does not allow.
+            if (this.archivedSegmentHasIgnoredChanges(existing, data)) {
+              log.warn(
+                `Segment "${existing.name}" is archived and immutable; its configuration changes are ignored. Create a new segment instead.`
+              );
+            }
             return this.client.experimentation.segments.update(id, { status: 'archived' });
           }
           return this.client.experimentation.segments.update(id, data);
@@ -64,22 +74,56 @@ export default class SegmentsHandler extends DefaultAPIHandler {
     return super.objString(item.name);
   }
 
-  async getType(): Promise<Asset[]> {
+  // Whether the desired state differs from the archived segment already on the tenant. Only used
+  // to decide whether to warn that the edit will be ignored; it does not change what is sent.
+  // Compares the user-editable fields and treats any non-archived target status (an un-archive
+  // attempt) as a divergence, since the API does not allow leaving the archived state.
+  private archivedSegmentHasIgnoredChanges(existing: Asset, data: Asset): boolean {
+    if (data.status !== undefined && data.status !== 'archived') return true;
+    if (data.name !== undefined && data.name !== existing.name) return true;
+    if (data.description !== undefined && data.description !== existing.description) return true;
+    if (data.rules !== undefined && !isEqual(data.rules, existing.rules)) return true;
+    return false;
+  }
+
+  async getType(): Promise<Asset[] | null> {
     if (this.existing) return this.existing;
 
-    const segments: Asset[] = [];
-    let page = await this.client.experimentation.segments.list();
-    segments.push(...page.data);
-    while (page.hasNextPage()) {
-      page = await page.getNextPage();
+    try {
+      const segments: Asset[] = [];
+      let page = await this.client.experimentation.segments.list();
       segments.push(...page.data);
-    }
+      while (page.hasNextPage()) {
+        page = await page.getNextPage();
+        segments.push(...page.data);
+      }
 
-    // Auth0-managed segments (type 'auth0') are provisioned automatically and cannot be
-    // created, updated or deleted, so exclude them. Only customer-defined ('self') segments
-    // are synced.
-    this.existing = segments.filter((segment) => segment.type !== 'auth0');
-    return this.existing;
+      // Auth0-managed segments (type 'auth0') are provisioned automatically and cannot be
+      // created, updated or deleted, so exclude them. Only customer-defined ('self') segments
+      // are synced.
+      this.existing = segments
+        .filter((segment) => segment.type !== 'auth0')
+        .map((segment) => {
+          // Drop read-only / API-generated fields from the exported shape so they do not land in
+          // users' config repos, churn on every export, or surface as phantom diffs in dry-run.
+          // type is always 'self' here (managed segments are filtered out above) and is read-only.
+          const portable: Asset = { ...segment };
+          delete portable.created_at;
+          delete portable.updated_at;
+          delete portable.type;
+          return portable;
+        });
+      return this.existing;
+    } catch (err) {
+      // Experiment Center is entitlement-gated. On a tenant without the entitlement the endpoints
+      // answer 403/404 (or 501 where unimplemented); treat that as "no segments to manage" and
+      // skip the resource rather than failing the whole export/import.
+      if (err.statusCode === 403 || err.statusCode === 404 || err.statusCode === 501) {
+        log.debug('Experiment Center is not enabled for this tenant; skipping segments.');
+        return null;
+      }
+      throw err;
+    }
   }
 
   @order('81')
