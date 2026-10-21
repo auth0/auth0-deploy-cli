@@ -7,7 +7,7 @@ import { Asset, Assets, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
 import { convertClientIdToName } from '../../../utils';
 import { isDryRun } from '../../utils';
-import { Client } from './clients';
+import { Client, excludeDynamicCimdClients, isDynamicCimdClient } from './clients';
 import { Connection } from './connections';
 import { ClientGrant } from './clientGrants';
 
@@ -595,7 +595,11 @@ export default class OrganizationsHandler extends DefaultHandler {
   }
 
   getClientIdByClientName(clientName: string): string {
-    const found = this.allClients?.find((c) => c.name === clientName);
+    // Dynamic CIMD clients are exported by raw client_id (they are not managed by deploy-cli),
+    // so match names against managed clients only and fall back to a dynamic client's id.
+    const found =
+      this.allClients?.find((c) => !isDynamicCimdClient(c) && c.name === clientName) ||
+      this.allClients?.find((c) => isDynamicCimdClient(c) && c.client_id === clientName);
     return found?.client_id || '';
   }
 
@@ -616,7 +620,7 @@ export default class OrganizationsHandler extends DefaultHandler {
     const formattedClientGrantsMapping = clientGrants?.map((clientGrant) => {
       const { id, client_id: clientName } = clientGrant;
       const grant = { grant_id: id, client_id: clientName };
-      const found = clients.find((c) => c.client_id === grant.client_id);
+      const found = excludeDynamicCimdClients(clients).find((c) => c.client_id === grant.client_id);
       if (found) grant.client_id = found.name;
       return grant;
     });
@@ -658,6 +662,9 @@ export default class OrganizationsHandler extends DefaultHandler {
         }),
       ]);
 
+      // Dynamic CIMD clients are not exported, so keep their raw client_id instead of a name.
+      const managedClients = excludeDynamicCimdClients(clients);
+
       for (let index = 0; index < organizations.length; index++) {
         const org = organizations[index];
         if (!org?.id) {
@@ -671,7 +678,7 @@ export default class OrganizationsHandler extends DefaultHandler {
         const organizationClientGrants = await this.getOrganizationClientGrants(org.id);
 
         org.client_grants = organizationClientGrants?.map((clientGrant) => ({
-          client_id: convertClientIdToName(clientGrant.client_id as string, clients),
+          client_id: convertClientIdToName(clientGrant.client_id as string, managedClients),
         }));
 
         // Get discovery domains for each organization
@@ -684,7 +691,7 @@ export default class OrganizationsHandler extends DefaultHandler {
         const orgClients = await this.getAllOrganizationClients(org.id);
         if (orgClients) {
           org.clients = orgClients.map((oc) => ({
-            client_id: convertClientIdToName(oc.client_id, clients),
+            client_id: convertClientIdToName(oc.client_id, managedClients),
             use_for_member_access: oc.use_for_member_access,
           }));
         }

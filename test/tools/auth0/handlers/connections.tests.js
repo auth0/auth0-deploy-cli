@@ -903,6 +903,50 @@ describe('#connections handler', () => {
       await stageFn.apply(handler, [{ connections: data }]);
     });
 
+    it('should not resolve client names to dynamic CIMD clients', async () => {
+      const auth0 = {
+        connections: {
+          list: (params) => mockPagedData(params, 'connections', []),
+        },
+        clients: {
+          list: (params) =>
+            mockPagedData(params, 'clients', [
+              {
+                name: 'My App',
+                client_id: 'dynamic1',
+                external_metadata_type: 'cimd',
+                external_metadata_created_by: 'client',
+              },
+              { name: 'My App', client_id: 'managed1' },
+            ]),
+        },
+        pool,
+      };
+
+      const handler = new connections.default({ client: pageClient(auth0), config });
+      handler.scimHandler = scimHandlerMock;
+      const assets = {
+        connections: [
+          {
+            name: 'someSamlConnection',
+            strategy: 'samlp',
+            enabled_clients: ['My App', 'dynamic1'],
+            options: { idpinitiated: { client_id: 'My App' } },
+          },
+        ],
+      };
+
+      // A raw dynamic client_id still passes through unchanged.
+      for (const changes of [
+        await handler.calcChanges(assets),
+        await handler.dryRunChanges(assets),
+      ]) {
+        expect(changes.create).to.have.lengthOf(1);
+        expect(changes.create[0].enabled_clients).to.have.members(['managed1', 'dynamic1']);
+        expect(changes.create[0].options.idpinitiated.client_id).to.equal('managed1');
+      }
+    });
+
     it('should process directory provisioning create and update operations', async () => {
       const poolExecutor = {
         addEachTask: ({ data, generator }) => ({

@@ -329,6 +329,91 @@ describe('#clientAuthCredentials handler', () => {
       expect(createCalls[0].clientId).to.equal('client1');
     });
 
+    const pkjwtMethods = {
+      private_key_jwt: {
+        credentials: [
+          {
+            name: 'new-key',
+            pem: '-----BEGIN PUBLIC KEY-----\nabc\n-----END PUBLIC KEY-----\n',
+            credential_type: 'public_key',
+          },
+        ],
+      },
+    };
+
+    it('should skip dynamic CIMD clients', async () => {
+      const createCalls: any[] = [];
+      const client = makeClient({
+        clients: {
+          credentials: {
+            list: () => Promise.resolve([]),
+            create: (clientId, data) => {
+              createCalls.push({ clientId, data });
+              return Promise.resolve({ id: 'cred_new123', name: data.name });
+            },
+            delete: () => Promise.resolve({}),
+          },
+        },
+      });
+
+      const handler = new clientAuthCredentials({ client, config: makeConfig() });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      await stageFn.apply(handler, [
+        {
+          clients: [
+            {
+              client_id: 'https://app.example.com/client.json',
+              name: 'Dynamic App',
+              external_metadata_type: 'cimd',
+              external_metadata_created_by: 'client',
+              client_authentication_methods: pkjwtMethods,
+            },
+          ],
+        },
+      ]);
+
+      expect(createCalls).to.have.lengthOf(0);
+    });
+
+    it('should not resolve a client name to a dynamic CIMD client', async () => {
+      const createCalls: any[] = [];
+      const client = makeClient({
+        clients: {
+          list: (params) =>
+            mockPagedData(params, 'clients', [
+              {
+                client_id: 'https://app.example.com/client.json',
+                name: 'My App',
+                external_metadata_type: 'cimd',
+                external_metadata_created_by: 'client',
+              },
+              { client_id: 'client1', name: 'My App' },
+            ]),
+          credentials: {
+            list: () => Promise.resolve([]),
+            create: (clientId, data) => {
+              createCalls.push({ clientId, data });
+              return Promise.resolve({ id: 'cred_new123', name: data.name });
+            },
+            delete: () => Promise.resolve({}),
+          },
+        },
+      });
+
+      const handler = new clientAuthCredentials({ client, config: makeConfig() });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+      await stageFn.apply(handler, [
+        {
+          clients: [
+            { client_id: null, name: 'My App', client_authentication_methods: pkjwtMethods },
+          ],
+        },
+      ]);
+
+      expect(createCalls).to.have.lengthOf(1);
+      expect(createCalls[0].clientId).to.equal('client1');
+    });
+
     it('should not delete credentials when AUTH0_ALLOW_DELETE is false', async () => {
       const deleteCalls: any[] = [];
       const updateCalls: any[] = [];
