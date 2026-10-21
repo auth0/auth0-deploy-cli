@@ -328,6 +328,7 @@ describe('#YAML context validation', () => {
         },
       ],
       connectionProfiles: [],
+      clientProfiles: [],
       tenant: {
         default_directory: 'users',
         friendly_name: 'Test',
@@ -489,6 +490,7 @@ describe('#YAML context validation', () => {
         },
       ],
       connectionProfiles: [],
+      clientProfiles: [],
       tenant: {
         default_directory: 'users',
         friendly_name: 'Test',
@@ -651,6 +653,7 @@ describe('#YAML context validation', () => {
         },
       ],
       connectionProfiles: [],
+      clientProfiles: [],
       tenant: {
         default_directory: 'users',
         friendly_name: 'Test',

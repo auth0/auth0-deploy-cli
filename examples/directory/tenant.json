@@ -4,5 +4,6 @@
   "session_lifetime": 168,
   "default_directory": "users",
   "sandbox_version": "8",
-  "idle_session_lifetime": 72
+  "idle_session_lifetime": 72,
+  "client_id_metadata_document_supported": true
 }

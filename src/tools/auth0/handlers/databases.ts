@@ -16,7 +16,7 @@ import {
   getConnectionEnabledClients,
   processConnectionEnabledClients,
 } from './connections';
-import { Client } from './clients';
+import { Client, excludeDynamicCimdClients } from './clients';
 import { Action } from './actions';
 
 export const schema = {
@@ -593,7 +593,12 @@ export default class DatabaseHandler extends DefaultAPIHandler {
       const formattedDb: any = { ...rest, options: formattedOptions };
 
       if (db.enabled_clients) {
-        formattedDb.enabled_clients = getEnabledClients(assets, db, existingConnections, clients);
+        formattedDb.enabled_clients = getEnabledClients(
+          assets,
+          db,
+          existingConnections,
+          excludeDynamicCimdClients(clients)
+        );
       }
 
       return formattedDb;
@@ -643,7 +648,7 @@ export default class DatabaseHandler extends DefaultAPIHandler {
           assets,
           db,
           existingWithEnabledClients,
-          clients
+          excludeDynamicCimdClients(clients)
         );
       }
 

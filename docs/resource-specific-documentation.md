@@ -1114,6 +1114,90 @@ tenant:
 }
 ```
 
+## Tenant Settings (Client ID Metadata Document)
+
+The Deploy CLI supports configuring Client ID Metadata Document (CIMD) support via two top-level tenant settings:
+
+- `client_id_metadata_document_supported` (boolean): Whether the authorization server supports retrieving client metadata from a `client_id` URL.
+- `client_id_metadata_document_dynamic_registration_supported` (boolean): Whether CIMD clients can be registered dynamically during the authorization flow. Requires `client_id_metadata_document_supported` to be `true`.
+
+> **Early Access:** `client_id_metadata_document_dynamic_registration_supported` requires the `dynamic_cimd` feature flag to be enabled on the tenant. When the flag is off, the Auth0 API omits the setting from exports and rejects any tenant settings write that includes it.
+
+Behavior notes:
+
+- Setting `client_id_metadata_document_dynamic_registration_supported: true` together with `client_id_metadata_document_supported: false` fails validation before any API call is made.
+- If the configuration sets only one of the two, it is checked against the tenant's current value. Enabling dynamic registration while CIMD support is off on the tenant fails with an error before any tenant settings are written. Disabling CIMD support while dynamic registration is on is reported by `--dry-run`; on import, the Auth0 API rejects the tenant settings update. Set both values in the same configuration to change them together.
+- Tenants with the `dynamic_cimd` flag export `client_id_metadata_document_dynamic_registration_supported: false` by default. When importing into a tenant without the flag, a `false` value is dropped automatically so the configuration can be deployed across environments. A `true` value is still sent, and the API's error is reported.
+
+**YAML Example**
+
+```yaml
+tenant:
+  client_id_metadata_document_supported: true
+  client_id_metadata_document_dynamic_registration_supported: true
+```
+
+**Directory Example**
+
+```
+./tenant.json
+```
+
+```json
+{
+  "client_id_metadata_document_supported": true,
+  "client_id_metadata_document_dynamic_registration_supported": true
+}
+```
+
+## Clients (Client ID Metadata Document)
+
+A CIMD client is declared by setting `external_client_id` to the HTTPS URL of its metadata document. The Deploy CLI creates it via the CIMD register endpoint and matches it on subsequent deploys by `external_client_id`. Only Auth0-side fields (such as `description`, `grant_types`, `web_origins` or `client_metadata`) are updated. Fields sourced from the metadata document are managed by editing that document.
+
+**YAML Example**
+
+```yaml
+clients:
+  - name: 'My CIMD Client'
+    external_client_id: 'https://mcpserver.example.com/.well-known/client.json'
+    app_type: 'regular_web'
+    grant_types:
+      - 'authorization_code'
+      - 'refresh_token'
+```
+
+**Directory Example**
+
+```
+./clients/My CIMD Client.json
+```
+
+```json
+{
+  "name": "My CIMD Client",
+  "external_client_id": "https://mcpserver.example.com/.well-known/client.json",
+  "app_type": "regular_web",
+  "grant_types": ["authorization_code", "refresh_token"]
+}
+```
+
+The following fields are read-only and are never sent to the API: `external_metadata_type`, `external_metadata_created_by`, `external_metadata_status` and `jwks_uri`. `external_metadata_status` (`available` or `unavailable`) is runtime state and is not exported.
+
+### Dynamically registered CIMD clients
+
+> **Early Access:** Requires the `dynamic_cimd` feature flag.
+
+When `client_id_metadata_document_dynamic_registration_supported` is enabled, CIMD clients can register themselves during the authorization flow. These clients have `external_metadata_created_by: client` and are not managed by the Deploy CLI:
+
+- They are not exported.
+- They are never updated or deleted, even with `AUTH0_ALLOW_DELETE=true`.
+- If a configuration contains one (for example, from an older export), it is skipped with a warning and can be removed from the configuration.
+- A manual CIMD client whose `external_client_id` is already registered as a dynamic client is skipped with a warning, since Auth0 would reject the registration. Delete the dynamic client in Auth0 to manage that URL from the configuration.
+- Credentials (`client_authentication_methods`) are not managed for them; their keys come from the `jwks_uri` in their metadata document.
+- Client names in other resources (connections, databases, client grants, organizations) never resolve to a dynamic client. Organizations export dynamic clients by their raw `client_id`, which resolves back to the same client on import.
+
+Manually registered CIMD clients (`external_metadata_created_by: admin`) are unaffected.
+
 ## Custom Domains
 
 Custom domains allow you to use your own domain for authentication instead of the default Auth0 domain. The Deploy CLI supports managing custom domains in both directory and YAML modes.
@@ -2211,6 +2295,90 @@ Each rate limit policy is stored as a separate JSON file named after its `consum
 ```
 
 For more details, see the [Management API documentation](https://auth0.com/docs/api/management/v2/rate-limit-policies/get-rate-limit-policies).
+
+## Client Profiles
+
+Client Profiles (Application Profiles) define a runtime policy that Auth0 applies to dynamically registered clients that match the profile's `apply_policy`. Currently the only supported match is Client ID Metadata Document (CIMD) clients registered by the client itself. Each `client_configuration` setting takes a `default_value`; omit a setting to keep the client's own value.
+
+> ⚠️ **NOTE:** Client Profiles is an Early Access feature. A tenant can have at most one client profile. The Deploy CLI client needs the `read:client_profiles`, `create:client_profiles`, `update:client_profiles` and `delete:client_profiles` scopes. If the feature isn't enabled for the tenant, client profiles are skipped on export.
+
+`client_configuration` is replaced as a whole on update, so always provide the complete configuration.
+
+Client profiles are matched by `name`. Renaming a profile replaces it (delete, then create), which requires `AUTH0_ALLOW_DELETE=true` because of the one-profile limit.
+
+### Schema Properties
+
+| Property                                                 | Type             | Required | Description                                                                                                                                                           |
+| -------------------------------------------------------- | ---------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                                   | `string`         | Yes      | Display name of the profile.                                                                                                                                          |
+| `description`                                            | `string \| null` | No       | Optional description.                                                                                                                                                 |
+| `client_configuration.refresh_token.token_lifetime`      | `object`         | No       | `{ default_value: integer }`: absolute refresh token lifetime in seconds.                                                                                             |
+| `client_configuration.refresh_token.idle_token_lifetime` | `object`         | No       | `{ default_value: integer }`: idle refresh token lifetime in seconds.                                                                                                 |
+| `client_configuration.refresh_token.leeway`              | `object`         | No       | `{ default_value: integer }`: grace period in seconds for refresh token rotation overlap.                                                                             |
+| `client_configuration.organization_usage`                | `object`         | No       | `{ default_value: "deny" \| "allow" \| "require" }`: whether clients may use organizations.                                                                           |
+| `client_configuration.organization_require_behavior`     | `object`         | No       | `{ default_value: "no_prompt" \| "pre_login_prompt" \| "post_login_prompt" }`: organization prompt behavior.                                                          |
+| `client_configuration.organization_discovery_methods`    | `object`         | No       | `{ default_value: ("email" \| "organization_name")[] }`: how the organization is discovered. Only allowed when `organization_require_behavior` is `pre_login_prompt`. |
+| `client_configuration.require_proof_of_possession`       | `object`         | No       | `{ default_value: boolean }`: when `true`, governed clients must provide a DPoP proof.                                                                                |
+| `apply_policy.external_metadata_type`                    | `string`         | Yes      | Registration type to match. Currently only `cimd`.                                                                                                                    |
+| `apply_policy.external_metadata_created_by`              | `string`         | Yes      | How the client was registered. Currently only `client`.                                                                                                               |
+
+### YAML Example
+
+```yaml
+# Contents of ./tenant.yaml
+clientProfiles:
+  - name: CIMD Client Profile
+    description: Runtime policy for CIMD clients
+    client_configuration:
+      refresh_token:
+        token_lifetime:
+          default_value: 2592000
+        idle_token_lifetime:
+          default_value: 1296000
+        leeway:
+          default_value: 0
+      organization_usage:
+        default_value: allow
+      organization_require_behavior:
+        default_value: pre_login_prompt
+      organization_discovery_methods:
+        default_value:
+          - email
+          - organization_name
+      require_proof_of_possession:
+        default_value: true
+    apply_policy:
+      external_metadata_type: cimd
+      external_metadata_created_by: client
+```
+
+### Directory Example
+
+Folder: `./client-profiles/`
+
+Each client profile is stored as a separate JSON file named after its `name` (e.g. `CIMD Client Profile.json`):
+
+```json
+{
+  "name": "CIMD Client Profile",
+  "description": "Runtime policy for CIMD clients",
+  "client_configuration": {
+    "refresh_token": {
+      "token_lifetime": { "default_value": 2592000 },
+      "idle_token_lifetime": { "default_value": 1296000 },
+      "leeway": { "default_value": 0 }
+    },
+    "organization_usage": { "default_value": "allow" },
+    "organization_require_behavior": { "default_value": "pre_login_prompt" },
+    "organization_discovery_methods": { "default_value": ["email", "organization_name"] },
+    "require_proof_of_possession": { "default_value": true }
+  },
+  "apply_policy": {
+    "external_metadata_type": "cimd",
+    "external_metadata_created_by": "client"
+  }
+}
+```
 
 ## Client Credentials (Private Key JWT / mTLS)
 
