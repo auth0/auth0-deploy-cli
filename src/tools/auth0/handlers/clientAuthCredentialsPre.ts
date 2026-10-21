@@ -82,6 +82,10 @@ export default class ClientAuthCredentialsPreHandler {
       clientIdByName = new Map(existingClients.map((c: any) => [c.name, c.client_id]));
     }
 
+    // Failures are collected so the remaining clients are still processed, then thrown together
+    // after the loop so the import exits non-zero instead of reporting success.
+    const failures: string[] = [];
+
     for (const client of deletionCandidates) {
       const clientId = client.client_id || (client.name && clientIdByName.get(client.name));
       if (!clientId) continue;
@@ -92,9 +96,7 @@ export default class ClientAuthCredentialsPreHandler {
       try {
         existing = (await this.client.clients.credentials.list(clientId)) as any[];
       } catch (err) {
-        log.warn(
-          `clientAuthCredentials: failed to list credentials for client "${clientName}": ${err}`
-        );
+        failures.push(`failed to list credentials for client "${clientName}": ${err}`);
         continue;
       }
 
@@ -109,8 +111,8 @@ export default class ClientAuthCredentialsPreHandler {
             (client as any).token_endpoint_auth_method || 'client_secret_post',
         });
       } catch (err) {
-        log.warn(
-          `clientAuthCredentials: failed to clear client_authentication_methods on client "${clientName}": ${err}`
+        failures.push(
+          `failed to clear client_authentication_methods on client "${clientName}": ${err}`
         );
         continue;
       }
@@ -127,6 +129,14 @@ export default class ClientAuthCredentialsPreHandler {
           );
         }
       }
+    }
+
+    if (failures.length > 0) {
+      throw new Error(
+        `clientAuthCredentials: ${failures.length} operation(s) failed:\n${failures
+          .map((f) => `  - ${f}`)
+          .join('\n')}`
+      );
     }
   }
 }
