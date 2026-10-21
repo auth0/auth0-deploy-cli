@@ -456,6 +456,90 @@ describe('#experiments handler', () => {
       expect(capture.update.body).to.not.have.property('allocations');
     });
 
+    it('skips (warns, does not abort) when create returns a feature_not_entitled 403', async () => {
+      const logWarn = sinon.stub(log, 'warn');
+      const client = pageClient({
+        experimentation: {
+          experiments: {
+            list: () => Promise.resolve(makePage([])),
+            create: () =>
+              Promise.reject(
+                Object.assign(new Error('not entitled'), {
+                  statusCode: 403,
+                  errorCode: 'feature_not_entitled',
+                })
+              ),
+          },
+          featureFlags: {
+            list: () => Promise.resolve(makePage([flag])),
+            variations: { list: () => Promise.resolve({ variations }) },
+          },
+          segments: { list: () => Promise.resolve(makePage([segment])) },
+        },
+        pool,
+      } as any);
+      const handler = new ExperimentsHandler({ client, config } as any);
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      // An experiment using advanced ramp ("levels") on a non-entitled tenant: the create 403s,
+      // but the run must not abort, the one experiment is skipped with a warning.
+      await stageFn.apply(handler, [
+        {
+          experiments: [
+            {
+              name: 'ramp-exp',
+              feature_flag_name: 'checkout',
+              authentication_flow: 'authentication',
+              allocation_strategy: 'percentage',
+              levels: [10, 50, 100],
+              allocations: [{ variation_name: 'control', is_control: true, weight: 100 }],
+            },
+          ],
+        },
+      ]);
+
+      expect(logWarn.called).to.equal(true);
+      expect(logWarn.firstCall.args[0]).to.include('not entitled');
+    });
+
+    it('rethrows a create error that is not feature_not_entitled', async () => {
+      const client = pageClient({
+        experimentation: {
+          experiments: {
+            list: () => Promise.resolve(makePage([])),
+            create: () => Promise.reject(Object.assign(new Error('boom'), { statusCode: 500 })),
+          },
+          featureFlags: {
+            list: () => Promise.resolve(makePage([flag])),
+            variations: { list: () => Promise.resolve({ variations }) },
+          },
+          segments: { list: () => Promise.resolve(makePage([segment])) },
+        },
+        pool,
+      } as any);
+      const handler = new ExperimentsHandler({ client, config } as any);
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      try {
+        await stageFn.apply(handler, [
+          {
+            experiments: [
+              {
+                name: 'exp',
+                feature_flag_name: 'checkout',
+                authentication_flow: 'authentication',
+                allocation_strategy: 'percentage',
+                allocations: [{ variation_name: 'control', is_control: true, weight: 100 }],
+              },
+            ],
+          },
+        ]);
+        expect.fail('Should have rethrown the non-entitlement error');
+      } catch (err: any) {
+        expect(err.message).to.include('boom');
+      }
+    });
+
     it('allows all draft field edits when the response carries no editable_fields', async () => {
       const capture: any = {};
       const draftNoEditable = { ...apiExperiment };

@@ -120,15 +120,19 @@ export default class ExperimentsHandler extends DefaultAPIHandler {
       functions: {
         create: async (data) => {
           const payload = await this.toCreatePayload(data);
-          return this.client.experimentation.experiments.create(
-            payload as unknown as Management.CreateExperimentRequestContent
+          return this.writeOrSkipIfNotEntitled('create', data.name, () =>
+            this.client.experimentation.experiments.create(
+              payload as unknown as Management.CreateExperimentRequestContent
+            )
           );
         },
         update: async (id: string, data) => {
           const payload = await this.toUpdatePayload(id, data);
-          return this.client.experimentation.experiments.update(
-            id,
-            payload as unknown as Management.UpdateExperimentRequestParameters
+          return this.writeOrSkipIfNotEntitled('update', data.name, () =>
+            this.client.experimentation.experiments.update(
+              id,
+              payload as unknown as Management.UpdateExperimentRequestParameters
+            )
           );
         },
         delete: (id: string) => this.client.experimentation.experiments.delete(id),
@@ -136,8 +140,54 @@ export default class ExperimentsHandler extends DefaultAPIHandler {
     });
   }
 
+  // Whether an error is the API's "the tenant is not entitled to a feature this experiment uses"
+  // 403 (feature_not_entitled). The most common cause is advanced ramp: an experiment with
+  // `levels` set on a tenant that is not entitled to it. The code lives at a couple of shapes
+  // depending on how the SDK surfaces it, so check both.
+  private isNotEntitledError(err: any): boolean {
+    const errorCode = err?.errorCode || err?.originalError?.response?.body?.errorCode;
+    return err?.statusCode === 403 && errorCode === 'feature_not_entitled';
+  }
+
+  // Runs a create/update and, if the tenant is not entitled to a feature the experiment uses,
+  // skips that one experiment with a clear warning instead of aborting the whole deploy. Returns
+  // a marker that didCreate/didUpdate recognize so the run reports a skip rather than a false
+  // "Created"/"Updated". Any other error propagates unchanged.
+  private async writeOrSkipIfNotEntitled(
+    action: 'create' | 'update',
+    name: string,
+    fn: () => Promise<unknown>
+  ): Promise<Asset> {
+    try {
+      return (await fn()) as Asset;
+    } catch (err) {
+      if (this.isNotEntitledError(err)) {
+        log.warn(
+          `Cannot ${action} experiment "${name}": the tenant is not entitled to a feature it uses (such as advanced ramp "levels"). Skipping it. Remove the unentitled field or enable the entitlement.`
+        );
+        return { __experimentSkipped: true, name };
+      }
+      throw err;
+    }
+  }
+
   objString(item: Asset): string {
     return super.objString(item.name);
+  }
+
+  didCreate(item: Asset): void {
+    // The base increments the created count right after this, so undo it for a skip to keep the
+    // run summary accurate; the skip was already warned about in writeOrSkipIfNotEntitled.
+    if (item && item.__experimentSkipped) {
+      this.created -= 1;
+      return;
+    }
+    super.didCreate(item);
+  }
+
+  didUpdate(item: Asset): void {
+    if (item && item.__experimentSkipped) return;
+    super.didUpdate(item);
   }
 
   // --- name -> id resolution (write path) --------------------------------------------------
