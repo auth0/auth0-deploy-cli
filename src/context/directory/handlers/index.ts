@@ -45,6 +45,10 @@ import tokenExchangeProfiles from './tokenExchangeProfiles';
 import supplementalSignals from './supplementalSignals';
 import rateLimitPolicies from './rateLimitPolicies';
 import eventStreams from './eventStreams';
+import featureFlags from './featureFlags';
+import variations from './variations';
+import segments from './segments';
+import experiments from './experiments';
 import clientAuthCredentials from './clientAuthCredentials';
 
 import DirectoryContext from '..';
@@ -107,6 +111,10 @@ const directoryHandlers: {
   supplementalSignals,
   rateLimitPolicies,
   eventStreams,
+  featureFlags,
+  variations,
+  segments,
+  experiments,
   clientAuthCredentials,
 };
 

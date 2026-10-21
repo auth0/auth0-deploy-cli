@@ -1,0 +1,8 @@
+{
+  "name": "checkout-experiment",
+  "description": "Controls the checkout experience",
+  "parameters": {
+    "enabled": { "type": "boolean", "value": false },
+    "variant_label": { "type": "string", "value": "control" }
+  }
+}

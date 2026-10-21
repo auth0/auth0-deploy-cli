@@ -719,6 +719,56 @@ rateLimitPolicies:
       limit: 10
       redirect_uri: https://example.com/rate-limited
 
+# Feature Flags are part of Experiment Center (Early Access). Only customer-defined flags are
+# managed; Auth0-managed built-in flags are excluded. A flag is created in 'draft'; activation
+# (which requires at least two variations) happens on a later update.
+featureFlags:
+  - name: checkout-experiment
+    description: Controls the checkout experience
+    parameters:
+      enabled:
+        type: boolean
+        value: false
+      variant_label:
+        type: string
+        value: control
+
+# Variations belong to a feature flag, referenced by name. The control variation overrides
+# nothing; other variations override one or more of the parent flag's parameters.
+variations:
+  - feature_flag_name: checkout-experiment
+    name: control
+    overrides: {}
+  - feature_flag_name: checkout-experiment
+    name: variant-a
+    description: Enables the new checkout
+    overrides:
+      enabled: true
+
+# Segments are reusable audiences defined by match rules; experiments can target them.
+segments:
+  - name: us-visitors
+    description: Visitors from the US
+    rules:
+      - match:
+          country:
+            - US
+
+# Experiments split traffic across a feature flag's variations. The referenced feature flag,
+# its variations, and any segments must exist first.
+experiments:
+  - name: checkout-experiment-test
+    feature_flag_name: checkout-experiment
+    authentication_flow: authentication
+    allocation_strategy: percentage
+    allocations:
+      - variation_name: control
+        is_control: true
+        weight: 50
+      - variation_name: variant-a
+        is_control: false
+        weight: 50
+
 organizations:
   - name: my-organization
     display_name: My Organization

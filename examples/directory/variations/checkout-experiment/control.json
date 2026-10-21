@@ -1,0 +1,5 @@
+{
+  "feature_flag_name": "checkout-experiment",
+  "name": "control",
+  "overrides": {}
+}
