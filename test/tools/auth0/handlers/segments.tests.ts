@@ -144,6 +144,27 @@ describe('#segments handler', () => {
       const data = await handler.getType();
       expect(data).to.equal(null);
     });
+
+    it('rethrows a missing-scope 403 so the base scope warning still fires', async () => {
+      const handler = new SegmentsHandler({
+        client: makeClient({
+          list: () =>
+            Promise.reject(
+              Object.assign(
+                new Error('Insufficient scope, expected any of: read:experimentation'),
+                { statusCode: 403 }
+              )
+            ),
+        }),
+        config,
+      } as any);
+      try {
+        await handler.getType();
+        expect.fail('Should have rethrown the insufficient-scope error');
+      } catch (err: any) {
+        expect(err.message).to.include('Insufficient scope');
+      }
+    });
   });
 
   describe('#segments processChanges', () => {

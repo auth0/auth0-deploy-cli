@@ -115,6 +115,12 @@ export default class SegmentsHandler extends DefaultAPIHandler {
         });
       return this.existing;
     } catch (err) {
+      // A missing-scope 403 ("Insufficient scope") is handled by the base load() wrapper
+      // (detectInsufficientScopeError), which surfaces a clear "missing scopes" warning naming the
+      // required scope. Let it propagate instead of masking it as a missing entitlement.
+      if (err.statusCode === 403 && err.message?.includes('Insufficient scope')) {
+        throw err;
+      }
       // Experiment Center is entitlement-gated. On a tenant without the entitlement the endpoints
       // answer 403/404 (or 501 where unimplemented); treat that as "no segments to manage" and
       // skip the resource rather than failing the whole export/import.
