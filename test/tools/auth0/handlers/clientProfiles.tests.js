@@ -168,10 +168,11 @@ describe('#clientProfiles handler', () => {
       });
     });
 
-    it('should warn and return empty array when the read scope is missing', async () => {
+    it('should leave clientProfiles out of the export when the read scope is missing', async () => {
       const warnings = [];
       const originalWarn = log.warn;
       log.warn = (message) => warnings.push(message);
+      let result;
       try {
         const handler = new clientProfiles.default({
           client: pageClient(
@@ -188,11 +189,11 @@ describe('#clientProfiles handler', () => {
           ),
           config,
         });
-        const data = await handler.getType();
-        expect(data).to.deep.equal([]);
+        result = await handler.load();
       } finally {
         log.warn = originalWarn;
       }
+      expect(result).to.deep.equal({ clientProfiles: null });
       expect(warnings).to.have.length(1);
       expect(warnings[0]).to.include('read:client_profiles');
     });
@@ -464,6 +465,17 @@ describe('#clientProfiles handler', () => {
       expect(names(changes.update)).to.deep.equal(['CIMD Profile']);
       expect(changes.create).to.have.length(0);
       expect(changes.del).to.have.length(0);
+    });
+
+    it('should report UPDATE when a client_configuration setting is removed locally', async () => {
+      const { organization_discovery_methods, ...rest } = sampleProfile.client_configuration;
+      const changes = await dryRun(
+        [{ ...sampleProfile, client_configuration: rest }],
+        [existingProfile]
+      );
+      expect(names(changes.update)).to.deep.equal(['CIMD Profile']);
+      expect(changes.update[0].id).to.equal('cp_123');
+      expect(changes.create).to.have.length(0);
     });
 
     it('should report UPDATE when description is cleared', async () => {

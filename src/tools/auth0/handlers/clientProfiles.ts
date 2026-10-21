@@ -2,6 +2,7 @@ import { Management } from 'auth0';
 import { Asset, Assets, Auth0APIClient, CalculatedChanges } from '../../../types';
 import DefaultAPIHandler from './default';
 import { paginate } from '../client';
+import { getObjectDifferences } from '../../calculateDryRunChanges';
 import log from '../../../logger';
 
 // The Management API allows at most one client profile per tenant (create returns 403 otherwise)
@@ -88,12 +89,8 @@ export const getClientProfiles = async (auth0Client: Auth0APIClient): Promise<Cl
       return [];
     }
     if (err.statusCode === 403) {
-      if (err.body?.errorCode === 'insufficient_scope') {
-        log.warn(
-          'Skipping client profiles: the deploy client is missing the `read:client_profiles` scope. Grant `read:client_profiles`, `create:client_profiles`, `update:client_profiles` and `delete:client_profiles` to manage client profiles.'
-        );
-        return [];
-      }
+      // Let load() report missing scopes; returning [] here would export an empty list
+      if (err.body?.errorCode === 'insufficient_scope') throw err;
       log.debug(
         'Client Profiles is not enabled for this tenant. Please verify `scope` or contact Auth0 support to enable this feature.'
       );
@@ -154,6 +151,26 @@ export default class ClientProfilesHandler extends DefaultAPIHandler {
   async dryRunChanges(assets: Assets): Promise<CalculatedChanges> {
     const changes = await super.dryRunChanges(assets);
     this.assertWithinTenantLimit(changes.del, changes.create);
+
+    // An update replaces client_configuration as a whole, so settings removed locally are cleared on
+    // the tenant. The default diff only compares keys present locally, so check the other direction too.
+    const pending = new Set([...changes.create, ...changes.update].map((p) => p.name));
+    (assets.clientProfiles || []).forEach((local) => {
+      if (pending.has(local.name)) return;
+      const remote = (this.existing || []).find(
+        (p) => (local.id && p.id === local.id) || p.name === local.name
+      );
+      if (!remote) return;
+      const removed = getObjectDifferences(
+        remote.client_configuration || {},
+        local.client_configuration || {},
+        'client_configuration',
+        this.type,
+        this.getEffectiveIgnoreDryRunFields()
+      );
+      if (removed.length > 0) changes.update.push({ ...local, [this.id]: remote.id });
+    });
+
     return changes;
   }
 
