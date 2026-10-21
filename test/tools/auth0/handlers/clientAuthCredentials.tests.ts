@@ -41,6 +41,29 @@ const makeClient = (overrides: any = {}) => {
   });
 };
 
+const PEM = '-----BEGIN PUBLIC KEY-----\nabc\n-----END PUBLIC KEY-----\n';
+
+const pkjClient = (clientId: string, name: string, credNames: string[]) => ({
+  client_id: clientId,
+  name,
+  client_authentication_methods: {
+    private_key_jwt: {
+      credentials: credNames.map((n) => ({ name: n, pem: PEM, credential_type: 'public_key' })),
+    },
+  },
+});
+
+// Runs processChanges and returns the thrown error, or null if it resolved.
+const runProcessChanges = async (handler, assets): Promise<Error | null> => {
+  const stageFn = Object.getPrototypeOf(handler).processChanges;
+  try {
+    await stageFn.apply(handler, [assets]);
+    return null;
+  } catch (err) {
+    return err as Error;
+  }
+};
+
 describe('#clientAuthCredentials handler', () => {
   describe('#processChanges', () => {
     it('should not create or delete when no client_authentication_methods and Auth0 has no credentials', async () => {
@@ -650,6 +673,154 @@ describe('#clientAuthCredentials handler', () => {
       expect(ids).to.include('cred_key-a');
       expect(ids).to.include('cred_key-b');
     });
+
+    it('should throw and leave the client untouched when a credential create fails during rotation', async () => {
+      const updateCalls: any[] = [];
+      const deleteCalls: any[] = [];
+      const client = makeClient({
+        clients: {
+          update: (id, data) => {
+            updateCalls.push({ id, data });
+            return Promise.resolve({ data });
+          },
+          credentials: {
+            list: () =>
+              Promise.resolve([{ id: 'cred_old', name: 'old-key', credential_type: 'public_key' }]),
+            create: () => Promise.reject(new Error('Invalid public key.')),
+            delete: (clientId, credId) => {
+              deleteCalls.push(credId);
+              return Promise.resolve({});
+            },
+          },
+        },
+      });
+
+      const handler = new clientAuthCredentials({ client, config: makeConfig() });
+      const err = await runProcessChanges(handler, {
+        clients: [pkjClient('client1', 'My App', ['new-key'])],
+      });
+
+      expect(err).to.be.an('error');
+      expect(err!.message).to.include(
+        'failed to create credential "new-key" on client "My App": Error: Invalid public key.'
+      );
+      // Without the fix this cleared client_authentication_methods (client_secret_post fallback)
+      expect(updateCalls).to.have.lengthOf(0);
+      expect(deleteCalls).to.have.lengthOf(0);
+    });
+
+    it('should throw and skip deletes when updating client_authentication_methods fails', async () => {
+      const deleteCalls: any[] = [];
+      const client = makeClient({
+        clients: {
+          update: () => Promise.reject(new Error('A JWT signing algorithm is required')),
+          credentials: {
+            list: () =>
+              Promise.resolve([{ id: 'cred_old', name: 'old-key', credential_type: 'public_key' }]),
+            create: (clientId, data) => Promise.resolve({ id: 'cred_new', name: data.name }),
+            delete: (clientId, credId) => {
+              deleteCalls.push(credId);
+              return Promise.resolve({});
+            },
+          },
+        },
+      });
+
+      const handler = new clientAuthCredentials({ client, config: makeConfig() });
+      const err = await runProcessChanges(handler, {
+        clients: [pkjClient('client1', 'My App', ['new-key'])],
+      });
+
+      expect(err).to.be.an('error');
+      expect(err!.message).to.include(
+        'failed to update client_authentication_methods on client "My App"'
+      );
+      expect(deleteCalls).to.have.lengthOf(0);
+    });
+
+    it('should throw when listing credentials fails', async () => {
+      const createCalls: any[] = [];
+      const client = makeClient({
+        clients: {
+          credentials: {
+            list: () => Promise.reject(new Error('Forbidden')),
+            create: (clientId, data) => {
+              createCalls.push(data);
+              return Promise.resolve({ id: 'cred_new', name: data.name });
+            },
+            delete: () => Promise.resolve({}),
+          },
+        },
+      });
+
+      const handler = new clientAuthCredentials({ client, config: makeConfig() });
+      const err = await runProcessChanges(handler, {
+        clients: [pkjClient('client1', 'My App', ['new-key'])],
+      });
+
+      expect(err).to.be.an('error');
+      expect(err!.message).to.include('failed to list credentials for client "My App"');
+      expect(createCalls).to.have.lengthOf(0);
+    });
+
+    it('should still process remaining clients and report every failure together', async () => {
+      const updateCalls: any[] = [];
+      const client = makeClient({
+        clients: {
+          update: (id, data) => {
+            updateCalls.push(id);
+            return Promise.resolve({ data });
+          },
+          credentials: {
+            list: (clientId) =>
+              clientId === 'client3' ? Promise.reject(new Error('Forbidden')) : Promise.resolve([]),
+            create: (clientId, data) =>
+              clientId === 'client1'
+                ? Promise.reject(new Error('Invalid public key.'))
+                : Promise.resolve({ id: `cred_${clientId}`, name: data.name }),
+            delete: () => Promise.resolve({}),
+          },
+        },
+      });
+
+      const handler = new clientAuthCredentials({ client, config: makeConfig() });
+      const err = await runProcessChanges(handler, {
+        clients: [
+          pkjClient('client1', 'App One', ['key-1']),
+          pkjClient('client2', 'App Two', ['key-2']),
+          pkjClient('client3', 'App Three', ['key-3']),
+        ],
+      });
+
+      expect(updateCalls).to.deep.equal(['client2']);
+      expect(err).to.be.an('error');
+      expect(err!.message).to.include('2 operation(s) failed');
+      expect(err!.message).to.include('failed to create credential "key-1" on client "App One"');
+      expect(err!.message).to.include('failed to list credentials for client "App Three"');
+    });
+
+    it('should only warn, not throw, when deleting a stale credential fails', async () => {
+      const client = makeClient({
+        clients: {
+          credentials: {
+            list: () =>
+              Promise.resolve([
+                { id: 'cred_keep', name: 'keep-key', credential_type: 'public_key' },
+                { id: 'cred_old', name: 'old-key', credential_type: 'public_key' },
+              ]),
+            create: () => Promise.resolve({ id: 'cred_new' }),
+            delete: () => Promise.reject(new Error('Not Found')),
+          },
+        },
+      });
+
+      const handler = new clientAuthCredentials({ client, config: makeConfig() });
+      const err = await runProcessChanges(handler, {
+        clients: [pkjClient('client1', 'My App', ['keep-key'])],
+      });
+
+      expect(err).to.equal(null);
+    });
   });
 });
 
@@ -883,6 +1054,71 @@ describe('#clientAuthCredentialsPre handler', () => {
       await stageFn.apply(handler, [{ clients: [{ client_id: 'client1', name: 'My App' }] }]);
 
       expect(deleteCalls).to.have.members(['cred_1', 'cred_2']);
+    });
+
+    it('should throw when listing credentials fails, after processing remaining clients', async () => {
+      const deleteCalls: any[] = [];
+      const client = makeClient({
+        clients: {
+          list: (params) =>
+            mockPagedData(params, 'clients', [
+              { client_id: 'client1', name: 'App One' },
+              { client_id: 'client2', name: 'App Two' },
+            ]),
+          credentials: {
+            list: (clientId) =>
+              clientId === 'client1'
+                ? Promise.reject(new Error('Forbidden'))
+                : Promise.resolve([{ id: 'cred_2', name: 'key-2', credential_type: 'public_key' }]),
+            create: () => Promise.resolve({ id: 'cred_new' }),
+            delete: (clientId, credId) => {
+              deleteCalls.push(credId);
+              return Promise.resolve({});
+            },
+          },
+        },
+      });
+
+      const handler = new clientAuthCredentialsPre({ client, config: makeConfig() });
+      const err = await runProcessChanges(handler, {
+        clients: [
+          { client_id: 'client1', name: 'App One' },
+          { client_id: 'client2', name: 'App Two' },
+        ],
+      });
+
+      expect(deleteCalls).to.deep.equal(['cred_2']);
+      expect(err).to.be.an('error');
+      expect(err!.message).to.include('failed to list credentials for client "App One"');
+    });
+
+    it('should throw and skip deletes when clearing client_authentication_methods fails', async () => {
+      const deleteCalls: any[] = [];
+      const client = makeClient({
+        clients: {
+          update: () => Promise.reject(new Error('Bad Request')),
+          credentials: {
+            list: () =>
+              Promise.resolve([{ id: 'cred_1', name: 'key-1', credential_type: 'public_key' }]),
+            create: () => Promise.resolve({ id: 'cred_new' }),
+            delete: (clientId, credId) => {
+              deleteCalls.push(credId);
+              return Promise.resolve({});
+            },
+          },
+        },
+      });
+
+      const handler = new clientAuthCredentialsPre({ client, config: makeConfig() });
+      const err = await runProcessChanges(handler, {
+        clients: [{ client_id: 'client1', name: 'My App' }],
+      });
+
+      expect(err).to.be.an('error');
+      expect(err!.message).to.include(
+        'failed to clear client_authentication_methods on client "My App"'
+      );
+      expect(deleteCalls).to.have.lengthOf(0);
     });
   });
 });
