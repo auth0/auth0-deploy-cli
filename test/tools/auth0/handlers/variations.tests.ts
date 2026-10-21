@@ -1,8 +1,10 @@
 import { PromisePoolExecutor } from 'promise-pool-executor';
 import { expect } from 'chai';
+import sinon from 'sinon';
 
 import VariationsHandler from '../../../../src/tools/auth0/handlers/variations';
 import pageClient from '../../../../src/tools/auth0/client';
+import log from '../../../../src/logger';
 
 const pool = new PromisePoolExecutor({
   concurrencyLimit: 3,
@@ -67,6 +69,8 @@ describe('#variations handler', () => {
   };
   config.data = { AUTH0_ALLOW_DELETE: false };
 
+  afterEach(() => sinon.restore());
+
   describe('#variations validate', () => {
     it('allows the same variation name under different flags', async () => {
       const handler = new VariationsHandler({ client: {}, config } as any);
@@ -119,7 +123,25 @@ describe('#variations handler', () => {
       expect(data).to.have.length(1);
       expect(data[0].feature_flag_name).to.equal('checkout');
       expect(data[0]).to.not.have.property('feature_flag_id');
+      // read-only timestamps are stripped on export
+      expect(data[0]).to.not.have.property('created_at');
+      expect(data[0]).to.not.have.property('updated_at');
       expect(data[0].name).to.equal('control');
+    });
+
+    it('returns null on 403/404 (tenant without the Experiment Center entitlement)', async () => {
+      const client = pageClient({
+        experimentation: {
+          featureFlags: {
+            list: () => Promise.reject(Object.assign(new Error('forbidden'), { statusCode: 403 })),
+          },
+        },
+        pool,
+      } as any);
+      const handler = new VariationsHandler({ client, config } as any);
+
+      const data = await handler.getType();
+      expect(data).to.equal(null);
     });
   });
 
@@ -190,7 +212,8 @@ describe('#variations handler', () => {
       config.data.AUTH0_ALLOW_DELETE = false;
     });
 
-    it('skips updating variations whose parent flag is archived', async () => {
+    it('skips updating variations whose parent flag is archived and warns', async () => {
+      const logWarn = sinon.stub(log, 'warn');
       const capture: any = {};
       const archivedFlag = { ...selfFlag, status: 'archived' };
       const handler = new VariationsHandler({
@@ -203,13 +226,68 @@ describe('#variations handler', () => {
       } as any);
       const stageFn = Object.getPrototypeOf(handler).processChanges;
 
-      // Re-import the existing variation unchanged; the parent flag is archived, so the update
-      // is skipped rather than failing with feature_flag_archived.
+      // Re-import the existing variation with a changed override; the parent flag is archived, so
+      // the update is skipped rather than failing with feature_flag_archived.
       await stageFn.apply(handler, [
-        { variations: [{ feature_flag_name: 'checkout', name: 'control', overrides: {} }] },
+        { variations: [{ feature_flag_name: 'checkout', name: 'control', overrides: { a: 1 } }] },
       ]);
 
       expect(capture.update).to.equal(undefined);
+      expect(logWarn.calledOnce).to.equal(true);
+      expect(logWarn.firstCall.args[0]).to.include('checkout');
+    });
+
+    it('skips creating a variation on an archived flag and warns', async () => {
+      const logWarn = sinon.stub(log, 'warn');
+      const capture: any = {};
+      const archivedFlag = { ...selfFlag, status: 'archived' };
+      const handler = new VariationsHandler({
+        client: makeClient({
+          flags: [archivedFlag],
+          variationsByFlag: { flg_self: [controlVariation] },
+          capture,
+        }),
+        config,
+      } as any);
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      // A brand-new variation on the archived flag cannot be created (feature_flag_archived), so
+      // the create is skipped rather than sent and failing.
+      await stageFn.apply(handler, [
+        {
+          variations: [
+            { feature_flag_name: 'checkout', name: 'control', overrides: {} },
+            { feature_flag_name: 'checkout', name: 'variant-a', overrides: { enabled: true } },
+          ],
+        },
+      ]);
+
+      expect(capture.create).to.equal(undefined);
+      expect(logWarn.called).to.equal(true);
+    });
+
+    it('dry-run preview omits create/update changes on an archived flag', async () => {
+      config.data.AUTH0_DRY_RUN = true;
+      const archivedFlag = { ...selfFlag, status: 'archived' };
+      const handler = new VariationsHandler({
+        client: makeClient({
+          flags: [archivedFlag],
+          variationsByFlag: { flg_self: [controlVariation] },
+        }),
+        config,
+      } as any);
+
+      const changes = await handler.dryRunChanges({
+        variations: [
+          { feature_flag_name: 'checkout', name: 'control', overrides: { a: 1 } },
+          { feature_flag_name: 'checkout', name: 'variant-a', overrides: { enabled: true } },
+        ],
+      } as any);
+
+      // Neither the changed existing variation nor the new one is proposed, matching the real run.
+      expect(changes.update).to.have.length(0);
+      expect(changes.create).to.have.length(0);
+      config.data.AUTH0_DRY_RUN = false;
     });
 
     it('throws a clear error when the referenced flag does not exist', async () => {

@@ -1,8 +1,9 @@
 import { Management } from 'auth0';
 import DefaultAPIHandler, { order } from './default';
-import { Asset, Assets } from '../../../types';
+import { Asset, Assets, CalculatedChanges } from '../../../types';
 import ValidationError from '../../validationError';
 import { convertJsonToString } from '../../utils';
+import log from '../../../logger';
 
 export const schema = {
   type: 'array',
@@ -163,28 +164,64 @@ export default class VariationsHandler extends DefaultAPIHandler {
     }
   }
 
-  async getType(): Promise<Asset[]> {
+  async getType(): Promise<Asset[] | null> {
     if (this.existing) return this.existing;
 
-    // List every feature flag to build the name -> id map and to walk each flag's variations.
-    const flags = await this.listFlags();
+    try {
+      // List every feature flag to build the name -> id map and to walk each flag's variations.
+      const flags = await this.listFlags();
 
-    const variations: Asset[] = [];
-    // Only customer-defined flags are managed; Auth0-managed built-ins (and their variations)
-    // are provisioned automatically and cannot be modified, so skip them.
-    for (const flag of flags.filter((flag) => flag.type !== 'auth0')) {
-      // eslint-disable-next-line no-await-in-loop
-      const response = await this.client.experimentation.featureFlags.variations.list(flag.id);
-      (response.variations || []).forEach((variation) => {
-        // Drop the tenant-specific feature_flag_id in favor of the portable flag name.
-        const portable: Asset = { ...variation, feature_flag_name: flag.name };
-        delete portable.feature_flag_id;
-        variations.push(portable);
-      });
+      const variations: Asset[] = [];
+      // Only customer-defined flags are managed; Auth0-managed built-ins (and their variations)
+      // are provisioned automatically and cannot be modified, so skip them.
+      for (const flag of flags.filter((flag) => flag.type !== 'auth0')) {
+        // eslint-disable-next-line no-await-in-loop
+        const response = await this.client.experimentation.featureFlags.variations.list(flag.id);
+        (response.variations || []).forEach((variation) => {
+          // Drop tenant-specific feature_flag_id in favor of the portable flag name, and the
+          // read-only timestamps so they do not churn users' config or show as phantom diffs.
+          const portable: Asset = { ...variation, feature_flag_name: flag.name };
+          delete portable.feature_flag_id;
+          delete portable.created_at;
+          delete portable.updated_at;
+          variations.push(portable);
+        });
+      }
+
+      this.existing = variations;
+      return this.existing;
+    } catch (err) {
+      // Experiment Center is entitlement-gated. On a tenant without the entitlement the
+      // endpoints answer 403/404 (or 501 where unimplemented); treat that as "no variations to
+      // manage" and skip the resource rather than failing the whole export/import.
+      if (err.statusCode === 403 || err.statusCode === 404 || err.statusCode === 501) {
+        log.debug(
+          'Experiment Center is not enabled for this tenant; skipping feature flag variations.'
+        );
+        return null;
+      }
+      throw err;
     }
+  }
 
-    this.existing = variations;
-    return this.existing;
+  // An archived parent flag is immutable: the API rejects creating or modifying its variations
+  // (feature_flag_archived) and that would abort the whole deploy. Drop create and update changes
+  // targeting an archived flag so a config still referencing them applies cleanly, and warn so the
+  // skip is visible. Both the apply path and the dry-run preview run this, so the preview and the
+  // real run agree. (Deletes of such variations are allowed by the API and are left untouched.)
+  private filterArchivedFlagChanges(changes: CalculatedChanges): CalculatedChanges {
+    const isOnArchivedFlag = (variation: Asset): boolean =>
+      this.archivedFlagNames.has(variation.feature_flag_name);
+    [...changes.create, ...changes.update].filter(isOnArchivedFlag).forEach((variation) => {
+      log.warn(
+        `Feature flag "${variation.feature_flag_name}" is archived and immutable; changes to its variation "${variation.name}" are ignored.`
+      );
+    });
+    return {
+      ...changes,
+      create: changes.create.filter((variation) => !isOnArchivedFlag(variation)),
+      update: changes.update.filter((variation) => !isOnArchivedFlag(variation)),
+    };
   }
 
   @order('81')
@@ -192,14 +229,16 @@ export default class VariationsHandler extends DefaultAPIHandler {
     const { variations } = assets;
     if (!variations) return;
     // calcChanges runs getType, which populates archivedFlagNames from the flag list.
-    const changes = await this.calcChanges(assets);
-    // An archived parent flag is immutable; updating its variations is rejected with
-    // feature_flag_archived and would abort the whole deploy. Skip those updates so a config
-    // that still contains variations of an archived flag re-imports cleanly. (Deletes of such
-    // variations are allowed by the API and are left untouched.)
-    const update = changes.update.filter(
-      (variation) => !this.archivedFlagNames.has(variation.feature_flag_name)
-    );
-    await super.processChanges(assets, { ...changes, update });
+    const changes = this.filterArchivedFlagChanges(await this.calcChanges(assets));
+    await super.processChanges(assets, changes);
+  }
+
+  // The dry-run preview computes changes through this path (not processChanges), so the archived
+  // filter is applied here too, otherwise the preview would show create/update changes that the
+  // real run silently skips.
+  async dryRunChanges(assets: Assets): Promise<CalculatedChanges> {
+    const { variations } = assets;
+    if (!variations) return { del: [], create: [], conflicts: [], update: [] };
+    return this.filterArchivedFlagChanges(await super.dryRunChanges(assets));
   }
 }

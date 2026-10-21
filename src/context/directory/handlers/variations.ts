@@ -1,7 +1,14 @@
 import path from 'path';
 import fs from 'fs-extra';
 import { constants } from '../../../tools';
-import { getFiles, existsMustBeDir, dumpJSON, loadJSON, sanitize } from '../../../utils';
+import {
+  getFiles,
+  existsMustBeDir,
+  isDirectory,
+  dumpJSON,
+  loadJSON,
+  sanitize,
+} from '../../../utils';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
 import { Asset, ParsedAsset } from '../../../types';
@@ -12,9 +19,15 @@ function parse(context: DirectoryContext): ParsedVariations {
   const variationsDirectory = path.join(context.filePath, constants.VARIATIONS_DIRECTORY);
   if (!existsMustBeDir(variationsDirectory)) return { variations: null };
 
-  const foundFiles = getFiles(variationsDirectory, ['.json']);
+  // Variations are stored one subfolder per flag (variations/<flag>/<variation>.json), so walk
+  // each flag subfolder and collect its variation files.
+  const flagFolders = fs
+    .readdirSync(variationsDirectory)
+    .map((entry) => path.join(variationsDirectory, entry))
+    .filter((entry) => isDirectory(entry));
 
-  const variations = foundFiles
+  const variations = flagFolders
+    .flatMap((folder) => getFiles(folder, ['.json']))
     .map((f) =>
       loadJSON(f, {
         mappings: context.mappings,
@@ -37,21 +50,38 @@ async function dump(context: DirectoryContext): Promise<void> {
 
   fs.ensureDirSync(variationsDirectory);
 
-  const expectedFiles = new Set<string>();
+  // Store each variation under a per-flag subfolder. A variation name is unique only within its
+  // flag, and both the flag name and the variation name can contain the sanitizer's separator, so
+  // a flat "<flag>-<variation>.json" scheme can collide (e.g. flag "a-b" + "c" vs flag "a" +
+  // "b-c"). The subfolder keeps the flag boundary unambiguous.
+  const expectedByFlag = new Map<string, Set<string>>();
 
   variations.forEach((variation) => {
-    // Variation names are unique only within a flag, so the file name is scoped by the flag.
-    const fileName = `${sanitize(variation.feature_flag_name)}-${sanitize(variation.name)}.json`;
-    const variationFile = path.join(variationsDirectory, fileName);
-    dumpJSON(variationFile, variation);
-    expectedFiles.add(fileName);
+    const flagFolderName = sanitize(variation.feature_flag_name);
+    const flagFolder = path.join(variationsDirectory, flagFolderName);
+    fs.ensureDirSync(flagFolder);
+
+    const fileName = `${sanitize(variation.name)}.json`;
+    dumpJSON(path.join(flagFolder, fileName), variation);
+
+    if (!expectedByFlag.has(flagFolderName)) expectedByFlag.set(flagFolderName, new Set());
+    expectedByFlag.get(flagFolderName)!.add(fileName);
   });
 
-  // Remove files for variations no longer present in the tenant
-  for (const existing of fs.readdirSync(variationsDirectory)) {
-    const fullPath = path.join(variationsDirectory, existing);
-    if (fs.statSync(fullPath).isFile() && !expectedFiles.has(existing)) {
-      fs.removeSync(fullPath);
+  // Remove flag subfolders and variation files no longer present in the tenant.
+  for (const entry of fs.readdirSync(variationsDirectory)) {
+    const flagFolder = path.join(variationsDirectory, entry);
+    if (!isDirectory(flagFolder)) continue;
+
+    const expectedFiles = expectedByFlag.get(entry);
+    if (!expectedFiles) {
+      fs.removeSync(flagFolder);
+      continue;
+    }
+    for (const file of fs.readdirSync(flagFolder)) {
+      if (!expectedFiles.has(file)) {
+        fs.removeSync(path.join(flagFolder, file));
+      }
     }
   }
 }
