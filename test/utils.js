@@ -308,6 +308,14 @@ export function mockMgmtClient() {
             getNextPage: () => Promise.resolve({ data: [], hasNextPage: () => false }),
           }),
       },
+      experiments: {
+        list: () =>
+          Promise.resolve({
+            data: [],
+            hasNextPage: () => false,
+            getNextPage: () => Promise.resolve({ data: [], hasNextPage: () => false }),
+          }),
+      },
     },
   };
 }

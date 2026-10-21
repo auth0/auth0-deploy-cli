@@ -49,6 +49,7 @@ import * as eventStreams from './eventStreams';
 import * as featureFlags from './featureFlags';
 import * as variations from './variations';
 import * as segments from './segments';
+import * as experiments from './experiments';
 import * as clientAuthCredentials from './clientAuthCredentials';
 import * as clientAuthCredentialsPre from './clientAuthCredentialsPre';
 
@@ -108,6 +109,7 @@ const auth0ApiHandlers: { [key in AssetTypes]: any } = {
   featureFlags,
   variations,
   segments,
+  experiments,
   clientAuthCredentials,
   // clientAuthCredentialsPre is a deploy-only pre-pass handler (order 40) — not a user-facing
   // asset type so it is not in AssetTypes, but must be registered here to run during deploy.

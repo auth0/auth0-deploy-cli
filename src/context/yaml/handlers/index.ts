@@ -48,6 +48,7 @@ import eventStreams from './eventStreams';
 import featureFlags from './featureFlags';
 import variations from './variations';
 import segments from './segments';
+import experiments from './experiments';
 import clientAuthCredentials from './clientAuthCredentials';
 
 import YAMLContext from '..';
@@ -111,6 +112,7 @@ const yamlHandlers: { [key in AssetTypes]: YAMLHandler<{ [key: string]: unknown 
   featureFlags,
   variations,
   segments,
+  experiments,
   clientAuthCredentials,
 };
 
