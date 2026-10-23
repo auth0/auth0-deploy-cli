@@ -64,6 +64,9 @@ on:
       PRODSEC_PYTHON_TOOLS_REPO:
         required: true
 
+permissions:
+  contents: read
+
 jobs:
   # ── Malware scan via ReversingLabs composite action ─────────────────────────
   rl-scan:
