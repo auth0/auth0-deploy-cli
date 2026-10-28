@@ -52,6 +52,7 @@ import * as segments from './segments';
 import * as experiments from './experiments';
 import * as clientAuthCredentials from './clientAuthCredentials';
 import * as clientAuthCredentialsPre from './clientAuthCredentialsPre';
+import * as agents from './agents';
 
 import { AssetTypes } from '../../../types';
 import APIHandler from './default';
@@ -111,6 +112,7 @@ const auth0ApiHandlers: { [key in AssetTypes]: any } = {
   segments,
   experiments,
   clientAuthCredentials,
+  agents,
   // clientAuthCredentialsPre is a deploy-only pre-pass handler (order 40) — not a user-facing
   // asset type so it is not in AssetTypes, but must be registered here to run during deploy.
   ...{ clientAuthCredentialsPre },

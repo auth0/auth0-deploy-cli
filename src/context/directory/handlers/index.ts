@@ -50,6 +50,7 @@ import variations from './variations';
 import segments from './segments';
 import experiments from './experiments';
 import clientAuthCredentials from './clientAuthCredentials';
+import agents from './agents';
 
 import DirectoryContext from '..';
 import { AssetTypes, Asset } from '../../../types';
@@ -116,6 +117,7 @@ const directoryHandlers: {
   segments,
   experiments,
   clientAuthCredentials,
+  agents,
 };
 
 export default directoryHandlers;
