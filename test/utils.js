@@ -263,6 +263,9 @@ export function mockMgmtClient() {
     clientProfiles: {
       list: (params) => mockPagedData(params, 'clientProfiles', []),
     },
+    agents: {
+      list: (params) => mockPagedData(params, 'agents', []),
+    },
     tokenExchangeProfiles: {
       list: (params) => mockPagedData(params, 'tokenExchangeProfiles', []),
     },

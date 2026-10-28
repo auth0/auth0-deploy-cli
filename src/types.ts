@@ -185,6 +185,7 @@ export type Assets = Partial<{
   variations: Variation[] | null;
   segments: Segment[] | null;
   experiments: Experiment[] | null;
+  agents: Asset[] | null;
 }>;
 
 export type CalculatedChanges = {
@@ -262,7 +263,8 @@ export type AssetTypes =
   | 'variations'
   | 'segments'
   | 'experiments'
-  | 'clientAuthCredentials';
+  | 'clientAuthCredentials'
+  | 'agents';
 
 export type KeywordMappings = { [key: string]: (string | number)[] | string | number };
 

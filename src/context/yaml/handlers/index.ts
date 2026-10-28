@@ -50,6 +50,7 @@ import variations from './variations';
 import segments from './segments';
 import experiments from './experiments';
 import clientAuthCredentials from './clientAuthCredentials';
+import agents from './agents';
 
 import YAMLContext from '..';
 import { AssetTypes } from '../../../types';
@@ -114,6 +115,7 @@ const yamlHandlers: { [key in AssetTypes]: YAMLHandler<{ [key: string]: unknown 
   segments,
   experiments,
   clientAuthCredentials,
+  agents,
 };
 
 export default yamlHandlers;

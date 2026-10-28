@@ -1,0 +1,5 @@
+{
+  "name": "My Agent M2M",
+  "app_type": "non_interactive",
+  "grant_types": ["client_credentials"]
+}

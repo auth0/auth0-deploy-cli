@@ -712,6 +712,8 @@ export default class ClientHandler extends DefaultAPIHandler {
         'external_metadata_created_by',
         'external_metadata_status',
         'jwks_uri',
+        // Agent links are managed by the agents handler
+        'agent_id',
       ],
       stripUpdateFields: [
         // Fields not allowed during updates
@@ -730,6 +732,8 @@ export default class ClientHandler extends DefaultAPIHandler {
         // API-generated timestamps; PATCH returns 400 if present
         'created_at',
         'updated_at',
+        // Agent links are managed by the agents handler
+        'agent_id',
       ],
       functions: {
         create: (client: Client) => this.createClient(client),
@@ -938,7 +942,8 @@ export default class ClientHandler extends DefaultAPIHandler {
       // ids — strip them so they are never exported to disk.
       .map(stripTokenVaultCredentialsOnExport)
       // external_metadata_status is read-only runtime state, not configuration.
-      .map((client) => omit(client, 'external_metadata_status') as Client);
+      // agent_id is a tenant-specific id; agent links are managed by the agents handler.
+      .map((client) => omit(client, ['external_metadata_status', 'agent_id']) as Client);
 
     // Enrich credential stubs with name and credential_type for export.
     // Auth0 does not return pem on read — it is never exported.
