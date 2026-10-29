@@ -357,11 +357,37 @@ describe('#schema validation tests', () => {
       checkEnum({ databases: data }, done);
     });
 
+    it('should fail validation if bad passkey "signup_behavior" provided', (done) => {
+      const data = [
+        {
+          name: 'name',
+          options: {
+            authentication_methods: { passkey: { enabled: true, signup_behavior: 'maybe' } },
+          },
+        },
+      ];
+
+      checkEnum({ databases: data }, done);
+    });
+
     it('should pass validation', (done) => {
       const data = [
         {
           name: 'name',
           options: {},
+        },
+      ];
+
+      checkPassed({ databases: data }, done);
+    });
+
+    it('should pass validation with passkey "signup_behavior"', (done) => {
+      const data = [
+        {
+          name: 'name',
+          options: {
+            authentication_methods: { passkey: { enabled: true, signup_behavior: 'block' } },
+          },
         },
       ];
 

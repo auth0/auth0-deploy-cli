@@ -142,6 +142,10 @@ databases:
           identifier:
             active: false  # Set to true when email.unique is false
           profile_required: false
+      # authentication_methods:
+      #   passkey:
+      #     enabled: true
+      #     signup_behavior: "allow"  # (Early Availability) "allow" or "block"
       # custom_password_hash:  # (Early Availability) Reference action by name
       #   action_id: "MyPasswordHashAction"
       #   hash_algorithm: "bcrypt"

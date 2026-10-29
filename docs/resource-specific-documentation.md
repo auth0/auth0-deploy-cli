@@ -557,6 +557,45 @@ Contents of `database.json`
 }
 ```
 
+### Passkey signup behavior — `authentication_methods.passkey.signup_behavior`
+
+> **Early Availability:** requires the `connection_passkey_auth_signup_behavior` feature flag on your tenant. Without it, the Management API rejects or ignores the property.
+
+`options.authentication_methods.passkey.signup_behavior` controls whether the passkey enrollment prompt is shown during signup. Allowed values are `allow` and `block`. Setting it to `allow` on a connection that is not passkey-ready (for example, one with `requires_username: true`) fails with a 400 from the Management API.
+
+If `signup_behavior` is omitted from a `passkey` block, Auth0 sets it to `allow` when `passkey.enabled` is `true` and `block` otherwise. Set it explicitly to keep the value stable across deploys.
+
+`authentication_methods` is sent as a whole object on update, so include every method you want to keep (for example `password`) alongside `passkey`. Any setting left out is reset to its Auth0 default.
+
+**YAML Example**
+
+```yaml
+databases:
+  - name: Username-Password-Authentication
+    options:
+      authentication_methods:
+        password:
+          enabled: true
+        passkey:
+          enabled: true
+          signup_behavior: allow
+```
+
+**Directory Example**
+
+Contents of `database.json`
+
+```json
+{
+  "options": {
+    "authentication_methods": {
+      "password": { "enabled": true },
+      "passkey": { "enabled": true, "signup_behavior": "allow" }
+    }
+  }
+}
+```
+
 ## Resource Servers
 
 Resource servers (APIs) configuration supports the Management API payload schema. The following fields are supported:
