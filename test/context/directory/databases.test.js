@@ -45,6 +45,36 @@ describe('#directory context databases', () => {
     ]);
   });
 
+  it('should process databases with passkey signup_behavior', async () => {
+    const repoDir = path.join(testDataDir, 'directory', 'databasesPasskey');
+    cleanThenMkdir(repoDir);
+    createDir(path.join(repoDir, constants.DATABASE_CONNECTIONS_DIRECTORY), {
+      users: {
+        'database.json': `
+          {
+            "name": "users",
+            "options": {
+              "authentication_methods": {
+                "passkey": { "enabled": true, "signup_behavior": "##PASSKEY_SIGNUP##" }
+              }
+            }
+          }
+        `,
+      },
+    });
+
+    const config = {
+      AUTH0_INPUT_FILE: repoDir,
+      AUTH0_KEYWORD_REPLACE_MAPPINGS: { PASSKEY_SIGNUP: 'block' },
+    };
+    const context = new Context(config, mockMgmtClient());
+    await context.loadAssetsFromLocal();
+
+    expect(context.assets.databases[0].options.authentication_methods).to.deep.equal({
+      passkey: { enabled: true, signup_behavior: 'block' },
+    });
+  });
+
   it('should ignore missing database.json', async () => {
     const db = { ...normalUsersDB };
     delete db['database.json'];

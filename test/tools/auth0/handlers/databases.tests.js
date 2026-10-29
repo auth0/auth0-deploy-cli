@@ -1337,6 +1337,63 @@ describe('#databases handler', () => {
       ]);
     });
 
+    it('should pass passkey signup_behavior through on update', async () => {
+      let updatePayload;
+      const auth0 = {
+        connections: {
+          get: () =>
+            Promise.resolve({
+              options: {
+                authentication_methods: {
+                  passkey: { enabled: true, signup_behavior: 'block' },
+                },
+              },
+            }),
+          update: (id, data) => {
+            updatePayload = data;
+            return Promise.resolve({ ...data, id });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) =>
+            mockPagedData(params, 'connections', [
+              { name: 'someDatabase', id: 'con1', strategy: 'auth0' },
+            ]),
+          clients: {
+            get: () => Promise.resolve(mockPagedData({}, 'clients', [])),
+            update: () => Promise.resolve({}),
+          },
+        },
+        clients: { list: (params) => mockPagedData(params, 'clients', []) },
+        actions: { list: (params) => mockPagedData(params, 'actions', []) },
+        pool,
+      };
+
+      const handler = new databases.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          databases: [
+            {
+              name: 'someDatabase',
+              strategy: 'auth0',
+              options: {
+                authentication_methods: {
+                  password: { enabled: true },
+                  passkey: { enabled: true, signup_behavior: 'allow' },
+                },
+              },
+            },
+          ],
+        },
+      ]);
+
+      expect(updatePayload.options.authentication_methods).to.deep.equal({
+        password: { enabled: true },
+        passkey: { enabled: true, signup_behavior: 'allow' },
+      });
+    });
+
     // If client is excluded and in the existing connection this client is enabled, it should keep enabled
     // If client is excluded and in the existing connection this client is disabled, it should keep disabled
     it('should handle excluded clients properly', async () => {
