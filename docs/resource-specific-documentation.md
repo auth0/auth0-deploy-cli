@@ -691,7 +691,7 @@ resourceServers:
 
 To move the type to another API, set `type: null` on the current holder and the type on the new one in the same config. The Deploy CLI updates the current holder first so the "only one" rule is never violated mid-deploy. If the current holder has `dev.ucp` scopes, also set `scopes: []` on it; omitting `scopes` leaves them in place and the API rejects the update.
 
-The current holder must be released in the same config. The Deploy CLI logs a warning, and the API returns `409`, when another resource server is given the type but the holder is missing `type: null` (omitting `type` leaves it unchanged), is excluded through `AUTH0_EXCLUDED`, or is removed from the config while `AUTH0_ALLOW_DELETE` is not `true`.
+The current holder must be released in the same config. The Deploy CLI logs a warning, and the API returns `409`, when another resource server is given the type but the holder is missing `type: null` (omitting `type` leaves it unchanged), is excluded by name through `AUTH0_EXCLUDED_RESOURCE_SERVERS`, or is removed from the config while `AUTH0_ALLOW_DELETE` is not `true`.
 
 Notes:
 
