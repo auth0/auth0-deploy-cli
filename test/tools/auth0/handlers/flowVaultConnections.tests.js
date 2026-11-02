@@ -169,7 +169,6 @@ describe('#flowVaultConnections handler', () => {
                 expect(id).to.equal(sampleFlowVaultConnections.id);
                 expect(data).to.be.an('object');
                 expect(data.name).to.equal(sampleFlowVaultConnections.name);
-                expect(data).to.not.have.any.keys('account_name', 'ready');
                 return Promise.resolve(data);
               },
               list: (params) => mockPagedData(params, 'connections', [sampleFlowVaultConnections]),

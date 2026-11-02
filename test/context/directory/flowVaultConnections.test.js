@@ -34,24 +34,37 @@ describe('#directory context flowVaultConnections', () => {
     expect(context.assets.flowVaultConnections).to.deep.equal(target);
   });
 
-  it('should dump flowVaultConnections', async () => {
-    const dir = path.join(testDataDir, 'directory', 'flowVaultConnectionsDump');
-    cleanThenMkdir(dir);
-    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+  it('should apply keyword mappings to setup', async () => {
+    const files = {
+      [constants.FLOWS_VAULT_DIRECTORY]: {
+        'Token Con.json':
+          '{ "name": "Token Con", "app_id": "HTTP", "setup": { "type": "BEARER", "token": "##TOKEN##" } }',
+        'Object Con.json':
+          '{ "name": "Object Con", "app_id": "HTTP", "setup": "@@SETUP_CONFIG@@" }',
+      },
+    };
 
-    context.assets.flowVaultConnections = [
-      { name: 'Auth0 M2M Con #1', account_name: 'domain_name', app_id: 'AUTH0', ready: true },
-      { name: 'HTTP Con #1', app_id: 'HTTP', ready: false },
-    ];
+    const repoDir = path.join(testDataDir, 'directory', 'flowVaultConnectionsSetupMappings');
+    createDir(repoDir, files);
 
-    await handler.dump(context);
-    const flowVaultConnectionsFolder = path.join(dir, constants.FLOWS_VAULT_DIRECTORY);
-    expect(loadJSON(path.join(flowVaultConnectionsFolder, 'Auth0 M2M Con #1.json'))).to.deep.equal(
-      context.assets.flowVaultConnections[0]
-    );
-    expect(loadJSON(path.join(flowVaultConnectionsFolder, 'HTTP Con #1.json'))).to.deep.equal(
-      context.assets.flowVaultConnections[1]
-    );
+    const config = {
+      AUTH0_INPUT_FILE: repoDir,
+      AUTH0_KEYWORD_REPLACE_MAPPINGS: {
+        TOKEN: 'secret-token',
+        SETUP_CONFIG: { type: 'BEARER', token: 'object-token' },
+      },
+    };
+    const context = new Context(config, mockMgmtClient());
+    await context.loadAssetsFromLocal();
+
+    expect(context.assets.flowVaultConnections).to.deep.equal([
+      { name: 'Object Con', app_id: 'HTTP', setup: { type: 'BEARER', token: 'object-token' } },
+      {
+        name: 'Token Con',
+        app_id: 'HTTP',
+        setup: { type: 'BEARER', token: 'secret-token' },
+      },
+    ]);
   });
 
   it('should dump flowVaultConnections sanitized', async () => {

@@ -2529,6 +2529,30 @@ clients:
 
 `account_name` and `ready` are read-only. The Management API derives them from the connection and does not accept them on create or update, so the Deploy CLI does not export them. If they are present in a file (for example from an older export), they are ignored on import, so keyword mappings applied to them have no effect.
 
+`setup` holds credentials, so it does not appear in exports. Add it to the connection by hand. [Keyword replacement](./keyword-replacement.md) works in it in both formats: `##KEY##` for a string value, or a quoted `'@@KEY@@'` to substitute the whole object (the mapping value is then a JSON object).
+
+```yaml
+flowVaultConnections:
+  - name: My HTTP Connection
+    app_id: HTTP
+    setup:
+      type: BEARER
+      token: '##HTTP_BEARER_TOKEN##'
+  # or the whole object: setup: '@@HTTP_SETUP@@'
+```
+
+In directory format, put the same fields in `flow-vault-connections/<name>.json`. A whole-object token must be a quoted string there too (`"setup": "@@HTTP_SETUP@@"`).
+
+```json
+{
+  "name": "My HTTP Connection",
+  "app_id": "HTTP",
+  "setup": { "type": "BEARER", "token": "##HTTP_BEARER_TOKEN##" }
+}
+```
+
+Because `setup` is never exported, running an export over the same files removes it. Keep it in version control or re-add it afterwards.
+
 ## MFA Advanced Factor Configuration
 
 The Deploy CLI manages the MFA (Guardian) advanced factor settings through three separate resources. Each is a single object rather than a set, so it cannot be deleted; an empty or omitted value is skipped rather than treated as a deletion. If the feature is unavailable on the tenant, the resource is skipped gracefully.
