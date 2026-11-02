@@ -157,9 +157,14 @@ describe('ScimHandler', () => {
       expect(mockConnectionsManager.scimConfiguration.get.calledOnce).to.be.true;
       expect(addEachTask.called).to.be.false;
       expect(handler.scimScopes.read).to.be.false;
+      // applyScimConfiguration relies on a non-empty map to avoid re-entering createIdMap.
+      expect(handler.idMap.size).to.equal(1);
+
+      await handler.createIdMap(connections);
+      expect(mockConnectionsManager.scimConfiguration.get.calledOnce).to.be.true;
     });
 
-    it('should look up every SCIM connection when the first lookup succeeds', async () => {
+    it('should keep looking up connections when the first lookup returns 404', async () => {
       const connections = Array.from({ length: 5 }, (_, i) => ({
         id: `con_saml_${i}`,
         strategy: 'samlp',
@@ -170,6 +175,76 @@ describe('ScimHandler', () => {
 
       expect(mockConnectionsManager.scimConfiguration.get.callCount).to.equal(5);
       expect(handler.idMap.size).to.equal(5);
+      expect(handler.scimScopes.read).to.be.true;
+    });
+
+    it('should store the SCIM configuration from the probe and from pooled lookups', async () => {
+      const connections = ['con_a', 'con_b', 'con_c'].map((id) => ({ id, strategy: 'samlp' }));
+      mockConnectionsManager.scimConfiguration.get.callsFake(async (id) => ({
+        connection_id: id,
+        user_id_attribute: `attr_${id}`,
+        mapping: [{ scim: 'userName', auth0: 'preferred_username' }],
+      }));
+
+      await handler.createIdMap(connections);
+
+      connections.forEach(({ id }) => {
+        expect(handler.idMap.get(id)).to.deep.equal({
+          strategy: 'samlp',
+          scimConfiguration: {
+            mapping: [{ scim: 'userName', auth0: 'preferred_username' }],
+            user_id_attribute: `attr_${id}`,
+          },
+        });
+      });
+    });
+
+    it('should stop queuing once a pooled lookup is denied after a successful probe', async () => {
+      const serialHandler = new ScimHandler(
+        mockConfig,
+        mockConnectionsManager,
+        new PromisePoolExecutor({ concurrencyLimit: 1 })
+      );
+      const connections = Array.from({ length: 5 }, (_, i) => ({
+        id: `con_saml_${i}`,
+        strategy: 'samlp',
+      }));
+      mockConnectionsManager.scimConfiguration.get.onCall(0).resolves(null); // probe
+      mockConnectionsManager.scimConfiguration.get.onCall(1).rejects({ statusCode: 403 });
+      mockConnectionsManager.scimConfiguration.get.resolves(null);
+
+      await serialHandler.createIdMap(connections);
+
+      // Probe plus the first pooled lookup; the remaining three are skipped by the guard.
+      expect(mockConnectionsManager.scimConfiguration.get.callCount).to.equal(2);
+      expect(serialHandler.scimScopes.read).to.be.false;
+    });
+
+    it('should reject without queuing the rest when the probe fails unexpectedly', async () => {
+      const connections = Array.from({ length: 3 }, (_, i) => ({
+        id: `con_saml_${i}`,
+        strategy: 'samlp',
+      }));
+      mockConnectionsManager.scimConfiguration.get.rejects(new Error('Unexpected error'));
+      const addEachTask = sinon.spy(mockPoolClient, 'addEachTask');
+
+      await expect(handler.createIdMap(connections)).to.be.rejectedWith('Unexpected error');
+
+      expect(mockConnectionsManager.scimConfiguration.get.calledOnce).to.be.true;
+      expect(addEachTask.called).to.be.false;
+    });
+
+    it('should keep going after a 429 on the probe', async () => {
+      const connections = Array.from({ length: 3 }, (_, i) => ({
+        id: `con_saml_${i}`,
+        strategy: 'samlp',
+      }));
+      mockConnectionsManager.scimConfiguration.get.onCall(0).rejects({ statusCode: 429 });
+      mockConnectionsManager.scimConfiguration.get.resolves(null);
+
+      await handler.createIdMap(connections);
+
+      expect(mockConnectionsManager.scimConfiguration.get.callCount).to.equal(3);
       expect(handler.scimScopes.read).to.be.true;
     });
 
