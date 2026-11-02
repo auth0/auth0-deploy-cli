@@ -143,6 +143,44 @@ describe('ScimHandler', () => {
       expect(handler.getScimConfiguration.called).to.be.false;
       expect(handler.idMap.size).to.equal(0);
     });
+
+    it('should stop after the first lookup when it is denied with a 403', async () => {
+      const connections = Array.from({ length: 5 }, (_, i) => ({
+        id: `con_saml_${i}`,
+        strategy: 'samlp',
+      }));
+      mockConnectionsManager.scimConfiguration.get.rejects({ statusCode: 403 });
+      const addEachTask = sinon.spy(mockPoolClient, 'addEachTask');
+
+      await handler.createIdMap(connections);
+
+      expect(mockConnectionsManager.scimConfiguration.get.calledOnce).to.be.true;
+      expect(addEachTask.called).to.be.false;
+      expect(handler.scimScopes.read).to.be.false;
+    });
+
+    it('should look up every SCIM connection when the first lookup succeeds', async () => {
+      const connections = Array.from({ length: 5 }, (_, i) => ({
+        id: `con_saml_${i}`,
+        strategy: 'samlp',
+      }));
+      mockConnectionsManager.scimConfiguration.get.rejects({ statusCode: 404 });
+
+      await handler.createIdMap(connections);
+
+      expect(mockConnectionsManager.scimConfiguration.get.callCount).to.equal(5);
+      expect(handler.idMap.size).to.equal(5);
+      expect(handler.scimScopes.read).to.be.true;
+    });
+
+    it('should not look anything up when there are no SCIM-capable connections', async () => {
+      handler.getScimConfiguration = sinon.stub().resolves(null);
+
+      await handler.createIdMap([{ id: 'con_db', strategy: 'auth0' }]);
+
+      expect(handler.getScimConfiguration.called).to.be.false;
+      expect(handler.idMap.size).to.equal(0);
+    });
   });
 
   describe('applyScimConfiguration', () => {
