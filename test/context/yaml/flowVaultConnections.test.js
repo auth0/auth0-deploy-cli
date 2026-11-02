@@ -56,6 +56,11 @@ describe('#YAML context flowVaultConnections', () => {
 
     const dumped = await handler.dump(context);
 
-    expect(dumped).to.deep.equal({ flowVaultConnections });
+    expect(dumped).to.deep.equal({
+      flowVaultConnections: [
+        { name: 'Auth0 M2M Con #1', app_id: 'AUTH0' },
+        { name: 'HTTP Con #1', app_id: 'HTTP' },
+      ],
+    });
   });
 });

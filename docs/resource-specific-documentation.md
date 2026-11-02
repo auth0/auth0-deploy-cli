@@ -2525,6 +2525,10 @@ clients:
             - 'channels:read'
 ```
 
+## Flow Vault Connections
+
+`account_name` and `ready` are read-only. The Management API derives them from the connection and does not accept them on create or update, so the Deploy CLI does not export them. If they are present in a file (for example from an older export), they are ignored on import, so keyword mappings applied to them have no effect.
+
 ## MFA Advanced Factor Configuration
 
 The Deploy CLI manages the MFA (Guardian) advanced factor settings through three separate resources. Each is a single object rather than a set, so it cannot be deleted; an empty or omitted value is skipped rather than treated as a deletion. If the feature is unavailable on the tenant, the resource is skipped gracefully.

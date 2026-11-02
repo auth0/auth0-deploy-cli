@@ -31,7 +31,16 @@ async function dump(context: YAMLContext): Promise<ParsedParsedFlowVaults> {
     throw new Error(`Duplicate flow vault connections names found: ${duplicatesArray}`);
   }
 
-  const removeKeysFromOutput = ['id', 'created_at', 'updated_at', 'refreshed_at', 'fingerprint'];
+  // account_name and ready are read-only, the API does not accept them on import
+  const removeKeysFromOutput = [
+    'id',
+    'created_at',
+    'updated_at',
+    'refreshed_at',
+    'fingerprint',
+    'account_name',
+    'ready',
+  ];
   flowVaultConnections.forEach((connection) => {
     removeKeysFromOutput.forEach((key) => {
       if (key in connection) {

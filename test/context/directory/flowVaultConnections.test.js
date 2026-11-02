@@ -66,11 +66,13 @@ describe('#directory context flowVaultConnections', () => {
 
     await handler.dump(context);
     const clientFolder = path.join(dir, constants.FLOWS_VAULT_DIRECTORY);
-    expect(loadJSON(path.join(clientFolder, 'Auth0 M2M Con #1.json'))).to.deep.equal(
-      context.assets.flowVaultConnections[0]
-    );
-    expect(loadJSON(path.join(clientFolder, 'HTTP Con #1.json'))).to.deep.equal(
-      context.assets.flowVaultConnections[1]
-    );
+    expect(loadJSON(path.join(clientFolder, 'Auth0 M2M Con #1.json'))).to.deep.equal({
+      name: 'Auth0 M2M Con #1',
+      app_id: 'AUTH0',
+    });
+    expect(loadJSON(path.join(clientFolder, 'HTTP Con #1.json'))).to.deep.equal({
+      name: 'HTTP Con #1',
+      app_id: 'HTTP',
+    });
   });
 });
