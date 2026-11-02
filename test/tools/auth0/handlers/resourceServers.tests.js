@@ -1,7 +1,9 @@
 import pageClient from '../../../../src/tools/auth0/client';
 
 const Ajv = require('ajv');
+const sinon = require('sinon');
 const { expect } = require('chai');
+const log = require('../../../../src/logger').default;
 const resourceServers = require('../../../../src/tools/auth0/handlers/resourceServers');
 const { mockPagedData } = require('../../../utils');
 
@@ -96,6 +98,19 @@ describe('#resourceServers handler', () => {
       expect(error.message).to.include('commerceAPI, otherCommerceAPI');
     });
 
+    it('should not count an excluded UCP-typed resource server', async () => {
+      const handler = new resourceServers.default({ client: {}, config });
+      const stageFn = Object.getPrototypeOf(handler).validate;
+      const data = [
+        { name: 'commerceAPI', type: 'universal_commerce_protocol_server' },
+        { name: 'excludedAPI', type: 'universal_commerce_protocol_server' },
+      ];
+
+      await stageFn.apply(handler, [
+        { resourceServers: data, exclude: { resourceServers: ['excludedAPI'] } },
+      ]);
+    });
+
     it('should allow one UCP-typed resource server alongside others, including type null', async () => {
       const handler = new resourceServers.default({ client: {}, config });
       const stageFn = Object.getPrototypeOf(handler).validate;
@@ -144,6 +159,14 @@ describe('#resourceServers handler', () => {
       const plain = { id: 'rs2', name: 'newAPI', identifier: 'https://new.example.com' };
       const brandNew = { name: 'brandNew', identifier: 'https://brand.example.com', type: UCP };
 
+      let warn;
+      beforeEach(() => {
+        warn = sinon.stub(log, 'warn');
+      });
+      afterEach(() => {
+        warn.restore();
+      });
+
       // Awaits tasks in order so the API call order is observable
       const sequentialPool = {
         addEachTask: ({ data, generator }) => {
@@ -157,7 +180,11 @@ describe('#resourceServers handler', () => {
         },
       };
 
-      const run = async (existing, desired, allowDelete = true) => {
+      const run = async (
+        existing,
+        desired,
+        { allowDelete = true, exclude, extensionSecret } = {}
+      ) => {
         const calls = [];
         const auth0 = {
           resourceServers: {
@@ -179,10 +206,11 @@ describe('#resourceServers handler', () => {
         };
         const handler = new resourceServers.default({
           client: pageClient(auth0),
-          config: (key) => ({ AUTH0_ALLOW_DELETE: allowDelete }[key]),
+          config: (key) =>
+            ({ AUTH0_ALLOW_DELETE: allowDelete, EXTENSION_SECRET: extensionSecret }[key]),
         });
         await Object.getPrototypeOf(handler).processChanges.apply(handler, [
-          { resourceServers: desired },
+          { resourceServers: desired, exclude: { resourceServers: exclude || [] } },
         ]);
         return calls;
       };
@@ -261,10 +289,62 @@ describe('#resourceServers handler', () => {
             { ...holder, type: null },
             { ...plain, type: UCP },
           ],
-          false
+          { allowDelete: false }
         );
 
         expect(calls).to.deep.equal(['update:rs1:null', `update:rs2:${UCP}`]);
+      });
+
+      it('should warn when another server takes the type and the holder omits it', async () => {
+        const calls = await run([holder, plain], [holder, { ...plain, type: UCP }]);
+
+        expect(calls).to.have.length(2);
+        expect(warn.calledOnce).to.equal(true);
+        expect(warn.firstCall.args[0]).to.include("'oldAPI' already has type");
+        expect(warn.firstCall.args[0]).to.include("'newAPI'");
+      });
+
+      it('should warn when the holder is excluded and is left untouched', async () => {
+        const calls = await run([holder, plain], [{ ...plain, type: UCP }], {
+          exclude: ['oldAPI'],
+        });
+
+        expect(calls).to.deep.equal([`update:rs2:${UCP}`]);
+        expect(warn.calledOnce).to.equal(true);
+        expect(warn.firstCall.args[0]).to.include("'oldAPI' already has type");
+      });
+
+      it('should warn when the holder is removed from the config but deletes are off', async () => {
+        const calls = await run([holder, plain], [{ ...plain, type: UCP }], {
+          allowDelete: false,
+        });
+
+        expect(calls).to.deep.equal([`update:rs2:${UCP}`]);
+        expect(warn.args.some(([msg]) => msg.includes("'oldAPI' already has type"))).to.equal(true);
+      });
+
+      it('should not warn when an extension deletes the holder', async () => {
+        const calls = await run([holder], [brandNew], {
+          allowDelete: false,
+          extensionSecret: 'secret',
+        });
+
+        expect(calls).to.deep.equal(['delete:rs1', `create:brandNew:${UCP}`]);
+        expect(warn.called).to.equal(false);
+      });
+
+      it('should not warn when the holder is deleted, released, or keeps the type', async () => {
+        await run([holder], [brandNew]);
+        await run(
+          [holder, plain],
+          [
+            { ...holder, type: null },
+            { ...plain, type: UCP },
+          ]
+        );
+        await run([holder, plain], [holder, plain]);
+
+        expect(warn.called).to.equal(false);
       });
     });
 

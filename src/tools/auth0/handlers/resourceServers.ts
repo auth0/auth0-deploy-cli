@@ -5,6 +5,8 @@ import constants from '../../constants';
 import DefaultHandler from './default';
 import { Assets } from '../../../types';
 import { paginate } from '../client';
+import log from '../../../logger';
+import { isTruthy } from '../../../utils';
 
 export const excludeSchema = {
   type: 'array',
@@ -233,7 +235,10 @@ export default class ResourceServersHandler extends DefaultHandler {
     }
 
     // The API allows only one UCP-typed resource server per tenant; fail early instead of on a 409
-    const ucpResourceServers = resourceServers.filter((r) => r.type === RESOURCE_SERVER_TYPE_UCP);
+    const excluded = assets.exclude?.resourceServers || [];
+    const ucpResourceServers = resourceServers.filter(
+      (r) => r.type === RESOURCE_SERVER_TYPE_UCP && !excluded.includes(r.name ?? '')
+    );
     if (ucpResourceServers.length > 1) {
       const names = ucpResourceServers.map((r) => r.name).join(', ');
       throw new ValidationError(
@@ -264,10 +269,25 @@ export default class ResourceServersHandler extends DefaultHandler {
     };
 
     // Only one resource server can hold the UCP type, so the holder giving it up is updated first
-    const holderId = this.existing?.find((e) => e.type === RESOURCE_SERVER_TYPE_UCP)?.id;
-    const releasing = holderId
-      ? changes.update.filter((r) => r.id === holderId && r.type === null)
+    const holder = this.existing?.find((e) => e.type === RESOURCE_SERVER_TYPE_UCP);
+    const releasing = holder
+      ? changes.update.filter((r) => r.id === holder.id && r.type === null)
       : [];
+
+    if (holder && !releasing.length) {
+      const taker = [...changes.create, ...changes.update].find(
+        (r) => r.type === RESOURCE_SERVER_TYPE_UCP && r.id !== holder.id
+      );
+      // Mirrors the delete gating in DefaultHandler.processChanges
+      const deletes =
+        isTruthy(this.config('AUTH0_ALLOW_DELETE')) || this.config('EXTENSION_SECRET');
+      if (taker && !(deletes && changes.del.some((r) => r.id === holder.id))) {
+        const { name } = holder;
+        log.warn(
+          `'${name}' already has type '${RESOURCE_SERVER_TYPE_UCP}', so setting it on '${taker.name}' is likely to fail with a 409. Set 'type: null' on '${name}' in the same config to move it.`
+        );
+      }
+    }
 
     if (releasing.length) {
       await super.processChanges(assets, { ...changes, update: releasing, create: [] });
