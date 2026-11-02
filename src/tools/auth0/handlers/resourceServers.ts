@@ -11,7 +11,10 @@ export const excludeSchema = {
   items: { type: 'string' },
 };
 
-export type ResourceServer = Management.ResourceServer;
+// Not yet exposed by the auth0 SDK (`Management.ResourceServerTypeEnum`); switch to it once released.
+const RESOURCE_SERVER_TYPE_UCP = 'universal_commerce_protocol_server';
+
+export type ResourceServer = Management.ResourceServer & { type?: string | null };
 
 export const schema = {
   type: 'array',
@@ -139,6 +142,12 @@ export const schema = {
         description:
           'When true, the authorization server rejects consent decisions that do not include a valid signature and kid. Requires the my_account_consents entitlement.',
       },
+      type: {
+        type: ['string', 'null'],
+        enum: [RESOURCE_SERVER_TYPE_UCP, null],
+        description:
+          'The type of the resource server. Set to universal_commerce_protocol_server to declare a Universal Commerce Protocol server, or null to clear it.',
+      },
     },
     required: ['name', 'identifier'],
   },
@@ -223,6 +232,15 @@ export default class ResourceServersHandler extends DefaultHandler {
       );
     }
 
+    // The API allows only one UCP-typed resource server per tenant; fail early instead of on a 409
+    const ucpResourceServers = resourceServers.filter((r) => r.type === RESOURCE_SERVER_TYPE_UCP);
+    if (ucpResourceServers.length > 1) {
+      const names = ucpResourceServers.map((r) => r.name).join(', ');
+      throw new ValidationError(
+        `Only one resource server can have type '${RESOURCE_SERVER_TYPE_UCP}', found: ${names}.`
+      );
+    }
+
     await super.validate(assets);
   }
 
@@ -244,6 +262,23 @@ export default class ResourceServersHandler extends DefaultHandler {
       create: filterResourceServer(create),
       conflicts: filterResourceServer(conflicts),
     };
+
+    // Only one resource server can hold the UCP type, so the holder giving it up is updated first
+    const holderId = this.existing?.find((e) => e.type === RESOURCE_SERVER_TYPE_UCP)?.id;
+    const releasing = holderId
+      ? changes.update.filter((r) => r.id === holderId && r.type === null)
+      : [];
+
+    if (releasing.length) {
+      await super.processChanges(assets, { ...changes, update: releasing, create: [] });
+      await super.processChanges(assets, {
+        del: [],
+        conflicts: [],
+        create: changes.create,
+        update: changes.update.filter((r) => !releasing.includes(r)),
+      });
+      return;
+    }
 
     await super.processChanges(assets, {
       ...changes,

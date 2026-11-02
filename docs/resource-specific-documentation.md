@@ -649,6 +649,48 @@ resourceServers:
 
 > **Note:** `require_consent_non_repudiation` requires the `my_account_consents` entitlement to be enabled on the tenant.
 
+### Universal Commerce Protocol (UCP) — `type`
+
+> **Early Access.** Requires the `universal_commerce_protocol` feature flag on the tenant.
+
+The `type` field declares a resource server as a Universal Commerce Protocol server. The only accepted value is `universal_commerce_protocol_server`. Doing so marks the API for UCP billing and merges its scopes into `scopes_supported` in the tenant's discovery metadata (`/.well-known/oauth-authorization-server` and `/.well-known/openid-configuration`).
+
+Constraints enforced by the Auth0 API:
+
+- Only **one** resource server per tenant can have `type: universal_commerce_protocol_server`. The Deploy CLI rejects a config with more than one before calling the API.
+- Scopes beginning with `dev.ucp` are reserved for UCP-typed resource servers; any other resource server with one is rejected with `400`.
+- Setting `type` on a tenant that is not enabled for UCP fails with a `403`.
+
+**YAML Example**
+
+```yaml
+resourceServers:
+  - name: Commerce API
+    identifier: https://commerce.example.com
+    type: universal_commerce_protocol_server
+```
+
+To clear the type, set it to `null`. Omitting `type` leaves the existing value unchanged:
+
+```yaml
+resourceServers:
+  - name: Commerce API
+    identifier: https://commerce.example.com
+    type: null
+```
+
+**Directory Example**
+
+```json
+{
+  "name": "Commerce API",
+  "identifier": "https://commerce.example.com",
+  "type": "universal_commerce_protocol_server"
+}
+```
+
+To move the type to another API, set `type: null` on the current holder and the type on the new one in the same config. The Deploy CLI updates the current holder first so the "only one" rule is never violated mid-deploy. If the current holder has `dev.ucp` scopes, also set `scopes: []` on it; omitting `scopes` leaves them in place and the API rejects the update.
+
 ### Online Refresh Tokens — `allow_online_access` and `allow_online_access_with_ephemeral_sessions`
 
 The `allow_online_access` field enables issuance of Online Refresh Tokens (ORTs) for a resource server. ORTs are stateless, non-rotating tokens bound to the Auth0 session lifetime — when the session expires or is revoked, the ORT becomes invalid.

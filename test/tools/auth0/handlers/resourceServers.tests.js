@@ -1,5 +1,6 @@
 import pageClient from '../../../../src/tools/auth0/client';
 
+const Ajv = require('ajv');
 const { expect } = require('chai');
 const resourceServers = require('../../../../src/tools/auth0/handlers/resourceServers');
 const { mockPagedData } = require('../../../utils');
@@ -71,9 +72,202 @@ describe('#resourceServers handler', () => {
 
       await stageFn.apply(handler, [{ resourceServers: data }]);
     });
+
+    it('should not allow more than one UCP-typed resource server', async () => {
+      const handler = new resourceServers.default({ client: {}, config });
+      const stageFn = Object.getPrototypeOf(handler).validate;
+      const data = [
+        { name: 'commerceAPI', type: 'universal_commerce_protocol_server' },
+        { name: 'otherCommerceAPI', type: 'universal_commerce_protocol_server' },
+        { name: 'plainAPI' },
+      ];
+
+      let error;
+      try {
+        await stageFn.apply(handler, [{ resourceServers: data }]);
+      } catch (err) {
+        error = err;
+      }
+
+      expect(error).to.be.an('object');
+      expect(error.message).to.include(
+        "Only one resource server can have type 'universal_commerce_protocol_server'"
+      );
+      expect(error.message).to.include('commerceAPI, otherCommerceAPI');
+    });
+
+    it('should allow one UCP-typed resource server alongside others, including type null', async () => {
+      const handler = new resourceServers.default({ client: {}, config });
+      const stageFn = Object.getPrototypeOf(handler).validate;
+      const data = [
+        { name: 'commerceAPI', type: 'universal_commerce_protocol_server' },
+        { name: 'clearedAPI', type: null },
+        { name: 'plainAPI' },
+      ];
+
+      await stageFn.apply(handler, [{ resourceServers: data }]);
+    });
+
+    describe('type schema', () => {
+      const ajv = new Ajv({ useDefaults: true, nullable: true });
+      const check = (type) =>
+        ajv.validate(resourceServers.schema, [{ name: 'someAPI', identifier: 'some-api', type }]);
+
+      it('should accept the UCP type and null', () => {
+        expect(check('universal_commerce_protocol_server')).to.equal(true);
+        expect(check(null)).to.equal(true);
+      });
+
+      it('should accept an omitted type', () => {
+        expect(
+          ajv.validate(resourceServers.schema, [{ name: 'someAPI', identifier: 'some-api' }])
+        ).to.equal(true);
+      });
+
+      it('should reject any other type value', () => {
+        expect(check('universal_commerce_protocol')).to.equal(false);
+        expect(check('')).to.equal(false);
+        expect(check(5)).to.equal(false);
+      });
+    });
   });
 
   describe('#resourceServers process', () => {
+    describe('type (Universal Commerce Protocol)', () => {
+      const UCP = 'universal_commerce_protocol_server';
+      const holder = {
+        id: 'rs1',
+        name: 'oldAPI',
+        identifier: 'https://old.example.com',
+        type: UCP,
+      };
+      const plain = { id: 'rs2', name: 'newAPI', identifier: 'https://new.example.com' };
+      const brandNew = { name: 'brandNew', identifier: 'https://brand.example.com', type: UCP };
+
+      // Awaits tasks in order so the API call order is observable
+      const sequentialPool = {
+        addEachTask: ({ data, generator }) => {
+          const done = (async () => {
+            for (const item of data || []) {
+              // eslint-disable-next-line no-await-in-loop
+              await generator(item);
+            }
+          })();
+          return { promise: () => done };
+        },
+      };
+
+      const run = async (existing, desired, allowDelete = true) => {
+        const calls = [];
+        const auth0 = {
+          resourceServers: {
+            create: (data) => {
+              calls.push(`create:${data.name}:${data.type}`);
+              return Promise.resolve({ ...data, id: 'new' });
+            },
+            update: (id, data) => {
+              calls.push(`update:${id}:${data.type}`);
+              return Promise.resolve({ id, ...data });
+            },
+            delete: (id) => {
+              calls.push(`delete:${id}`);
+              return Promise.resolve([]);
+            },
+            list: (params) => mockPagedData(params, 'resource_servers', existing),
+          },
+          pool: sequentialPool,
+        };
+        const handler = new resourceServers.default({
+          client: pageClient(auth0),
+          config: (key) => ({ AUTH0_ALLOW_DELETE: allowDelete }[key]),
+        });
+        await Object.getPrototypeOf(handler).processChanges.apply(handler, [
+          { resourceServers: desired },
+        ]);
+        return calls;
+      };
+
+      it('should create a resource server with the type', async () => {
+        expect(await run([], [brandNew])).to.deep.equal([`create:brandNew:${UCP}`]);
+      });
+
+      it('should clear the type with null', async () => {
+        expect(await run([holder], [{ ...holder, type: null }])).to.deep.equal(['update:rs1:null']);
+      });
+
+      it('should set the type on an existing resource server', async () => {
+        expect(await run([plain], [{ ...plain, type: UCP }])).to.deep.equal([`update:rs2:${UCP}`]);
+      });
+
+      it('should leave the type unset when the config omits it', async () => {
+        expect(await run([plain], [plain])).to.deep.equal(['update:rs2:undefined']);
+      });
+
+      it('should keep a holder that keeps the type', async () => {
+        const calls = await run([holder, plain], [holder, plain]);
+
+        expect(calls).to.deep.equal([`update:rs1:${UCP}`, 'update:rs2:undefined']);
+      });
+
+      it('should clear the holder before another existing server takes the type', async () => {
+        // New holder is listed first to show the order does not depend on the config order
+        const calls = await run(
+          [holder, plain],
+          [
+            { ...plain, type: UCP },
+            { ...holder, type: null },
+          ]
+        );
+
+        expect(calls).to.deep.equal(['update:rs1:null', `update:rs2:${UCP}`]);
+      });
+
+      it('should clear the holder before a newly created server takes the type', async () => {
+        const calls = await run([holder], [{ ...holder, type: null }, brandNew]);
+
+        expect(calls).to.deep.equal(['update:rs1:null', `create:brandNew:${UCP}`]);
+      });
+
+      it('should delete the holder before creating a replacement', async () => {
+        expect(await run([holder], [brandNew])).to.deep.equal([
+          'delete:rs1',
+          `create:brandNew:${UCP}`,
+        ]);
+      });
+
+      it('should clear a holder with no taker, then apply the other updates', async () => {
+        const calls = await run([holder, plain], [plain, { ...holder, type: null }]);
+
+        expect(calls).to.deep.equal(['update:rs1:null', 'update:rs2:undefined']);
+      });
+
+      it('should only release the server that holds the type', async () => {
+        const calls = await run(
+          [holder, plain],
+          [{ ...holder, type: null }, { ...plain, type: null }, brandNew]
+        );
+
+        expect(calls).to.deep.equal([
+          'update:rs1:null',
+          `create:brandNew:${UCP}`,
+          'update:rs2:null',
+        ]);
+      });
+
+      it('should still move the type when deletes are not allowed', async () => {
+        const calls = await run(
+          [holder, plain],
+          [
+            { ...holder, type: null },
+            { ...plain, type: UCP },
+          ],
+          false
+        );
+
+        expect(calls).to.deep.equal(['update:rs1:null', `update:rs2:${UCP}`]);
+      });
+    });
+
     it('should create resource server', async () => {
       const auth0 = {
         resourceServers: {
