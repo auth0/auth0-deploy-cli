@@ -563,9 +563,9 @@ Contents of `database.json`
 
 `options.authentication_methods.passkey.signup_behavior` controls whether the passkey enrollment prompt is shown during signup. Allowed values are `allow` and `block`. Setting it to `allow` on a connection that is not passkey-ready (for example, one with `requires_username: true`) fails with a 400 from the Management API.
 
-If `signup_behavior` is omitted from a `passkey` block, Auth0 sets it to `allow` when `passkey.enabled` is `true` and `block` otherwise. Set it explicitly to keep the value stable across deploys.
+If `signup_behavior` is omitted from a `passkey` block, Auth0 currently sets it to `allow` when `passkey.enabled` is `true` and `block` otherwise (observed during Early Availability; may change). Set it explicitly to keep the value stable across deploys.
 
-`authentication_methods` is sent as a whole object on update, so include every method you want to keep (for example `password`) alongside `passkey`. Any setting left out is reset to its Auth0 default.
+When `authentication_methods` is present in your config, it is sent as a whole object on update, so include every method you want to keep (for example `password`) alongside `passkey`. Any setting left out is reset to its Auth0 default. When `authentication_methods` is omitted from the config entirely, the existing tenant value is preserved.
 
 **YAML Example**
 
