@@ -3,7 +3,7 @@ import ValidationError from '../../validationError';
 
 import constants from '../../constants';
 import DefaultHandler from './default';
-import { Assets } from '../../../types';
+import { Assets, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
 import log from '../../../logger';
 import { isTruthy } from '../../../utils';
@@ -15,6 +15,7 @@ export const excludeSchema = {
 
 // Not yet exposed by the auth0 SDK (`Management.ResourceServerTypeEnum`); switch to it once released.
 const RESOURCE_SERVER_TYPE_UCP = 'universal_commerce_protocol_server';
+const UCP_SCOPE_PREFIX = 'dev.ucp';
 
 export type ResourceServer = Management.ResourceServer & { type?: string | null };
 
@@ -234,17 +235,32 @@ export default class ResourceServersHandler extends DefaultHandler {
       );
     }
 
-    // The API allows only one UCP-typed resource server per tenant; fail early instead of on a 409
+    // Excluded and system servers never send `type` to the API, so they don't count below
     const excluded = assets.exclude?.resourceServers || [];
-    const ucpResourceServers = resourceServers.filter(
-      (r) => r.type === RESOURCE_SERVER_TYPE_UCP && !excluded.includes(r.name ?? '')
+    const configured = resourceServers.filter(
+      (r) => !excluded.includes(r.name ?? '') && r.is_system !== true
     );
+
+    // The API allows only one UCP-typed resource server per tenant; fail early instead of on a 409
+    const ucpResourceServers = configured.filter((r) => r.type === RESOURCE_SERVER_TYPE_UCP);
     if (ucpResourceServers.length > 1) {
       const names = ucpResourceServers.map((r) => r.name).join(', ');
       throw new ValidationError(
         `Only one resource server can have type '${RESOURCE_SERVER_TYPE_UCP}', found: ${names}.`
       );
     }
+
+    // dev.ucp scopes are reserved for the UCP-typed server, so the API is likely to reject them once the type is cleared
+    configured
+      .filter(
+        (r) =>
+          r.type === null && r.scopes?.some((scope) => scope.value?.startsWith(UCP_SCOPE_PREFIX))
+      )
+      .forEach((r) =>
+        log.warn(
+          `'${r.name}' sets 'type: null' but still has '${UCP_SCOPE_PREFIX}' scopes, which are reserved for the UCP-typed resource server. Set 'scopes: []' on it or keep the type.`
+        )
+      );
 
     await super.validate(assets);
   }
@@ -268,41 +284,81 @@ export default class ResourceServersHandler extends DefaultHandler {
       conflicts: filterResourceServer(conflicts),
     };
 
+    this.warnIfHolderStays(changes, excluded);
+
     // Only one resource server can hold the UCP type, so the holder giving it up is updated first
-    const holder = this.existing?.find((e) => e.type === RESOURCE_SERVER_TYPE_UCP);
-    const releasing = holder
-      ? changes.update.filter((r) => r.id === holder.id && r.type === null)
-      : [];
-
-    if (holder && !releasing.length) {
-      const taker = [...changes.create, ...changes.update].find(
-        (r) => r.type === RESOURCE_SERVER_TYPE_UCP && r.id !== holder.id
-      );
-      // Mirrors the delete gating in DefaultHandler.processChanges
-      const deletes =
-        isTruthy(this.config('AUTH0_ALLOW_DELETE')) || this.config('EXTENSION_SECRET');
-      if (taker && !(deletes && changes.del.some((r) => r.id === holder.id))) {
-        const { name } = holder;
-        log.warn(
-          `'${name}' already has type '${RESOURCE_SERVER_TYPE_UCP}', so setting it on '${taker.name}' is likely to fail with a 409. Set 'type: null' on '${name}' in the same config to move it.`
-        );
-      }
-    }
-
+    const { releasing } = this.typeRelease(changes.update);
     if (releasing.length) {
       await super.processChanges(assets, { ...changes, update: releasing, create: [] });
-      await super.processChanges(assets, {
-        del: [],
-        conflicts: [],
-        create: changes.create,
-        update: changes.update.filter((r) => !releasing.includes(r)),
-      });
+      try {
+        await super.processChanges(assets, {
+          del: [],
+          conflicts: [],
+          create: changes.create,
+          update: changes.update.filter((r) => !releasing.includes(r)),
+        });
+      } catch (err) {
+        const names = releasing.map((r) => `'${r.name}'`).join(', ');
+        throw new Error(
+          `${err.message}\nThe type '${RESOURCE_SERVER_TYPE_UCP}' was already released from ${names} in this run, so no resource server has it until the import succeeds. Fix the error and re-run.`
+        );
+      }
       return;
     }
 
     await super.processChanges(assets, {
       ...changes,
     });
+  }
+
+  async dryRunChanges(assets: Assets): Promise<CalculatedChanges> {
+    if (!assets.resourceServers) return super.dryRunChanges(assets);
+
+    // A null type is the same as no type for a server that doesn't have one, so it isn't a change
+    await this.getType();
+    const resourceServers = assets.resourceServers.map((r) => {
+      if (r.type !== null) return r;
+      const remote = this.existing.find((e) => e.id === r.id || e.identifier === r.identifier);
+      if (remote?.type) return r;
+      const copy = { ...r };
+      delete copy.type;
+      return copy;
+    });
+
+    const changes = await super.dryRunChanges({ ...assets, resourceServers });
+    this.warnIfHolderStays(changes, assets.exclude?.resourceServers || []);
+    return changes;
+  }
+
+  // The tenant's UCP holder, and the updates that give the type up
+  private typeRelease(update: ResourceServer[]) {
+    const holder = this.existing?.find((e) => e.type === RESOURCE_SERVER_TYPE_UCP);
+    const releasing = holder ? update.filter((r) => r.id === holder.id && r.type === null) : [];
+    return { holder, releasing };
+  }
+
+  // Warns when another server is given the type but the holder is neither released nor deleted
+  private warnIfHolderStays(changes: CalculatedChanges, excluded: string[]): void {
+    const { holder, releasing } = this.typeRelease(changes.update);
+    if (!holder || releasing.length) return;
+
+    const taker = [...changes.create, ...changes.update].find(
+      (r) => r.type === RESOURCE_SERVER_TYPE_UCP && r.id !== holder.id && !excluded.includes(r.name)
+    );
+    if (!taker) return;
+
+    const holderInDel = changes.del.some((r) => r.id === holder.id);
+    // Mirrors the delete gating in DefaultHandler.processChanges
+    const deletes = isTruthy(this.config('AUTH0_ALLOW_DELETE')) || this.config('EXTENSION_SECRET');
+    if (holderInDel && deletes) return;
+
+    const { name } = holder;
+    const hint = holderInDel
+      ? `Set 'AUTH0_ALLOW_DELETE' to true to delete '${name}', or keep it in the config with 'type: null'.`
+      : `Set 'type: null' on '${name}' in the same config to move it.`;
+    log.warn(
+      `'${name}' already has type '${RESOURCE_SERVER_TYPE_UCP}', so setting it on '${taker.name}' is likely to fail with a 409. ${hint}`
+    );
   }
 
   async updateResourceServer(

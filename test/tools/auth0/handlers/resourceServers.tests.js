@@ -111,6 +111,58 @@ describe('#resourceServers handler', () => {
       ]);
     });
 
+    it('should not count a system resource server, whose type is never sent', async () => {
+      const handler = new resourceServers.default({ client: {}, config });
+      const stageFn = Object.getPrototypeOf(handler).validate;
+      const data = [
+        { name: 'systemAPI', is_system: true, type: 'universal_commerce_protocol_server' },
+        { name: 'commerceAPI', type: 'universal_commerce_protocol_server' },
+      ];
+
+      await stageFn.apply(handler, [{ resourceServers: data }]);
+    });
+
+    it('should warn about type null combined with dev.ucp scopes', async () => {
+      const warn = sinon.stub(log, 'warn');
+      try {
+        const handler = new resourceServers.default({ client: {}, config });
+        const stageFn = Object.getPrototypeOf(handler).validate;
+        const data = [
+          { name: 'oldAPI', type: null, scopes: [{ value: 'dev.ucp.shopping.checkout' }] },
+        ];
+
+        await stageFn.apply(handler, [{ resourceServers: data }]);
+
+        expect(warn.calledOnce).to.equal(true);
+        expect(warn.firstCall.args[0]).to.include("'oldAPI' sets 'type: null' but still has");
+      } finally {
+        warn.restore();
+      }
+    });
+
+    it('should not warn about dev.ucp scopes on the UCP-typed server or type null with other scopes', async () => {
+      const warn = sinon.stub(log, 'warn');
+      const handler = new resourceServers.default({ client: {}, config });
+      const stageFn = Object.getPrototypeOf(handler).validate;
+      const data = [
+        {
+          name: 'commerceAPI',
+          type: 'universal_commerce_protocol_server',
+          scopes: [{ value: 'dev.ucp.shopping.checkout' }],
+        },
+        { name: 'oldAPI', type: null, scopes: [{ value: 'read:orders' }] },
+        { name: 'clearedAPI', type: null, scopes: [] },
+        { name: 'untypedAPI', scopes: [{ value: 'dev.ucp.shopping.cart' }] },
+      ];
+
+      try {
+        await stageFn.apply(handler, [{ resourceServers: data }]);
+        expect(warn.called).to.equal(false);
+      } finally {
+        warn.restore();
+      }
+    });
+
     it('should allow one UCP-typed resource server alongside others, including type null', async () => {
       const handler = new resourceServers.default({ client: {}, config });
       const stageFn = Object.getPrototypeOf(handler).validate;
@@ -183,7 +235,7 @@ describe('#resourceServers handler', () => {
       const run = async (
         existing,
         desired,
-        { allowDelete = true, exclude, extensionSecret } = {}
+        { allowDelete = true, exclude, extensionSecret, failUpdate } = {}
       ) => {
         const calls = [];
         const auth0 = {
@@ -194,6 +246,7 @@ describe('#resourceServers handler', () => {
             },
             update: (id, data) => {
               calls.push(`update:${id}:${data.type}`);
+              if (id === failUpdate) return Promise.reject(new Error('boom'));
               return Promise.resolve({ id, ...data });
             },
             delete: (id) => {
@@ -295,6 +348,39 @@ describe('#resourceServers handler', () => {
         expect(calls).to.deep.equal(['update:rs1:null', `update:rs2:${UCP}`]);
       });
 
+      it('should move the type when the config has no ids', async () => {
+        const calls = await run(
+          [holder, plain],
+          [
+            { name: 'newAPI', identifier: plain.identifier, type: UCP },
+            { name: 'oldAPI', identifier: holder.identifier, type: null },
+          ]
+        );
+
+        expect(calls).to.deep.equal(['update:rs1:null', `update:rs2:${UCP}`]);
+      });
+
+      it('should say the type was already released when the next update fails', async () => {
+        let error;
+        try {
+          await run(
+            [holder, plain],
+            [
+              { ...holder, type: null },
+              { ...plain, type: UCP },
+            ],
+            {
+              failUpdate: 'rs2',
+            }
+          );
+        } catch (err) {
+          error = err;
+        }
+
+        expect(error.message).to.include('boom');
+        expect(error.message).to.include("already released from 'oldAPI'");
+      });
+
       it('should warn when another server takes the type and the holder omits it', async () => {
         const calls = await run([holder, plain], [holder, { ...plain, type: UCP }]);
 
@@ -320,7 +406,11 @@ describe('#resourceServers handler', () => {
         });
 
         expect(calls).to.deep.equal([`update:rs2:${UCP}`]);
-        expect(warn.args.some(([msg]) => msg.includes("'oldAPI' already has type"))).to.equal(true);
+        const message = warn.args
+          .map(([msg]) => msg)
+          .find((msg) => msg.includes('already has type'));
+        expect(message).to.include("'oldAPI' already has type");
+        expect(message).to.include('AUTH0_ALLOW_DELETE');
       });
 
       it('should not warn when an extension deletes the holder', async () => {
@@ -345,6 +435,104 @@ describe('#resourceServers handler', () => {
         await run([holder, plain], [holder, plain]);
 
         expect(warn.called).to.equal(false);
+      });
+
+      describe('dry run', () => {
+        const dryRun = async (existing, desired, exclude = []) => {
+          const auth0 = {
+            resourceServers: {
+              list: (params) => mockPagedData(params, 'resource_servers', existing),
+            },
+            pool: sequentialPool,
+          };
+          const handler = new resourceServers.default({
+            client: pageClient(auth0),
+            config: (key) => ({ AUTH0_ALLOW_DELETE: true }[key]),
+          });
+          return Object.getPrototypeOf(handler).dryRunChanges.apply(handler, [
+            { resourceServers: desired, exclude: { resourceServers: exclude } },
+          ]);
+        };
+
+        it('should warn when another server takes the type and the holder omits it', async () => {
+          const changes = await dryRun(
+            [holder, plain],
+            [
+              { name: 'oldAPI', identifier: holder.identifier },
+              { name: 'newAPI', identifier: plain.identifier, type: UCP },
+            ]
+          );
+
+          expect(changes.update.map((r) => r.name)).to.deep.equal(['newAPI']);
+          expect(warn.calledOnce).to.equal(true);
+          expect(warn.firstCall.args[0]).to.include("'oldAPI' already has type");
+        });
+
+        it('should not warn when the holder is released', async () => {
+          await dryRun(
+            [holder, plain],
+            [
+              { name: 'oldAPI', identifier: holder.identifier, type: null },
+              { name: 'newAPI', identifier: plain.identifier, type: UCP },
+            ]
+          );
+
+          expect(warn.called).to.equal(false);
+        });
+
+        it('should not warn when the server taking the type is excluded', async () => {
+          await dryRun(
+            [holder, plain],
+            [{ name: 'newAPI', identifier: plain.identifier, type: UCP }],
+            ['newAPI']
+          );
+
+          expect(warn.called).to.equal(false);
+        });
+
+        it('should not fetch resource servers when the config has none', async () => {
+          let listed = false;
+          const auth0 = {
+            resourceServers: {
+              list: () => {
+                listed = true;
+                return Promise.resolve([]);
+              },
+            },
+            pool: sequentialPool,
+          };
+          const handler = new resourceServers.default({ client: pageClient(auth0), config });
+
+          const changes = await Object.getPrototypeOf(handler).dryRunChanges.apply(handler, [{}]);
+
+          expect(listed).to.equal(false);
+          expect(changes).to.deep.equal({ del: [], create: [], conflicts: [], update: [] });
+        });
+
+        it('should not report type null on a server that does not hold the type', async () => {
+          const changes = await dryRun(
+            [holder, plain],
+            [
+              { name: 'oldAPI', identifier: holder.identifier, type: UCP },
+              { name: 'newAPI', identifier: plain.identifier, type: null },
+            ]
+          );
+
+          expect(changes.update).to.deep.equal([]);
+          expect(changes.create).to.deep.equal([]);
+        });
+
+        it('should report type null on the holder as a change', async () => {
+          const changes = await dryRun(
+            [holder, plain],
+            [
+              { name: 'oldAPI', identifier: holder.identifier, type: null },
+              { name: 'newAPI', identifier: plain.identifier },
+            ]
+          );
+
+          expect(changes.update.map((r) => r.name)).to.deep.equal(['oldAPI']);
+        });
       });
     });
 

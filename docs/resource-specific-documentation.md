@@ -689,15 +689,14 @@ resourceServers:
 }
 ```
 
-To move the type to another API, set `type: null` on the current holder and the type on the new one in the same config. The Deploy CLI updates the current holder first so the "only one" rule is never violated mid-deploy. If the current holder has `dev.ucp` scopes, also set `scopes: []` on it; omitting `scopes` leaves them in place and the API rejects the update.
+To move the type to another API, set `type: null` on the current holder and the type on the new one in the same config. The Deploy CLI updates the current holder first so the "only one" rule is never violated mid-deploy. If the current holder has `dev.ucp` scopes, also set `scopes: []` on it; omitting `scopes` leaves them in place, and the API rejects the update. The Deploy CLI warns when `type: null` is combined with `dev.ucp` scopes.
 
-The current holder must be released in the same config. The Deploy CLI logs a warning, and the API returns `409`, when another resource server is given the type but the holder is missing `type: null` (omitting `type` leaves it unchanged), is excluded by name through `AUTH0_EXCLUDED_RESOURCE_SERVERS`, or is removed from the config while `AUTH0_ALLOW_DELETE` is not `true`.
+The current holder must be released in the same config. The Deploy CLI logs a warning (during `--dry-run` it shows with `AUTH0_DEBUG=true`), and the API returns `409`, when another resource server is given the type but the holder is missing `type: null` (omitting `type` leaves it unchanged), is excluded by name through `AUTH0_EXCLUDED_RESOURCE_SERVERS`, or is removed from the config while `AUTH0_ALLOW_DELETE` is not `true`.
 
 Notes:
 
 - Resource servers that don't hold the type have no `type` property in API responses, so exports are unchanged for them.
 - `type: null` is accepted whether or not the tenant has the feature flag. Setting `universal_commerce_protocol_server` without the flag fails with `403`.
-- A config with `type: null` on a server that doesn't hold the type shows as an `UPDATE` in every dry run. The update itself changes nothing.
 
 ### Online Refresh Tokens — `allow_online_access` and `allow_online_access_with_ephemeral_sessions`
 
