@@ -48,8 +48,9 @@ export const findDuplicateNames = (agents: { name?: string }[]): string[] => {
   return [...duplicates];
 };
 
-// node-auth0 does not type `agent_id` on clients yet; the API returns it and the SDK passes it through.
-type ClientWithAgent = Management.Client & {
+// node-auth0 only types `agent_id` on clients from v7.7.0 (as `string | undefined`). Define it here so
+// this compiles with both 7.6.x and 7.7+, and allow null once a client has been unlinked.
+type ClientWithAgent = Omit<Management.Client, 'agent_id'> & {
   client_id: string;
   name: string;
   agent_id?: string | null;
