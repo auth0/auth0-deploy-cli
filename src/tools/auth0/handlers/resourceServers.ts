@@ -3,8 +3,9 @@ import ValidationError from '../../validationError';
 
 import constants from '../../constants';
 import DefaultHandler from './default';
-import { Assets } from '../../../types';
+import { Assets, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
+import log from '../../../logger';
 
 export const excludeSchema = {
   type: 'array',
@@ -225,6 +226,49 @@ export default class ResourceServersHandler extends DefaultHandler {
     await super.validate(assets);
   }
 
+  // `require_consent_non_repudiation` is only accepted on customer resource servers. Drop it
+  // from system resource servers (e.g. Auth0 My Account API) with a warning, so it is neither
+  // sent on update nor reported as a permanent change in dry-run.
+  async stripSystemResourceServerFields(
+    resourceServers: ResourceServer[]
+  ): Promise<ResourceServer[]> {
+    const existing = await this.getType();
+    const systemIdentifiers = existing
+      .filter((rs) => rs.is_system === true)
+      .map((rs) => rs.identifier);
+
+    return resourceServers.map((resourceServer) => {
+      if (
+        !systemIdentifiers.includes(resourceServer.identifier) ||
+        !('require_consent_non_repudiation' in resourceServer)
+      ) {
+        return resourceServer;
+      }
+
+      log.warn(
+        `Ignoring 'require_consent_non_repudiation' on system resource server ${this.objString(
+          resourceServer
+        )}: it is only supported on customer resource servers.`
+      );
+      const sanitized = { ...resourceServer };
+      delete sanitized.require_consent_non_repudiation;
+      return sanitized;
+    });
+  }
+
+  async dryRunChanges(assets: Assets): Promise<CalculatedChanges> {
+    const { resourceServers } = assets;
+
+    if (!resourceServers) {
+      return { del: [], create: [], conflicts: [], update: [] };
+    }
+
+    return super.dryRunChanges({
+      ...assets,
+      resourceServers: await this.stripSystemResourceServerFields(resourceServers),
+    });
+  }
+
   async processChanges(assets: Assets): Promise<void> {
     const { resourceServers } = assets;
 
@@ -235,7 +279,10 @@ export default class ResourceServersHandler extends DefaultHandler {
 
     const filterResourceServer = (items) => items.filter((r) => !excluded.includes(r.name));
 
-    const { del, update, create, conflicts } = await this.calcChanges(assets);
+    const { del, update, create, conflicts } = await this.calcChanges({
+      ...assets,
+      resourceServers: await this.stripSystemResourceServerFields(resourceServers),
+    });
 
     const changes = {
       del: filterResourceServer(del),

@@ -1,7 +1,9 @@
 import pageClient from '../../../../src/tools/auth0/client';
 
 const { expect } = require('chai');
+const sinon = require('sinon');
 const resourceServers = require('../../../../src/tools/auth0/handlers/resourceServers');
+const log = require('../../../../src/logger').default;
 const { mockPagedData } = require('../../../utils');
 
 const pool = {
@@ -975,9 +977,54 @@ describe('#resourceServers handler', () => {
 
       const handler = new resourceServers.default({ client: pageClient(auth0), config });
       const stageFn = Object.getPrototypeOf(handler).processChanges;
+      const warnSpy = sinon.spy(log, 'warn');
 
-      await stageFn.apply(handler, [
-        {
+      try {
+        await stageFn.apply(handler, [
+          {
+            resourceServers: [
+              {
+                name: 'Auth0 My Account API',
+                identifier: 'https://auth0.com/my-account/me/',
+                token_lifetime: 3600,
+                require_consent_non_repudiation: true,
+              },
+            ],
+          },
+        ]);
+
+        expect(warnSpy.calledOnce).to.be.true;
+        expect(warnSpy.firstCall.args[0]).to.include('require_consent_non_repudiation');
+      } finally {
+        warnSpy.restore();
+      }
+
+      expect(updateCalledWith).to.not.equal(null);
+      expect(updateCalledWith.token_lifetime).to.equal(3600);
+      expect(updateCalledWith).to.not.have.property('require_consent_non_repudiation');
+    });
+
+    it('should not report an update in dry-run for require_consent_non_repudiation on Auth0 My Account API', async () => {
+      const existingResourceServer = {
+        id: 'rs_my_account',
+        identifier: 'https://auth0.com/my-account/me/',
+        name: 'Auth0 My Account API',
+        is_system: true,
+        token_lifetime: 3600,
+      };
+
+      const auth0 = {
+        resourceServers: {
+          list: (params) => mockPagedData(params, 'resource_servers', [existingResourceServer]),
+        },
+        pool,
+      };
+
+      const handler = new resourceServers.default({ client: pageClient(auth0), config });
+      const warnSpy = sinon.spy(log, 'warn');
+
+      try {
+        const changes = await handler.dryRunChanges({
           resourceServers: [
             {
               name: 'Auth0 My Account API',
@@ -986,12 +1033,50 @@ describe('#resourceServers handler', () => {
               require_consent_non_repudiation: true,
             },
           ],
-        },
-      ]);
+        });
 
-      expect(updateCalledWith).to.not.equal(null);
-      expect(updateCalledWith.token_lifetime).to.equal(3600);
-      expect(updateCalledWith).to.not.have.property('require_consent_non_repudiation');
+        expect(changes.update).to.have.length(0);
+        expect(changes.create).to.have.length(0);
+        expect(warnSpy.calledOnce).to.be.true;
+      } finally {
+        warnSpy.restore();
+      }
+    });
+
+    it('should not warn about require_consent_non_repudiation on a custom resource server', async () => {
+      const existingResourceServer = {
+        id: 'rs_custom',
+        identifier: 'https://api.example.com',
+        name: 'My API',
+      };
+
+      const auth0 = {
+        resourceServers: {
+          list: (params) => mockPagedData(params, 'resource_servers', [existingResourceServer]),
+        },
+        pool,
+      };
+
+      const handler = new resourceServers.default({ client: pageClient(auth0), config });
+      const warnSpy = sinon.spy(log, 'warn');
+
+      try {
+        const changes = await handler.dryRunChanges({
+          resourceServers: [
+            {
+              name: 'My API',
+              identifier: 'https://api.example.com',
+              require_consent_non_repudiation: true,
+            },
+          ],
+        });
+
+        expect(changes.update).to.have.length(1);
+        expect(changes.update[0].require_consent_non_repudiation).to.equal(true);
+        expect(warnSpy.called).to.be.false;
+      } finally {
+        warnSpy.restore();
+      }
     });
 
     it('should include require_consent_non_repudiation in create payload for a custom resource server', async () => {
