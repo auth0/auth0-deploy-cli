@@ -923,7 +923,7 @@ describe('#resourceServers handler', () => {
       expect(updateCalledWith.authorization_policy).to.equal(null);
     });
 
-    it('should preserve require_consent_non_repudiation on system resource server export (getType)', async () => {
+    it('should not preserve require_consent_non_repudiation on system resource server export (getType)', async () => {
       const systemResourceServer = {
         id: 'rs_system',
         identifier: 'https://api.system.com/me/',
@@ -946,13 +946,12 @@ describe('#resourceServers handler', () => {
       const handler = new resourceServers.default({ client: pageClient(auth0), config });
       const result = await handler.getType();
 
-      expect(result[0]).to.have.property('require_consent_non_repudiation');
-      expect(result[0].require_consent_non_repudiation).to.equal(true);
+      expect(result[0]).to.not.have.property('require_consent_non_repudiation');
       expect(result[0]).to.not.have.property('scopes');
       expect(result[0]).to.not.have.property('signing_alg');
     });
 
-    it('should include require_consent_non_repudiation in update payload for Auth0 My Account API', async () => {
+    it('should not include require_consent_non_repudiation in update payload for Auth0 My Account API', async () => {
       let updateCalledWith = null;
       const existingResourceServer = {
         id: 'rs_my_account',
@@ -983,6 +982,84 @@ describe('#resourceServers handler', () => {
             {
               name: 'Auth0 My Account API',
               identifier: 'https://auth0.com/my-account/me/',
+              token_lifetime: 3600,
+              require_consent_non_repudiation: true,
+            },
+          ],
+        },
+      ]);
+
+      expect(updateCalledWith).to.not.equal(null);
+      expect(updateCalledWith.token_lifetime).to.equal(3600);
+      expect(updateCalledWith).to.not.have.property('require_consent_non_repudiation');
+    });
+
+    it('should include require_consent_non_repudiation in create payload for a custom resource server', async () => {
+      let createCalledWith = null;
+
+      const auth0 = {
+        resourceServers: {
+          create: function (data) {
+            createCalledWith = data;
+            return Promise.resolve({ data });
+          },
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) => mockPagedData(params, 'resource_servers', []),
+        },
+        pool,
+      };
+
+      const handler = new resourceServers.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          resourceServers: [
+            {
+              name: 'My API',
+              identifier: 'https://api.example.com',
+              require_consent_non_repudiation: true,
+            },
+          ],
+        },
+      ]);
+
+      expect(createCalledWith).to.not.equal(null);
+      expect(createCalledWith.require_consent_non_repudiation).to.equal(true);
+    });
+
+    it('should include require_consent_non_repudiation in update payload for a custom resource server', async () => {
+      let updateCalledWith = null;
+      const existingResourceServer = {
+        id: 'rs_custom',
+        identifier: 'https://api.example.com',
+        name: 'My API',
+        require_consent_non_repudiation: false,
+      };
+
+      const auth0 = {
+        resourceServers: {
+          create: () => Promise.resolve({ data: [] }),
+          update: function (id, data) {
+            updateCalledWith = data;
+            return Promise.resolve({ data });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) => mockPagedData(params, 'resource_servers', [existingResourceServer]),
+        },
+        pool,
+      };
+
+      const handler = new resourceServers.default({ client: pageClient(auth0), config });
+      const stageFn = Object.getPrototypeOf(handler).processChanges;
+
+      await stageFn.apply(handler, [
+        {
+          resourceServers: [
+            {
+              name: 'My API',
+              identifier: 'https://api.example.com',
               require_consent_non_repudiation: true,
             },
           ],

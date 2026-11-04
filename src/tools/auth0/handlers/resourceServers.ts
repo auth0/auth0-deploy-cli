@@ -189,7 +189,6 @@ export default class ResourceServersHandler extends DefaultHandler {
             'id',
             'is_system',
             'authorization_policy',
-            'require_consent_non_repudiation',
           ];
           const sanitized: any = {};
           allowedKeys.forEach((key) => {
@@ -268,7 +267,6 @@ export default class ResourceServersHandler extends DefaultHandler {
           update.skip_consent_for_verifiable_first_party_clients,
         subject_type_authorization: update.subject_type_authorization,
         authorization_policy: update.authorization_policy,
-        require_consent_non_repudiation: update.require_consent_non_repudiation,
       };
 
       return this.client.resourceServers.update(id, updateFields);
