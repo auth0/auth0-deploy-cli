@@ -107,8 +107,9 @@ export default class ScimHandler {
     await this.poolClient
       .addEachTask({
         data: rest,
+        // Returning undefined ends the task, so a 403 mid-pool stops spending rate-limit slots.
         generator: (connection) =>
-          this.scimScopes.read ? this.loadScimConfiguration(connection) : Promise.resolve(null),
+          this.scimScopes.read ? this.loadScimConfiguration(connection) : undefined,
       })
       .promise();
   }

@@ -220,6 +220,30 @@ describe('ScimHandler', () => {
       expect(serialHandler.scimScopes.read).to.be.false;
     });
 
+    it('should stop queuing when a 429 on the probe is followed by a 403', async () => {
+      // Two slots per second: draining 11 skipped connections as no-ops would take seconds.
+      const throttledHandler = new ScimHandler(
+        mockConfig,
+        mockConnectionsManager,
+        new PromisePoolExecutor({ concurrencyLimit: 1, frequencyLimit: 2, frequencyWindow: 1000 })
+      );
+      const connections = Array.from({ length: 12 }, (_, i) => ({
+        id: `con_saml_${i}`,
+        strategy: 'samlp',
+      }));
+      mockConnectionsManager.scimConfiguration.get.onCall(0).rejects({ statusCode: 429 }); // probe
+      mockConnectionsManager.scimConfiguration.get.onCall(1).rejects({ statusCode: 403 });
+      mockConnectionsManager.scimConfiguration.get.resolves(null);
+
+      const start = Date.now();
+      await throttledHandler.createIdMap(connections);
+
+      // The pool ends at the first 403 instead of draining the remaining connections.
+      expect(Date.now() - start).to.be.below(1000);
+      expect(mockConnectionsManager.scimConfiguration.get.callCount).to.equal(2);
+      expect(throttledHandler.scimScopes.read).to.be.false;
+    });
+
     it('should reject without queuing the rest when the probe fails unexpectedly', async () => {
       const connections = Array.from({ length: 3 }, (_, i) => ({
         id: `con_saml_${i}`,
