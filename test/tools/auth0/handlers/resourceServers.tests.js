@@ -405,6 +405,8 @@ describe('#resourceServers handler', () => {
         expect(calls).to.deep.equal([`update:rs2:${UCP}`]);
         expect(warn.calledOnce).to.equal(true);
         expect(warn.firstCall.args[0]).to.include("'oldAPI' already has type");
+        expect(warn.firstCall.args[0]).to.include('AUTH0_EXCLUDED_RESOURCE_SERVERS');
+        expect(warn.firstCall.args[0]).to.not.include('type: null');
       });
 
       it('should warn when the holder is removed from the config but deletes are off', async () => {
@@ -445,7 +447,7 @@ describe('#resourceServers handler', () => {
       });
 
       describe('dry run', () => {
-        const dryRun = async (existing, desired, exclude = []) => {
+        const dryRun = async (existing, desired, exclude = [], allowDelete = true) => {
           const auth0 = {
             resourceServers: {
               list: (params) => mockPagedData(params, 'resource_servers', existing),
@@ -454,7 +456,7 @@ describe('#resourceServers handler', () => {
           };
           const handler = new resourceServers.default({
             client: pageClient(auth0),
-            config: (key) => ({ AUTH0_ALLOW_DELETE: true }[key]),
+            config: (key) => ({ AUTH0_ALLOW_DELETE: allowDelete }[key]),
           });
           return Object.getPrototypeOf(handler).dryRunChanges.apply(handler, [
             { resourceServers: desired, exclude: { resourceServers: exclude } },
@@ -473,6 +475,44 @@ describe('#resourceServers handler', () => {
           expect(changes.update.map((r) => r.name)).to.deep.equal(['newAPI']);
           expect(warn.calledOnce).to.equal(true);
           expect(warn.firstCall.args[0]).to.include("'oldAPI' already has type");
+        });
+
+        const takerConfig = { name: 'newAPI', identifier: plain.identifier, type: UCP };
+
+        [true, false].forEach((allowDelete) => {
+          it(`should point to the exclusion for an excluded holder (AUTH0_ALLOW_DELETE=${allowDelete})`, async () => {
+            await dryRun([holder, plain], [takerConfig], ['oldAPI'], allowDelete);
+
+            expect(warn.calledOnce).to.equal(true);
+            expect(warn.firstCall.args[0]).to.include('AUTH0_EXCLUDED_RESOURCE_SERVERS');
+            expect(warn.firstCall.args[0]).to.not.include('AUTH0_ALLOW_DELETE');
+          });
+        });
+
+        it('should warn when an excluded holder is released in the config, since the import skips it', async () => {
+          await dryRun(
+            [holder, plain],
+            [{ name: 'oldAPI', identifier: holder.identifier, type: null }, takerConfig],
+            ['oldAPI']
+          );
+
+          expect(warn.calledOnce).to.equal(true);
+          expect(warn.firstCall.args[0]).to.include('AUTH0_EXCLUDED_RESOURCE_SERVERS');
+        });
+
+        it('should leave excluded servers out of the preview, like the import does', async () => {
+          const changes = await dryRun(
+            [holder, plain],
+            [
+              { name: 'excludedNew', identifier: 'https://excluded.example.com' },
+              { name: 'newAPI', identifier: plain.identifier, description: 'changed' },
+            ],
+            ['oldAPI', 'excludedNew']
+          );
+
+          expect(changes.del).to.deep.equal([]);
+          expect(changes.create).to.deep.equal([]);
+          expect(changes.update.map((r) => r.name)).to.deep.equal(['newAPI']);
         });
 
         it('should not warn when the holder is released', async () => {

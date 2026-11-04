@@ -7,6 +7,7 @@ import { Assets, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
 import log from '../../../logger';
 import { isTruthy } from '../../../utils';
+import { filterExcluded } from '../../utils';
 
 export const excludeSchema = {
   type: 'array',
@@ -272,16 +273,7 @@ export default class ResourceServersHandler extends DefaultHandler {
 
     const excluded = (assets.exclude && assets.exclude.resourceServers) || [];
 
-    const filterResourceServer = (items) => items.filter((r) => !excluded.includes(r.name));
-
-    const { del, update, create, conflicts } = await this.calcChanges(assets);
-
-    const changes = {
-      del: filterResourceServer(del),
-      update: filterResourceServer(update),
-      create: filterResourceServer(create),
-      conflicts: filterResourceServer(conflicts),
-    };
+    const changes = filterExcluded(await this.calcChanges(assets), excluded);
 
     this.warnIfHolderStays(changes, excluded);
 
@@ -324,8 +316,12 @@ export default class ResourceServersHandler extends DefaultHandler {
       return copy;
     });
 
-    const changes = await super.dryRunChanges({ ...assets, resourceServers });
-    this.warnIfHolderStays(changes, assets.exclude?.resourceServers || []);
+    const excluded = assets.exclude?.resourceServers || [];
+    const changes = filterExcluded(
+      await super.dryRunChanges({ ...assets, resourceServers }),
+      excluded
+    );
+    this.warnIfHolderStays(changes, excluded);
     return changes;
   }
 
@@ -336,13 +332,14 @@ export default class ResourceServersHandler extends DefaultHandler {
     return { holder, releasing };
   }
 
-  // Warns when another server is given the type but the holder is neither released nor deleted
+  // Warns when another server is given the type but the holder is neither released nor deleted.
+  // `changes` must already be filtered by exclusion, so an excluded holder is simply left untouched.
   private warnIfHolderStays(changes: CalculatedChanges, excluded: string[]): void {
     const { holder, releasing } = this.typeRelease(changes.update);
     if (!holder || releasing.length) return;
 
     const taker = [...changes.create, ...changes.update].find(
-      (r) => r.type === RESOURCE_SERVER_TYPE_UCP && r.id !== holder.id && !excluded.includes(r.name)
+      (r) => r.type === RESOURCE_SERVER_TYPE_UCP && r.id !== holder.id
     );
     if (!taker) return;
 
@@ -352,9 +349,12 @@ export default class ResourceServersHandler extends DefaultHandler {
     if (holderInDel && deletes) return;
 
     const { name } = holder;
-    const hint = holderInDel
-      ? `Set 'AUTH0_ALLOW_DELETE' to true to delete '${name}', or keep it in the config with 'type: null'.`
-      : `Set 'type: null' on '${name}' in the same config to move it.`;
+    let hint = `Set 'type: null' on '${name}' in the same config to move it.`;
+    if (excluded.includes(name ?? '')) {
+      hint = `'${name}' is excluded through 'AUTH0_EXCLUDED_RESOURCE_SERVERS' and can't be changed. Remove it from the exclusion to move the type.`;
+    } else if (holderInDel) {
+      hint = `Set 'AUTH0_ALLOW_DELETE' to true to delete '${name}', or keep it in the config with 'type: null'.`;
+    }
     log.warn(
       `'${name}' already has type '${RESOURCE_SERVER_TYPE_UCP}', so setting it on '${taker.name}' is likely to fail with a 409. ${hint}`
     );
