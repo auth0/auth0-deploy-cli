@@ -98,6 +98,12 @@ export default class AgentsHandler extends DefaultAPIHandler {
       throw err;
     }
 
+    // No agents, so no links to resolve
+    if (agents.length === 0) {
+      this.existing = [];
+      return this.existing;
+    }
+
     // Agent names are not unique on the tenant, but agents are matched by name
     const duplicateNames = findDuplicateNames(agents);
     if (duplicateNames.length > 0) {
@@ -152,21 +158,28 @@ export default class AgentsHandler extends DefaultAPIHandler {
     this.assertNamesUnambiguous(agents, existing);
     this.assertExternalAgentIdsUnchanged(agents, existing);
 
-    // Clients created earlier in the same import do not exist on the tenant yet
-    const clients = await this.listClients();
-    const knownClientNames = [
-      ...clients.map((c) => c.name),
-      ...(assets.clients || []).map((c) => c.name as string),
-    ];
-    this.assertClientsExist(agents, knownClientNames);
+    // Only list clients when links or deletes need them
+    let clients: ClientWithAgent[] | null = null;
+    if (agents.some((agent) => (agent.clients || []).length > 0)) {
+      clients = await this.listClients();
+      // Clients created earlier in the same import do not exist on the tenant yet
+      const knownClientNames = [
+        ...clients.map((c) => c.name),
+        ...(assets.clients || []).map((c) => c.name as string),
+      ];
+      this.assertClientsExist(agents, knownClientNames);
+    }
 
     const changes = await super.dryRunChanges(assets);
 
     const allowDelete =
       this.config('AUTH0_ALLOW_DELETE') === 'true' || this.config('AUTH0_ALLOW_DELETE') === true;
-    if (allowDelete) {
+    if (allowDelete && changes.del.length > 0) {
+      const tenantClients = clients || (await this.listClients());
       changes.del.forEach((agent) => {
-        const linked = clients.filter((c) => c.agent_id === agent.agent_id).map((c) => c.name);
+        const linked = tenantClients
+          .filter((c) => c.agent_id === agent.agent_id)
+          .map((c) => c.name);
         if (linked.length > 0) {
           log.warn(
             `Deleting agent "${agent.name}" will first unlink client(s) ${linked
@@ -199,12 +212,15 @@ export default class AgentsHandler extends DefaultAPIHandler {
         .map((agent) => [agent.name, [...agent.clients]])
     );
 
-    // Re-fetch so clients created earlier in this import can be linked
-    this.tenantClients = await this.listClients();
-    this.assertClientsExist(
-      agents,
-      this.tenantClients.map((c) => c.name)
-    );
+    // Re-fetch so clients created earlier in this import can be linked.
+    // Deletes fetch clients on their own if needed.
+    if (desiredLinks.size > 0) {
+      this.tenantClients = await this.listClients();
+      this.assertClientsExist(
+        agents,
+        this.tenantClients.map((c) => c.name)
+      );
+    }
 
     const { del, update, create, conflicts } = await this.calcChanges(assets);
 
@@ -240,8 +256,8 @@ export default class AgentsHandler extends DefaultAPIHandler {
   // DELETE /agents/{id} keeps linked clients but leaves their agent_id pointing at
   // the deleted agent. Unlink them first so no client references a missing agent.
   private async deleteAgent(agentId: string): Promise<void> {
-    const clients = this.tenantClients || (await this.listClients());
-    const linked = clients.filter((c) => c.agent_id === agentId);
+    this.tenantClients = this.tenantClients || (await this.listClients());
+    const linked = this.tenantClients.filter((c) => c.agent_id === agentId);
 
     for (const client of linked) {
       await this.setClientAgent(client, null);

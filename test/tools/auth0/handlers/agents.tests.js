@@ -131,6 +131,18 @@ describe('#agents handler', () => {
       ]);
     });
 
+    it('should not list clients when the tenant has no agents', async () => {
+      const handler = new agents.default({
+        client: pageClient({
+          agents: { list: (params) => mockPagedData(params, 'agents', []) },
+          clients: { list: notCalled('clients.list') },
+        }),
+        config,
+      });
+
+      expect(await handler.getType()).to.deep.equal([]);
+    });
+
     it('should return null when agents are not enabled for the tenant', async () => {
       const { client } = mockClient({
         agentsListError: Object.assign(new Error('Forbidden'), { statusCode: 403 }),
@@ -355,6 +367,30 @@ describe('#agents handler', () => {
         expect(err.message).to.include('agents_as_principals_limited_ea');
       }
       expect(calls).to.deep.equal([]);
+    });
+
+    it('should not list clients when no agent configures links', async () => {
+      let clientListCalls = 0;
+      const auth0 = {
+        agents: {
+          list: (params) =>
+            mockPagedData(params, 'agents', [{ agent_id: AGENT_A, name: 'Agent A', metadata: {} }]),
+          update: (id, data) => Promise.resolve({ agent_id: id, ...data }),
+        },
+        clients: {
+          list: (params) => {
+            clientListCalls += 1;
+            return mockPagedData(params, 'clients', []);
+          },
+        },
+      };
+      const handler = new agents.default({ client: pageClient(auth0), config });
+
+      await handler.processChanges({ agents: [{ name: 'Agent A', metadata: { a: 1 } }] });
+      await handler.dryRunChanges({ agents: [{ name: 'Agent A' }] });
+
+      // Only getType lists clients, once, to resolve existing links
+      expect(clientListCalls).to.equal(1);
     });
 
     it('should do nothing when agents are not configured', async () => {
