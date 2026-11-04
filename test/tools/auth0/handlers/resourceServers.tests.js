@@ -1,6 +1,7 @@
 import pageClient from '../../../../src/tools/auth0/client';
 
 const Ajv = require('ajv');
+const { Management } = require('auth0');
 const sinon = require('sinon');
 const { expect } = require('chai');
 const log = require('../../../../src/logger').default;
@@ -183,6 +184,12 @@ describe('#resourceServers handler', () => {
       it('should accept the UCP type and null', () => {
         expect(check('universal_commerce_protocol_server')).to.equal(true);
         expect(check(null)).to.equal(true);
+      });
+
+      it('should accept every value of the SDK type enum', () => {
+        Object.values(Management.ResourceServerTypeEnum).forEach((value) => {
+          expect(check(value)).to.equal(true);
+        });
       });
 
       it('should accept an omitted type', () => {

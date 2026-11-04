@@ -13,11 +13,10 @@ export const excludeSchema = {
   items: { type: 'string' },
 };
 
-// Not yet exposed by the auth0 SDK (`Management.ResourceServerTypeEnum`); switch to it once released.
-const RESOURCE_SERVER_TYPE_UCP = 'universal_commerce_protocol_server';
+const RESOURCE_SERVER_TYPE_UCP = Management.ResourceServerTypeEnum.UniversalCommerceProtocolServer;
 const UCP_SCOPE_PREFIX = 'dev.ucp';
 
-export type ResourceServer = Management.ResourceServer & { type?: string | null };
+export type ResourceServer = Management.ResourceServer;
 
 export const schema = {
   type: 'array',
@@ -147,7 +146,7 @@ export const schema = {
       },
       type: {
         type: ['string', 'null'],
-        enum: [RESOURCE_SERVER_TYPE_UCP, null],
+        enum: [...Object.values(Management.ResourceServerTypeEnum), null],
         description:
           'The type of the resource server. Set to universal_commerce_protocol_server to declare a Universal Commerce Protocol server, or null to clear it.',
       },

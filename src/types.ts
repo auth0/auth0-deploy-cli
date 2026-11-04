@@ -28,7 +28,6 @@ import { FeatureFlag } from './tools/auth0/handlers/featureFlags';
 import { Variation } from './tools/auth0/handlers/variations';
 import { Segment } from './tools/auth0/handlers/segments';
 import { Experiment } from './tools/auth0/handlers/experiments';
-import { ResourceServer } from './tools/auth0/handlers/resourceServers';
 
 type SharedPaginationParams = {
   checkpoint?: boolean;
@@ -153,7 +152,7 @@ export type Assets = Partial<{
   organizations: Asset[] | null;
   pages: Page[] | null;
   prompts: Prompts | null;
-  resourceServers: ResourceServer[] | null;
+  resourceServers: Management.ResourceServer[] | null;
   roles: Asset[] | null;
   rules: Asset[] | null;
   rulesConfigs: Asset[] | null;
