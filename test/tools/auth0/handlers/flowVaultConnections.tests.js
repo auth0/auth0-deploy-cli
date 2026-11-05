@@ -188,6 +188,34 @@ describe('#flowVaultConnections handler', () => {
       ]);
     });
 
+    it('should ignore read-only fields when calculating dry-run changes', async () => {
+      const auth0 = {
+        flows: {
+          vault: {
+            connections: {
+              list: (params) => mockPagedData(params, 'connections', [sampleFlowVaultConnections]),
+            },
+          },
+        },
+        pool,
+      };
+
+      const dryRunConfig = (key) => ({ AUTH0_DRY_RUN: true }[key]);
+      const handler = new flowVaultConnections.default({
+        client: pageClient(auth0),
+        config: dryRunConfig,
+      });
+
+      const readOnlyEdited = { ...sampleFlowVaultConnections, account_name: 'edited', ready: true };
+      const unchanged = await handler.calcChanges({ flowVaultConnections: [readOnlyEdited] });
+      expect(unchanged.update).to.have.length(0);
+
+      const changed = await handler.calcChanges({
+        flowVaultConnections: [{ ...readOnlyEdited, app_id: 'AUTH0' }],
+      });
+      expect(changed.update).to.have.length(1);
+    });
+
     it('should delete flowVaultConnections and create another one instead', async () => {
       config.data.AUTH0_ALLOW_DELETE = true;
 
