@@ -557,6 +557,45 @@ Contents of `database.json`
 }
 ```
 
+### Passkey signup behavior — `authentication_methods.passkey.signup_behavior`
+
+> **Early Availability:** requires the `connection_passkey_auth_signup_behavior` feature flag on your tenant. Without it, the Management API rejects any create or update that includes `signup_behavior` with a 400 (`Passkey signup_behavior is not enabled for this tenant`) and does not return the property. Remove `signup_behavior` from configs exported from a flagged tenant before importing them into a tenant without the flag; `--dry-run` cannot detect this.
+
+`options.authentication_methods.passkey.signup_behavior` controls whether the passkey enrollment prompt is shown during signup. Allowed values are `allow` and `block`. Setting it to `allow` on a connection that is not passkey-ready (for example, one with `requires_username: true`) fails with a 400 from the Management API.
+
+If `signup_behavior` is omitted from a `passkey` block, Auth0 currently sets it to `allow` when `passkey.enabled` is `true` and `block` otherwise (observed during Early Availability; may change). Set it explicitly to keep the value stable across deploys.
+
+When `authentication_methods` is present in your config, it is sent as a whole object on update, so include every method you want to keep (for example `password`) alongside `passkey`. Any setting left out is reset to its Auth0 default. When `authentication_methods` is omitted from the config entirely, the existing tenant value is preserved.
+
+**YAML Example**
+
+```yaml
+databases:
+  - name: Username-Password-Authentication
+    options:
+      authentication_methods:
+        password:
+          enabled: true
+        passkey:
+          enabled: true
+          signup_behavior: allow
+```
+
+**Directory Example**
+
+Contents of `database.json`
+
+```json
+{
+  "options": {
+    "authentication_methods": {
+      "password": { "enabled": true },
+      "passkey": { "enabled": true, "signup_behavior": "allow" }
+    }
+  }
+}
+```
+
 ## Resource Servers
 
 Resource servers (APIs) configuration supports the Management API payload schema. The following fields are supported:
@@ -648,6 +687,55 @@ resourceServers:
 ```
 
 > **Note:** `require_consent_non_repudiation` requires the `my_account_consents` entitlement to be enabled on the tenant.
+
+### Universal Commerce Protocol (UCP) — `type`
+
+> **Early Access.** Requires the `universal_commerce_protocol` feature flag on the tenant.
+
+The `type` field declares a resource server as a Universal Commerce Protocol server. The only accepted value is `universal_commerce_protocol_server`. Doing so marks the API for UCP billing and merges its scopes into `scopes_supported` in the tenant's discovery metadata (`/.well-known/oauth-authorization-server` and `/.well-known/openid-configuration`).
+
+Constraints enforced by the Auth0 API:
+
+- Only **one** resource server per tenant can have `type: universal_commerce_protocol_server`. The Deploy CLI rejects a config with more than one before calling the API.
+- Scopes beginning with `dev.ucp` are reserved for UCP-typed resource servers; any other resource server with one is rejected with `400`.
+- Setting `type` on a tenant that is not enabled for UCP fails with a `403`.
+
+**YAML Example**
+
+```yaml
+resourceServers:
+  - name: Commerce API
+    identifier: https://commerce.example.com
+    type: universal_commerce_protocol_server
+```
+
+To clear the type, set it to `null`. Omitting `type` leaves the existing value unchanged:
+
+```yaml
+resourceServers:
+  - name: Commerce API
+    identifier: https://commerce.example.com
+    type: null
+```
+
+**Directory Example**
+
+```json
+{
+  "name": "Commerce API",
+  "identifier": "https://commerce.example.com",
+  "type": "universal_commerce_protocol_server"
+}
+```
+
+To move the type to another API, set `type: null` on the current holder and the type on the new one in the same config. The Deploy CLI updates the current holder first so the "only one" rule is never violated mid-deploy. If the current holder has `dev.ucp` scopes, also set `scopes: []` on it; omitting `scopes` leaves them in place, and the API rejects the update. The Deploy CLI warns when `type: null` is combined with `dev.ucp` scopes.
+
+The current holder must be released in the same config. The Deploy CLI logs a warning (during `--dry-run` it shows with `AUTH0_DEBUG=true`), and the API returns `409`, when another resource server is given the type but the holder is missing `type: null` (omitting `type` leaves it unchanged), is excluded by name through `AUTH0_EXCLUDED_RESOURCE_SERVERS`, or is removed from the config while `AUTH0_ALLOW_DELETE` is not `true`.
+
+Notes:
+
+- Resource servers that don't hold the type have no `type` property in API responses, so exports are unchanged for them.
+- `type: null` is accepted whether or not the tenant has the feature flag. Setting `universal_commerce_protocol_server` without the flag fails with `403`.
 
 ### Online Refresh Tokens — `allow_online_access` and `allow_online_access_with_ephemeral_sessions`
 

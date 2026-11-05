@@ -142,6 +142,12 @@ databases:
           identifier:
             active: false  # Set to true when email.unique is false
           profile_required: false
+      # authentication_methods:  # Replaced as a whole on update; list every method to keep
+      #   password:
+      #     enabled: true
+      #   passkey:
+      #     enabled: true
+      #     signup_behavior: "allow"  # (Early Availability) "allow" or "block"
       # custom_password_hash:  # (Early Availability) Reference action by name
       #   action_id: "MyPasswordHashAction"
       #   hash_algorithm: "bcrypt"
@@ -227,6 +233,7 @@ resourceServers:
       - value: "read:account"
         description: "read account"
     # client_id: "if linked to a resource server client (readonly)"
+    # type: "universal_commerce_protocol_server" # EA, one per tenant, null clears it
     # Add other resource server settings (https://auth0.com/docs/api/management/v2#!/Resource_Servers/post_resource_servers)
   -
     name: "Auth0 My Account API"
