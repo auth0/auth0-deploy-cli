@@ -1,0 +1,7 @@
+{
+  "name": "Support Agent",
+  "clients": ["My Agent M2M"],
+  "metadata": {
+    "team": "support"
+  }
+}

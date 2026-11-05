@@ -707,11 +707,15 @@ export default class ClientHandler extends DefaultAPIHandler {
       id: 'client_id',
       identifiers: ['client_id', 'name'],
       objectFields: ['client_metadata'],
+      // agent_id is stripped from payloads, so it is never a change
+      ignoreDryRunFields: ['agent_id'],
       stripCreateFields: [
         'external_metadata_type',
         'external_metadata_created_by',
         'external_metadata_status',
         'jwks_uri',
+        // Agent links are managed by the agents handler
+        'agent_id',
       ],
       stripUpdateFields: [
         // Fields not allowed during updates
@@ -730,6 +734,8 @@ export default class ClientHandler extends DefaultAPIHandler {
         // API-generated timestamps; PATCH returns 400 if present
         'created_at',
         'updated_at',
+        // Agent links are managed by the agents handler
+        'agent_id',
       ],
       functions: {
         create: (client: Client) => this.createClient(client),
@@ -839,6 +845,19 @@ export default class ClientHandler extends DefaultAPIHandler {
     // Do nothing if not set
     if (!clients) return;
 
+    // agent_id is a tenant-specific id and is stripped from payloads; agent links are managed
+    // by the agents handler. Warn so a configured agent_id isn't silently ignored.
+    const clientsWithAgentId = clients
+      .filter((client) => client.agent_id !== undefined)
+      .map((client) => `"${client.name}"`);
+    if (clientsWithAgentId.length > 0) {
+      log.warn(
+        `Ignoring agent_id on client(s) ${clientsWithAgentId.join(
+          ', '
+        )}. Link clients to agents with the clients list of each agent instead.`
+      );
+    }
+
     assets.clients = await this.sanitizeMapClientReferences(this.client, clients);
 
     const excludedClients = (assets.exclude && assets.exclude.clients) || [];
@@ -938,7 +957,8 @@ export default class ClientHandler extends DefaultAPIHandler {
       // ids — strip them so they are never exported to disk.
       .map(stripTokenVaultCredentialsOnExport)
       // external_metadata_status is read-only runtime state, not configuration.
-      .map((client) => omit(client, 'external_metadata_status') as Client);
+      // agent_id is a tenant-specific id; agent links are managed by the agents handler.
+      .map((client) => omit(client, ['external_metadata_status', 'agent_id']) as Client);
 
     // Enrich credential stubs with name and credential_type for export.
     // Auth0 does not return pem on read — it is never exported.

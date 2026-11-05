@@ -2468,6 +2468,62 @@ Each client profile is stored as a separate JSON file named after its `name` (e.
 }
 ```
 
+## Agents
+
+Agents are first-class principals that represent an AI agent on the tenant. An agent can be linked to one or more machine-to-machine clients; a client can be linked to only one agent at a time.
+
+> ⚠️ **NOTE:** Agents is a Limited Early Access feature (`agents_as_principals_limited_ea`). The Deploy CLI client needs the `read:agents`, `create:agents`, `update:agents` and `delete:agents` scopes, plus `update:clients` to manage client links. If the feature isn't enabled for the tenant, agents are skipped on export, an empty `agents: []` list is ignored, and an import that configures agents fails.
+
+Agents are matched by `name`. Agent names are not unique on the tenant: if several agents share a name, an import that configures that name fails until they are renamed, and directory exports number their file names (for example `my-agent-1.json`). Directory exports also remove files of agents that no longer exist on the tenant. Linked clients are referenced by client `name` and are processed after clients, so a client created in the same import can be linked.
+
+- Omit `clients` to leave an agent's links untouched. Removing a client from the list (or `clients: []`) unlinks it only when `AUTH0_ALLOW_DELETE=true`; otherwise the CLI warns and keeps the link. Moving a client to another agent is not a removal.
+- Clients follow the same rules as the clients handler: clients in `AUTH0_EXCLUDED_CLIENTS`, third-party clients with `AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS`, and dynamic CIMD clients are never linked, unlinked or exported in `clients`. A client name must match exactly one client on the tenant.
+- The client the Deploy CLI authenticates with (`AUTH0_CLIENT_ID`) is never linked or unlinked, the same way the clients handler never modifies it. The CLI warns and skips the change.
+- Renaming an agent creates a new agent; the old one is only deleted with `AUTH0_ALLOW_DELETE=true`. `external_agent_id` must be unique, so keeping it on a renamed agent fails while the old agent still exists.
+- Set links on the agent, not on the client: `agent_id` in a client's configuration is ignored with a warning, and is not exported.
+- `external_agent_id` can only be set when the agent is created. Changing it on an existing agent fails the import and the dry run.
+- `metadata` is replaced as a whole on update, so always provide the complete object.
+- Deleting an agent keeps its linked clients. Before deleting an agent (with `AUTH0_ALLOW_DELETE=true`), the Deploy CLI unlinks its clients so none of them is left pointing at the deleted agent. If the delete then fails, the clients are linked back to the agent.
+
+### Schema Properties
+
+| Property            | Type       | Required | Description                                                                               |
+| ------------------- | ---------- | -------- | ----------------------------------------------------------------------------------------- |
+| `name`              | `string`   | Yes      | Display name of the agent (1–255 characters). Avoid PII, it may appear in logs.           |
+| `clients`           | `string[]` | No       | Names of the clients linked to the agent.                                                 |
+| `external_agent_id` | `string`   | No       | Customer-supplied identifier used in tokens and logs instead of the generated `agent_id`. |
+| `metadata`          | `object`   | No       | Free-form JSON (up to 10 KB). Avoid PII, it may appear in logs.                           |
+
+### YAML Example
+
+```yaml
+# Contents of ./tenant.yaml
+agents:
+  - name: 'Support Agent'
+    clients:
+      - 'My M2M'
+    external_agent_id: 'support-agent'
+    metadata:
+      team: 'support'
+```
+
+### Directory Example
+
+Folder: `./agents/`
+
+Each agent is stored as a separate JSON file named after its `name` (e.g. `Support Agent.json`):
+
+```json
+{
+  "name": "Support Agent",
+  "clients": ["My M2M"],
+  "external_agent_id": "support-agent",
+  "metadata": {
+    "team": "support"
+  }
+}
+```
+
 ## Client Credentials (Private Key JWT / mTLS)
 
 The Deploy CLI supports managing client authentication credentials for Private Key JWT and mTLS. Credentials are child resources of clients, managed via the `/clients/{id}/credentials` API.
