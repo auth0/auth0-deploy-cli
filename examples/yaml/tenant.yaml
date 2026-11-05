@@ -235,6 +235,7 @@ resourceServers:
     # require_consent_non_repudiation is only applicable when the my_account_consents entitlement is enabled
     require_consent_non_repudiation: true
     # client_id: "if linked to a resource server client (readonly)"
+    # type: "universal_commerce_protocol_server" # EA, one per tenant, null clears it
     # Add other resource server settings (https://auth0.com/docs/api/management/v2#!/Resource_Servers/post_resource_servers)
   -
     name: "Auth0 My Account API"

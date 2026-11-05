@@ -50,6 +50,63 @@ describe('#YAML context resource servers', () => {
     expect(context.assets.resourceServers).to.deep.equal(target);
   });
 
+  it('should process the resource server type, including null and an empty value', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'resourceServersType');
+    cleanThenMkdir(dir);
+
+    const yaml = `
+    resourceServers:
+      -
+        name: holder
+        identifier: http://holder.com/api
+        type: universal_commerce_protocol_server
+      -
+        name: cleared
+        identifier: http://cleared.com/api
+        type: null
+      -
+        name: empty
+        identifier: http://empty.com/api
+        type:
+      -
+        name: omitted
+        identifier: http://omitted.com/api
+    `;
+
+    const yamlFile = path.join(dir, 'resources.yaml');
+    fs.writeFileSync(yamlFile, yaml);
+
+    const context = new Context({ AUTH0_INPUT_FILE: yamlFile }, mockMgmtClient());
+    await context.loadAssetsFromLocal();
+
+    expect(context.assets.resourceServers).to.deep.equal([
+      {
+        name: 'holder',
+        identifier: 'http://holder.com/api',
+        type: 'universal_commerce_protocol_server',
+      },
+      { name: 'cleared', identifier: 'http://cleared.com/api', type: null },
+      { name: 'empty', identifier: 'http://empty.com/api', type: null },
+      { name: 'omitted', identifier: 'http://omitted.com/api' },
+    ]);
+  });
+
+  it('should dump the resource server type only when it is set', async () => {
+    const context = new Context({ AUTH0_INPUT_FILE: './test.yml' }, mockMgmtClient());
+    const resourceServers = [
+      {
+        name: 'holder',
+        identifier: 'http://holder.com/api',
+        type: 'universal_commerce_protocol_server',
+      },
+      { name: 'plain', identifier: 'http://plain.com/api' },
+    ];
+    context.assets.resourceServers = resourceServers;
+
+    const dumped = await handler.dump(context);
+    expect(dumped).to.deep.equal({ resourceServers });
+  });
+
   it('should dump resource servers', async () => {
     const context = new Context({ AUTH0_INPUT_FILE: './test.yml' }, mockMgmtClient());
     const resourceServers = [

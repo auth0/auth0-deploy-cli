@@ -6,11 +6,16 @@ import DefaultHandler from './default';
 import { Assets, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
 import log from '../../../logger';
+import { isTruthy } from '../../../utils';
+import { filterExcluded } from '../../utils';
 
 export const excludeSchema = {
   type: 'array',
   items: { type: 'string' },
 };
+
+const RESOURCE_SERVER_TYPE_UCP = Management.ResourceServerTypeEnum.UniversalCommerceProtocolServer;
+const UCP_SCOPE_PREFIX = 'dev.ucp';
 
 export type ResourceServer = Management.ResourceServer;
 
@@ -140,6 +145,12 @@ export const schema = {
         description:
           'When true, the authorization server rejects consent decisions that do not include a valid signature and kid. Requires the my_account_consents entitlement.',
       },
+      type: {
+        type: ['string', 'null'],
+        enum: [...Object.values(Management.ResourceServerTypeEnum), null],
+        description:
+          'The type of the resource server. Set to universal_commerce_protocol_server to declare a Universal Commerce Protocol server, or null to clear it.',
+      },
     },
     required: ['name', 'identifier'],
   },
@@ -223,6 +234,33 @@ export default class ResourceServersHandler extends DefaultHandler {
       );
     }
 
+    // Excluded and system servers never send `type` to the API, so they don't count below
+    const excluded = assets.exclude?.resourceServers || [];
+    const configured = resourceServers.filter(
+      (r) => !excluded.includes(r.name ?? '') && r.is_system !== true
+    );
+
+    // The API allows only one UCP-typed resource server per tenant; fail early instead of on a 409
+    const ucpResourceServers = configured.filter((r) => r.type === RESOURCE_SERVER_TYPE_UCP);
+    if (ucpResourceServers.length > 1) {
+      const names = ucpResourceServers.map((r) => r.name).join(', ');
+      throw new ValidationError(
+        `Only one resource server can have type '${RESOURCE_SERVER_TYPE_UCP}', found: ${names}.`
+      );
+    }
+
+    // dev.ucp scopes are reserved for the UCP-typed server, so the API is likely to reject them once the type is cleared
+    configured
+      .filter(
+        (r) =>
+          r.type === null && r.scopes?.some((scope) => scope.value?.startsWith(UCP_SCOPE_PREFIX))
+      )
+      .forEach((r) =>
+        log.warn(
+          `'${r.name}' sets 'type: null' but still has '${UCP_SCOPE_PREFIX}' scopes, which are reserved for the UCP-typed resource server. Set 'scopes: []' on it or keep the type.`
+        )
+      );
+
     await super.validate(assets);
   }
 
@@ -256,19 +294,6 @@ export default class ResourceServersHandler extends DefaultHandler {
     });
   }
 
-  async dryRunChanges(assets: Assets): Promise<CalculatedChanges> {
-    const { resourceServers } = assets;
-
-    if (!resourceServers) {
-      return { del: [], create: [], conflicts: [], update: [] };
-    }
-
-    return super.dryRunChanges({
-      ...assets,
-      resourceServers: await this.stripSystemResourceServerFields(resourceServers),
-    });
-  }
-
   async processChanges(assets: Assets): Promise<void> {
     const { resourceServers } = assets;
 
@@ -277,23 +302,99 @@ export default class ResourceServersHandler extends DefaultHandler {
 
     const excluded = (assets.exclude && assets.exclude.resourceServers) || [];
 
-    const filterResourceServer = (items) => items.filter((r) => !excluded.includes(r.name));
+    const changes = filterExcluded(
+      await this.calcChanges({
+        ...assets,
+        resourceServers: await this.stripSystemResourceServerFields(resourceServers),
+      }),
+      excluded
+    );
 
-    const { del, update, create, conflicts } = await this.calcChanges({
-      ...assets,
-      resourceServers: await this.stripSystemResourceServerFields(resourceServers),
-    });
+    this.warnIfHolderStays(changes, excluded);
 
-    const changes = {
-      del: filterResourceServer(del),
-      update: filterResourceServer(update),
-      create: filterResourceServer(create),
-      conflicts: filterResourceServer(conflicts),
-    };
+    // Only one resource server can hold the UCP type, so the holder giving it up is updated first
+    const { releasing } = this.typeRelease(changes.update);
+    if (releasing.length) {
+      await super.processChanges(assets, { ...changes, update: releasing, create: [] });
+      try {
+        await super.processChanges(assets, {
+          del: [],
+          conflicts: [],
+          create: changes.create,
+          update: changes.update.filter((r) => !releasing.includes(r)),
+        });
+      } catch (err) {
+        const names = releasing.map((r) => `'${r.name}'`).join(', ');
+        throw new Error(
+          `${err.message}\nThe type '${RESOURCE_SERVER_TYPE_UCP}' was already released from ${names} in this run, so no resource server has it until the import succeeds. Fix the error and re-run.`
+        );
+      }
+      return;
+    }
 
     await super.processChanges(assets, {
       ...changes,
     });
+  }
+
+  async dryRunChanges(assets: Assets): Promise<CalculatedChanges> {
+    if (!assets.resourceServers) return super.dryRunChanges(assets);
+
+    // A null type is the same as no type for a server that doesn't have one, so it isn't a change
+    await this.getType();
+    const resourceServers = (
+      await this.stripSystemResourceServerFields(assets.resourceServers)
+    ).map((r) => {
+      if (r.type !== null) return r;
+      const remote = this.existing.find((e) => e.id === r.id || e.identifier === r.identifier);
+      if (remote?.type) return r;
+      const copy = { ...r };
+      delete copy.type;
+      return copy;
+    });
+
+    const excluded = assets.exclude?.resourceServers || [];
+    const changes = filterExcluded(
+      await super.dryRunChanges({ ...assets, resourceServers }),
+      excluded
+    );
+    this.warnIfHolderStays(changes, excluded);
+    return changes;
+  }
+
+  // The tenant's UCP holder, and the updates that give the type up
+  private typeRelease(update: ResourceServer[]) {
+    const holder = this.existing?.find((e) => e.type === RESOURCE_SERVER_TYPE_UCP);
+    const releasing = holder ? update.filter((r) => r.id === holder.id && r.type === null) : [];
+    return { holder, releasing };
+  }
+
+  // Warns when another server is given the type but the holder is neither released nor deleted.
+  // `changes` must already be filtered by exclusion, so an excluded holder is simply left untouched.
+  private warnIfHolderStays(changes: CalculatedChanges, excluded: string[]): void {
+    const { holder, releasing } = this.typeRelease(changes.update);
+    if (!holder || releasing.length) return;
+
+    const taker = [...changes.create, ...changes.update].find(
+      (r) => r.type === RESOURCE_SERVER_TYPE_UCP && r.id !== holder.id
+    );
+    if (!taker) return;
+
+    const holderInDel = changes.del.some((r) => r.id === holder.id);
+    // Mirrors the delete gating in DefaultHandler.processChanges
+    const deletes = isTruthy(this.config('AUTH0_ALLOW_DELETE')) || this.config('EXTENSION_SECRET');
+    if (holderInDel && deletes) return;
+
+    const { name } = holder;
+    let hint = `Set 'type: null' on '${name}' in the same config to move it.`;
+    if (excluded.includes(name ?? '')) {
+      hint = `'${name}' is excluded through 'AUTH0_EXCLUDED_RESOURCE_SERVERS' and can't be changed. Remove it from the exclusion to move the type.`;
+    } else if (holderInDel) {
+      hint = `Set 'AUTH0_ALLOW_DELETE' to true to delete '${name}', or keep it in the config with 'type: null'.`;
+    }
+    log.warn(
+      `'${name}' already has type '${RESOURCE_SERVER_TYPE_UCP}', so setting it on '${taker.name}' is likely to fail with a 409. ${hint}`
+    );
   }
 
   async updateResourceServer(
