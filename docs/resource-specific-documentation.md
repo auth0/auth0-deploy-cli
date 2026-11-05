@@ -2553,6 +2553,8 @@ In directory format, put the same fields in `flow-vault-connections/<name>.json`
 
 Because `setup` is never exported, running an export over the same files removes it. Keep it in version control or re-add it afterwards.
 
+Because the Management API never returns `setup`, a connection that includes it always shows as an UPDATE in `--dry-run`. That matches a real import, which always sends `setup`. To hide it from the preview, set [`AUTH0_IGNORE_DRY_RUN_FIELDS`](./configuring-the-deploy-cli.md#auth0_ignore_dry_run_fields) to `{ "flowVaultConnections": ["setup"] }`.
+
 ## MFA Advanced Factor Configuration
 
 The Deploy CLI manages the MFA (Guardian) advanced factor settings through three separate resources. Each is a single object rather than a set, so it cannot be deleted; an empty or omitted value is skipped rather than treated as a deletion. If the feature is unavailable on the tenant, the resource is skipped gracefully.
