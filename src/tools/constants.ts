@@ -238,6 +238,7 @@ const constants = {
   VARIATIONS_DIRECTORY: 'variations',
   SEGMENTS_DIRECTORY: 'segments',
   EXPERIMENTS_DIRECTORY: 'experiments',
+  AGENTS_DIRECTORY: 'agents',
 };
 
 export default constants;
