@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.3.0] - 2026-11-05
+
+### Added
+
+- Add support for `agents` (agents as principals). [#1528]
+- Support the `passkey` `signup_behavior` on `authentication_methods` for `databases`. [#1529]
+- Support the `UCP` resource server type, releasing it before it is reassigned. [#1530]
+
+### Fixed
+
+- Probe the SCIM scope before queuing per-connection SCIM lookups for `connections`. [#1531]
+- Stop exporting the read-only `account_name` and `ready` fields for `flowVaultConnections`. [#1532]
+- Scope `require_consent_non_repudiation` to customer resource servers. [#1533]
+
 ## [9.2.0] - 2026-10-21
 
 ### Added
@@ -2056,7 +2070,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1522]: https://github.com/auth0/auth0-deploy-cli/issues/1522
 [#1524]: https://github.com/auth0/auth0-deploy-cli/issues/1524
 [#1526]: https://github.com/auth0/auth0-deploy-cli/issues/1526
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v9.2.0...HEAD
+[#1528]: https://github.com/auth0/auth0-deploy-cli/issues/1528
+[#1529]: https://github.com/auth0/auth0-deploy-cli/issues/1529
+[#1530]: https://github.com/auth0/auth0-deploy-cli/issues/1530
+[#1531]: https://github.com/auth0/auth0-deploy-cli/issues/1531
+[#1532]: https://github.com/auth0/auth0-deploy-cli/issues/1532
+[#1533]: https://github.com/auth0/auth0-deploy-cli/issues/1533
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v9.3.0...HEAD
+[9.3.0]: https://github.com/auth0/auth0-deploy-cli/compare/v9.2.0...v9.3.0
 [9.2.0]: https://github.com/auth0/auth0-deploy-cli/compare/v9.1.0...v9.2.0
 [9.1.0]: https://github.com/auth0/auth0-deploy-cli/compare/v9.0.0...v9.1.0
 [9.0.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.45.0...v9.0.0
