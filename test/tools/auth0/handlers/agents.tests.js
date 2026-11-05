@@ -21,10 +21,17 @@ function mockClient({
   remoteClients = [],
   agentsListError,
   createError,
+  // Error, or (id, agentId) => Error | undefined to fail specific calls
   clientUpdateError,
+  // Error, or () => Error | undefined called on each delete
+  deleteError,
+  // Simulates list lag: agents created in this run are not returned by list
+  listOmitsCreated = false,
+  createResponse = (data) => ({ ...data, agent_id: AGENT_NEW }),
 } = {}) {
   const calls = [];
   let agentsState = [...remoteAgents];
+  const pick = (error, ...args) => (typeof error === 'function' ? error(...args) : error);
 
   const auth0 = {
     agents: {
@@ -35,8 +42,8 @@ function mockClient({
       create: (data) => {
         calls.push(['agents.create', data]);
         if (createError) return Promise.reject(createError);
-        const created = { ...data, agent_id: AGENT_NEW };
-        agentsState = [...agentsState, created];
+        const created = createResponse(data);
+        if (!listOmitsCreated) agentsState = [...agentsState, created];
         return Promise.resolve(created);
       },
       update: (id, data) => {
@@ -45,6 +52,8 @@ function mockClient({
       },
       delete: (id) => {
         calls.push(['agents.delete', id]);
+        const error = pick(deleteError);
+        if (error) return Promise.reject(error);
         agentsState = agentsState.filter((a) => a.agent_id !== id);
         return Promise.resolve();
       },
@@ -52,12 +61,13 @@ function mockClient({
     clients: {
       list: (params) => mockPagedData(params, 'clients', remoteClients),
       update: (id, data) => {
-        // Only the agent link may be sent
-        if (Object.keys(data).join() !== 'agent_id') {
+        // Only the agent link may be sent, and it must be an id or null (never undefined)
+        if (Object.keys(data).join() !== 'agent_id' || data.agent_id === undefined) {
           return Promise.reject(new Error(`unexpected client update body ${JSON.stringify(data)}`));
         }
         calls.push(['clients.update', id, data.agent_id]);
-        if (clientUpdateError) return Promise.reject(clientUpdateError);
+        const error = pick(clientUpdateError, id, data.agent_id);
+        if (error) return Promise.reject(error);
         return Promise.resolve({ client_id: id });
       },
     },
@@ -1082,6 +1092,146 @@ describe('#agents handler', () => {
           'Agents are configured but the Agents API is not available on this tenant (HTTP 404).'
         );
       }
+    });
+  });
+
+  describe('#agents delete and link failures', () => {
+    const linkedAgent = {
+      remoteAgents: [{ agent_id: AGENT_A, name: 'Agent X', metadata: {} }],
+      remoteClients: [
+        { client_id: 'c1', name: 'App One', agent_id: AGENT_A },
+        { client_id: 'c2', name: 'App Two', agent_id: AGENT_A },
+      ],
+    };
+
+    it('should link the clients back when the agent delete fails', async () => {
+      const { client, calls } = mockClient({
+        ...linkedAgent,
+        deleteError: Object.assign(new Error('Forbidden'), { statusCode: 403 }),
+      });
+
+      try {
+        await new agents.default({ client, config }).processChanges({ agents: [] });
+        expect.fail('should have thrown');
+      } catch (err) {
+        expect(err.message).to.include(
+          'The agent was not deleted; client(s) "App One", "App Two" were unlinked and have been linked back to it.'
+        );
+        expect(err.message).to.include('Forbidden');
+      }
+
+      expect(calls).to.deep.equal([
+        ['clients.update', 'c1', null],
+        ['clients.update', 'c2', null],
+        ['agents.delete', AGENT_A],
+        ['clients.update', 'c1', AGENT_A],
+        ['clients.update', 'c2', AGENT_A],
+      ]);
+    });
+
+    it('should name the clients that could not be linked back after a failed delete', async () => {
+      const { client } = mockClient({
+        ...linkedAgent,
+        deleteError: Object.assign(new Error('Forbidden'), { statusCode: 403 }),
+        // Re-linking App Two fails
+        clientUpdateError: (id, agentId) =>
+          id === 'c2' && agentId === AGENT_A
+            ? Object.assign(new Error('relink failed'), { statusCode: 400 })
+            : undefined,
+      });
+
+      try {
+        await new agents.default({ client, config }).processChanges({ agents: [] });
+        expect.fail('should have thrown');
+      } catch (err) {
+        expect(err.message).to.include(
+          `client(s) "App Two" could not be linked back to it after being unlinked. Link them to agent [${AGENT_A}] again`
+        );
+      }
+    });
+
+    it('should link back clients unlinked before a failed unlink', async () => {
+      const { client, calls } = mockClient({
+        ...linkedAgent,
+        clientUpdateError: (id, agentId) =>
+          id === 'c2' && agentId === null
+            ? Object.assign(new Error('unlink failed'), { statusCode: 400 })
+            : undefined,
+      });
+
+      try {
+        await new agents.default({ client, config }).processChanges({ agents: [] });
+        expect.fail('should have thrown');
+      } catch (err) {
+        expect(err.message).to.include('"App One" were unlinked and have been linked back');
+      }
+
+      expect(calls).to.deep.equal([
+        ['clients.update', 'c1', null],
+        ['clients.update', 'c2', null],
+        ['clients.update', 'c1', AGENT_A],
+      ]);
+    });
+
+    it('should retry a rate-limited delete and unlink again before retrying', async () => {
+      config.data = { AUTH0_ALLOW_DELETE: true, AUTH0_RETRY_INITIAL_DELAY_MS: 1 };
+      let deletes = 0;
+      const { client, calls } = mockClient({
+        ...linkedAgent,
+        deleteError: () => {
+          deletes += 1;
+          return deletes === 1
+            ? Object.assign(new Error('Too Many Requests'), { statusCode: 429 })
+            : undefined;
+        },
+      });
+
+      await new agents.default({ client, config }).processChanges({ agents: [] });
+
+      expect(calls).to.deep.equal([
+        ['clients.update', 'c1', null],
+        ['clients.update', 'c2', null],
+        ['agents.delete', AGENT_A],
+        ['clients.update', 'c1', AGENT_A],
+        ['clients.update', 'c2', AGENT_A],
+        ['clients.update', 'c1', null],
+        ['clients.update', 'c2', null],
+        ['agents.delete', AGENT_A],
+      ]);
+    });
+
+    it('should link clients to a created agent even if the agent list lags', async () => {
+      const { client, calls } = mockClient({
+        remoteClients: [{ client_id: 'c1', name: 'App One' }],
+        listOmitsCreated: true,
+      });
+
+      await new agents.default({ client, config }).processChanges({
+        agents: [{ name: 'New', clients: ['App One'] }],
+      });
+
+      expect(calls).to.deep.equal([
+        ['agents.create', { name: 'New' }],
+        ['clients.update', 'c1', AGENT_NEW],
+      ]);
+    });
+
+    it('should fail instead of skipping links when a created agent has no id', async () => {
+      const { client, calls } = mockClient({
+        remoteClients: [{ client_id: 'c1', name: 'App One' }],
+        listOmitsCreated: true,
+        createResponse: (data) => ({ ...data }),
+      });
+
+      try {
+        await new agents.default({ client, config }).processChanges({
+          agents: [{ name: 'New', clients: ['App One'] }],
+        });
+        expect.fail('should have thrown');
+      } catch (err) {
+        expect(err.message).to.include('Cannot link clients to agent(s) "New"');
+      }
+      expect(calls.filter(([fn]) => fn === 'clients.update')).to.deep.equal([]);
     });
   });
 });

@@ -2483,7 +2483,7 @@ Agents are matched by `name`. Agent names are not unique on the tenant: if sever
 - Set links on the agent, not on the client: `agent_id` in a client's configuration is ignored with a warning, and is not exported.
 - `external_agent_id` can only be set when the agent is created. Changing it on an existing agent fails the import and the dry run.
 - `metadata` is replaced as a whole on update, so always provide the complete object.
-- Deleting an agent keeps its linked clients. Before deleting an agent (with `AUTH0_ALLOW_DELETE=true`), the Deploy CLI unlinks its clients so none of them is left pointing at the deleted agent.
+- Deleting an agent keeps its linked clients. Before deleting an agent (with `AUTH0_ALLOW_DELETE=true`), the Deploy CLI unlinks its clients so none of them is left pointing at the deleted agent. If the delete then fails, the clients are linked back to the agent.
 
 ### Schema Properties
 

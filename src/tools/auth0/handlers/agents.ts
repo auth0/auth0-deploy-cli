@@ -82,6 +82,9 @@ export default class AgentsHandler extends DefaultAPIHandler {
 
   private tenantClients: ClientWithAgent[] | null = null;
 
+  // agent_id of each agent created in this run, by name, used to link its clients
+  private createdAgentIds = new Map<string, string>();
+
   constructor(config: DefaultAPIHandler) {
     super({
       ...config,
@@ -91,6 +94,7 @@ export default class AgentsHandler extends DefaultAPIHandler {
       stripCreateFields: ['clients', 'created_at', 'updated_at'],
       stripUpdateFields: ['clients', 'external_agent_id', 'created_at', 'updated_at'],
       functions: {
+        create: (agent: Management.CreateAgentRequestContent) => this.createAgent(agent),
         delete: (agentId: string) => this.deleteAgent(agentId),
       },
     });
@@ -275,7 +279,7 @@ export default class AgentsHandler extends DefaultAPIHandler {
     await super.processChanges(assets, { del, update, create, conflicts });
 
     if (desiredLinks.size > 0) {
-      await this.syncClientLinks(desiredLinks);
+      await this.syncClientLinks(desiredLinks, existing);
     }
   }
 
@@ -409,17 +413,70 @@ export default class AgentsHandler extends DefaultAPIHandler {
   // DELETE /agents/{id} keeps linked clients but leaves their agent_id pointing at
   // the deleted agent. Unlink them first so no client references a missing agent.
   // tenantClients is loaded by processChanges before deletes run; never list here.
+  private async createAgent(
+    agent: Management.CreateAgentRequestContent
+  ): Promise<Management.AgentResponseContent> {
+    const created = await this.client.agents.create(agent);
+    if (created?.agent_id) this.createdAgentIds.set(agent.name, created.agent_id);
+    return created;
+  }
+
+  // If anything fails before the agent is deleted, the unlinked clients are linked back so the
+  // tenant is unchanged and a re-run can retry the delete.
   private async deleteAgent(agentId: string): Promise<void> {
     const linked = (this.tenantClients || []).filter((c) => c.agent_id === agentId);
     this.reportSkippedDeployClient(linked.filter((c) => this.isDeployClient(c)).map((c) => c.name));
 
-    for (const client of linked.filter((c) => !this.isDeployClient(c))) {
-      await this.setClientAgent(client, null);
-      delete client.agent_id;
-      log.info(`Unlinked client "${client.name}" from deleted agent [${agentId}]`);
+    const unlinked: ClientWithAgent[] = [];
+    try {
+      for (const client of linked.filter((c) => !this.isDeployClient(c))) {
+        await this.setClientAgent(client, null);
+        unlinked.push(client);
+      }
+      await this.client.agents.delete(agentId);
+    } catch (err) {
+      return this.relinkAfterFailedDelete(agentId, unlinked, err);
     }
 
-    await this.client.agents.delete(agentId);
+    // Only update the known state once the agent is gone
+    unlinked.forEach((client) => {
+      delete client.agent_id;
+      log.info(`Unlinked client "${client.name}" from deleted agent [${agentId}]`);
+    });
+  }
+
+  private async relinkAfterFailedDelete(
+    agentId: string,
+    unlinked: ClientWithAgent[],
+    err
+  ): Promise<never> {
+    if (unlinked.length === 0) throw err;
+
+    const retryConfig = this.getRetryConfig();
+    const notRestored: string[] = [];
+    for (const client of unlinked) {
+      try {
+        await retryWithExponentialBackoff(() => this.setClientAgent(client, agentId), retryConfig);
+      } catch {
+        notRestored.push(client.name);
+      }
+    }
+
+    const restored = unlinked.map((c) => c.name).filter((name) => !notRestored.includes(name));
+    const message =
+      notRestored.length > 0
+        ? `The agent was not deleted, and client(s) ${quoteList(
+            notRestored
+          )} could not be linked back to it after being unlinked. Link them to agent [${agentId}] again before re-running the import.`
+        : `The agent was not deleted; client(s) ${quoteList(
+            restored
+          )} were unlinked and have been linked back to it.`;
+
+    // Keep the status code so the default handler still retries rate-limited deletes
+    throw Object.assign(new Error(`${message}\n${err}`), {
+      statusCode: err?.statusCode,
+      rawResponse: err?.rawResponse,
+    });
   }
 
   private planClientLinks(
@@ -486,9 +543,24 @@ export default class AgentsHandler extends DefaultAPIHandler {
     );
   }
 
-  private async syncClientLinks(desiredLinks: Map<string, string[]>): Promise<void> {
-    // Re-list agents to pick up IDs of agents created in this run
-    const agentIdByName = new Map((await this.listAgents()).map((a) => [a.name, a.agent_id]));
+  private async syncClientLinks(
+    desiredLinks: Map<string, string[]>,
+    existing: Agent[]
+  ): Promise<void> {
+    // IDs of existing agents, plus the ones returned when agents were created in this run.
+    // Configured names are unambiguous (assertNamesUnambiguous), so each maps to one agent.
+    const agentIdByName = new Map([
+      ...existing.map((a): [string, string] => [a.name, a.agent_id]),
+      ...this.createdAgentIds,
+    ]);
+    const missing = [...desiredLinks.keys()].filter((name) => !agentIdByName.get(name));
+    if (missing.length > 0) {
+      throw new Error(
+        `Cannot link clients to agent(s) ${quoteList(
+          missing
+        )}: the agent ID is not known after creating it. Re-run the import to retry.`
+      );
+    }
     const allowDelete = this.isDeleteAllowed();
     const { links, removals, skippedDeployClient } = this.planClientLinks(
       desiredLinks,
@@ -519,7 +591,7 @@ export default class AgentsHandler extends DefaultAPIHandler {
 
     await this.client.pool
       .addEachTask({
-        data: links.filter(({ agentId }) => !!agentId),
+        data: links,
         generator: ({ client, agentId, agentName }) =>
           retryWithExponentialBackoff(() => this.setClientAgent(client, agentId), retryConfig)
             .then(() => {
