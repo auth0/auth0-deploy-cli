@@ -2423,11 +2423,12 @@ Each client profile is stored as a separate JSON file named after its `name` (e.
 
 Agents are first-class principals that represent an AI agent on the tenant. An agent can be linked to one or more machine-to-machine clients; a client can be linked to only one agent at a time.
 
-> ⚠️ **NOTE:** Agents is a Limited Early Access feature (`agents_as_principals_limited_ea`). The Deploy CLI client needs the `read:agents`, `create:agents`, `update:agents` and `delete:agents` scopes, plus `update:clients` to manage client links. If the feature isn't enabled for the tenant, agents are skipped on export and an import that contains `agents` fails.
+> ⚠️ **NOTE:** Agents is a Limited Early Access feature (`agents_as_principals_limited_ea`). The Deploy CLI client needs the `read:agents`, `create:agents`, `update:agents` and `delete:agents` scopes, plus `update:clients` to manage client links. If the feature isn't enabled for the tenant, agents are skipped on export, an empty `agents: []` list is ignored, and an import that configures agents fails.
 
-Agents are matched by `name`. Agent names are not unique on the tenant: if several agents share a name, an import that configures that name fails until they are renamed, and directory exports number their file names (for example `my-agent-1.json`). Linked clients are referenced by client `name` and are processed after clients, so a client created in the same import can be linked.
+Agents are matched by `name`. Agent names are not unique on the tenant: if several agents share a name, an import that configures that name fails until they are renamed, and directory exports number their file names (for example `my-agent-1.json`). Directory exports also remove files of agents that no longer exist on the tenant. Linked clients are referenced by client `name` and are processed after clients, so a client created in the same import can be linked.
 
-- Omit `clients` to leave an agent's links untouched. Use `clients: []` to unlink all clients.
+- Omit `clients` to leave an agent's links untouched. Removing a client from the list (or `clients: []`) unlinks it only when `AUTH0_ALLOW_DELETE=true`; otherwise the CLI warns and keeps the link. Moving a client to another agent is not a removal.
+- Clients follow the same rules as the clients handler: clients in `AUTH0_EXCLUDED_CLIENTS`, third-party clients with `AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS`, and dynamic CIMD clients are never linked, unlinked or exported in `clients`. A client name must match exactly one client on the tenant.
 - `external_agent_id` can only be set when the agent is created. Changing it on an existing agent fails the import and the dry run.
 - `metadata` is replaced as a whole on update, so always provide the complete object.
 - Deleting an agent keeps its linked clients. Before deleting an agent (with `AUTH0_ALLOW_DELETE=true`), the Deploy CLI unlinks its clients so none of them is left pointing at the deleted agent.

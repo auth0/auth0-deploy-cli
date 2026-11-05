@@ -145,7 +145,10 @@ describe('#agents handler', () => {
 
     it('should return null when agents are not enabled for the tenant', async () => {
       const { client } = mockClient({
-        agentsListError: Object.assign(new Error('Forbidden'), { statusCode: 403 }),
+        agentsListError: Object.assign(new Error('Forbidden'), {
+          statusCode: 403,
+          body: { errorCode: 'feature_not_enabled' },
+        }),
       });
       const handler = new agents.default({ client, config });
 
@@ -349,14 +352,19 @@ describe('#agents handler', () => {
         await handler.processChanges({ agents: [{ name: 'Agent A', clients: ['Missing App'] }] });
         expect.fail('should have thrown');
       } catch (err) {
-        expect(err.message).to.include('links to client(s) that do not exist: "Missing App"');
+        expect(err.message).to.include(
+          'links to client(s) that do not exist or are excluded: "Missing App"'
+        );
       }
       expect(calls).to.deep.equal([]);
     });
 
     it('should fail when agents are configured but not enabled for the tenant', async () => {
       const { client, calls } = mockClient({
-        agentsListError: Object.assign(new Error('Forbidden'), { statusCode: 403 }),
+        agentsListError: Object.assign(new Error('Forbidden'), {
+          statusCode: 403,
+          body: { errorCode: 'feature_not_enabled' },
+        }),
       });
       const handler = new agents.default({ client, config });
 
@@ -501,7 +509,7 @@ describe('#agents handler', () => {
       ]);
     });
 
-    it('should unlink a client only once when it moves between agents', async () => {
+    it('should move a client between agents with a single link call', async () => {
       config.data = { AUTH0_ALLOW_DELETE: true };
       const { client, calls } = mockClient({
         remoteAgents: [
@@ -520,7 +528,6 @@ describe('#agents handler', () => {
       });
 
       expect(calls.filter(([fn]) => fn === 'clients.update')).to.deep.equal([
-        ['clients.update', 'c1', null],
         ['clients.update', 'c1', AGENT_B],
       ]);
     });
@@ -566,7 +573,10 @@ describe('#agents handler', () => {
 
     it('should fail like a real import when agents are not enabled', async () => {
       const { client } = mockClient({
-        agentsListError: Object.assign(new Error('Forbidden'), { statusCode: 403 }),
+        agentsListError: Object.assign(new Error('Forbidden'), {
+          statusCode: 403,
+          body: { errorCode: 'feature_not_enabled' },
+        }),
       });
       const handler = new agents.default({ client, config });
 
@@ -575,6 +585,240 @@ describe('#agents handler', () => {
         expect.fail('should have thrown');
       } catch (err) {
         expect(err.message).to.include('agents_as_principals_limited_ea');
+      }
+    });
+  });
+
+  describe('#agents deletes, removals and client filters', () => {
+    const captureWarnings = async (fn) => {
+      const warnings = [];
+      const warnStub = sinon.stub(log, 'warn').callsFake((msg) => warnings.push(msg));
+      try {
+        await fn();
+      } finally {
+        warnStub.restore();
+      }
+      return warnings;
+    };
+
+    it('should delete 3 or more agents without deadlocking the request pool', async function () {
+      this.timeout(5000);
+      const { client, calls } = mockClient({
+        remoteAgents: [
+          { agent_id: 'agt_1', name: 'Old 1', metadata: {} },
+          { agent_id: 'agt_2', name: 'Old 2', metadata: {} },
+          { agent_id: 'agt_3', name: 'Old 3', metadata: {} },
+          { agent_id: 'agt_4', name: 'Old 4', metadata: {} },
+        ],
+        remoteClients: [{ client_id: 'c1', name: 'App One', agent_id: 'agt_2' }],
+      });
+      const handler = new agents.default({ client, config });
+
+      // No configured agent has a `clients` key, so nothing prefetches clients for links
+      await handler.processChanges({ agents: [{ name: 'New' }] });
+
+      expect(calls.filter(([fn]) => fn === 'agents.delete').map(([, id]) => id)).to.have.members([
+        'agt_1',
+        'agt_2',
+        'agt_3',
+        'agt_4',
+      ]);
+      const unlinkIndex = calls.findIndex(([fn, id]) => fn === 'clients.update' && id === 'c1');
+      const deleteIndex = calls.findIndex(([fn, id]) => fn === 'agents.delete' && id === 'agt_2');
+      expect(unlinkIndex).to.be.greaterThan(-1);
+      expect(unlinkIndex).to.be.lessThan(deleteIndex);
+    });
+
+    it('should not unlink removed clients when AUTH0_ALLOW_DELETE is off, and warn', async () => {
+      config.data = { AUTH0_ALLOW_DELETE: false };
+      const { client, calls } = mockClient({
+        remoteAgents: [{ agent_id: AGENT_A, name: 'Agent A', metadata: {} }],
+        remoteClients: [{ client_id: 'c1', name: 'App One', agent_id: AGENT_A }],
+      });
+      const handler = new agents.default({ client, config });
+
+      const warnings = await captureWarnings(() =>
+        handler.processChanges({ agents: [{ name: 'Agent A', clients: [] }] })
+      );
+
+      expect(calls.filter(([fn]) => fn === 'clients.update')).to.deep.equal([]);
+      expect(warnings.some((w) => w.includes('"App One" from agent "Agent A"'))).to.equal(true);
+    });
+
+    it('should still move clients between agents when AUTH0_ALLOW_DELETE is off', async () => {
+      config.data = { AUTH0_ALLOW_DELETE: false };
+      const { client, calls } = mockClient({
+        remoteAgents: [
+          { agent_id: AGENT_A, name: 'Agent A', metadata: {} },
+          { agent_id: AGENT_B, name: 'Agent B', metadata: {} },
+        ],
+        remoteClients: [{ client_id: 'c1', name: 'App One', agent_id: AGENT_A }],
+      });
+      const handler = new agents.default({ client, config });
+
+      await handler.processChanges({
+        agents: [
+          { name: 'Agent A', clients: [] },
+          { name: 'Agent B', clients: ['App One'] },
+        ],
+      });
+
+      expect(calls.filter(([fn]) => fn === 'clients.update')).to.deep.equal([
+        ['clients.update', 'c1', AGENT_B],
+      ]);
+    });
+
+    it('should warn about removals in a dry run when AUTH0_ALLOW_DELETE is off', async () => {
+      config.data = { AUTH0_ALLOW_DELETE: false, AUTH0_DRY_RUN: 'preview' };
+      const { client, calls } = mockClient({
+        remoteAgents: [{ agent_id: AGENT_A, name: 'Agent A', metadata: {} }],
+        remoteClients: [{ client_id: 'c1', name: 'App One', agent_id: AGENT_A }],
+      });
+      const handler = new agents.default({ client, config });
+
+      const warnings = await captureWarnings(() =>
+        handler.dryRunChanges({ agents: [{ name: 'Agent A', clients: [] }] })
+      );
+
+      expect(warnings.some((w) => w.includes('"App One" from agent "Agent A"'))).to.equal(true);
+      expect(calls).to.deep.equal([]);
+    });
+
+    it('should not unlink, link or export excluded clients', async () => {
+      config.data = { AUTH0_ALLOW_DELETE: true, AUTH0_EXCLUDED_CLIENTS: ['Excluded App'] };
+      const { client, calls } = mockClient({
+        remoteAgents: [{ agent_id: AGENT_A, name: 'Agent A', metadata: {} }],
+        remoteClients: [
+          { client_id: 'c1', name: 'Excluded App', agent_id: AGENT_A },
+          { client_id: 'c2', name: 'App Two', agent_id: AGENT_A },
+        ],
+      });
+      const handler = new agents.default({ client, config });
+
+      expect((await handler.getType())[0].clients).to.deep.equal(['App Two']);
+
+      await handler.processChanges({ agents: [{ name: 'Agent A', clients: [] }] });
+      expect(calls.filter(([fn]) => fn === 'clients.update')).to.deep.equal([
+        ['clients.update', 'c2', null],
+      ]);
+
+      try {
+        await handler.processChanges({ agents: [{ name: 'Agent A', clients: ['Excluded App'] }] });
+        expect.fail('should have thrown');
+      } catch (err) {
+        expect(err.message).to.include('do not exist or are excluded: "Excluded App"');
+      }
+    });
+
+    it('should ignore dynamic CIMD clients that share a name with a managed client', async () => {
+      const { client, calls } = mockClient({
+        remoteAgents: [{ agent_id: AGENT_A, name: 'Agent A', metadata: {} }],
+        remoteClients: [
+          { client_id: 'managed', name: 'Shared Name' },
+          {
+            client_id: 'cimd',
+            name: 'Shared Name',
+            external_metadata_type: 'cimd',
+            external_metadata_created_by: 'client',
+          },
+        ],
+      });
+      const handler = new agents.default({ client, config });
+
+      await handler.processChanges({ agents: [{ name: 'Agent A', clients: ['Shared Name'] }] });
+
+      expect(calls.filter(([fn]) => fn === 'clients.update')).to.deep.equal([
+        ['clients.update', 'managed', AGENT_A],
+      ]);
+    });
+
+    it('should export each client name once and reject linking an ambiguous client name', async () => {
+      const { client, calls } = mockClient({
+        remoteAgents: [{ agent_id: AGENT_A, name: 'Agent A', metadata: {} }],
+        remoteClients: [
+          { client_id: 'c1', name: 'Dup', agent_id: AGENT_A },
+          { client_id: 'c2', name: 'Dup', agent_id: AGENT_A },
+        ],
+      });
+      const handler = new agents.default({ client, config });
+
+      expect((await handler.getType())[0].clients).to.deep.equal(['Dup']);
+
+      try {
+        await handler.processChanges({ agents: [{ name: 'Agent A', clients: ['Dup'] }] });
+        expect.fail('should have thrown');
+      } catch (err) {
+        expect(err.message).to.include('shared by several clients on the tenant: "Dup"');
+      }
+      expect(calls).to.deep.equal([]);
+    });
+
+    it('should report a dry-run update when a metadata key is removed', async () => {
+      config.data = { AUTH0_DRY_RUN: 'preview' };
+      const { client } = mockClient({
+        remoteAgents: [{ agent_id: AGENT_A, name: 'Agent A', metadata: { a: 1, b: 2 } }],
+      });
+      const handler = new agents.default({ client, config });
+
+      const changes = await handler.dryRunChanges({
+        agents: [{ name: 'Agent A', metadata: { a: 1 } }],
+      });
+
+      expect(changes.update.map((a) => a.name)).to.deep.equal(['Agent A']);
+    });
+
+    it('should treat an empty agents list as a no-op on a tenant without the feature', async () => {
+      const notEnabled = Object.assign(new Error('Forbidden'), {
+        statusCode: 403,
+        body: { errorCode: 'feature_not_enabled' },
+      });
+      const insufficientScope = Object.assign(
+        new Error('Insufficient scope, expected any of: read:agents'),
+        { statusCode: 403, body: { errorCode: 'insufficient_scope' } }
+      );
+
+      for (const agentsListError of [notEnabled, insufficientScope]) {
+        const { client, calls } = mockClient({ agentsListError });
+        await new agents.default({ client, config }).processChanges({ agents: [] });
+        const changes = await new agents.default({ client, config }).dryRunChanges({ agents: [] });
+        expect(changes).to.deep.equal({ del: [], create: [], conflicts: [], update: [] });
+        expect(calls).to.deep.equal([]);
+      }
+    });
+
+    it('should rethrow 403 errors that are not a disabled feature', async () => {
+      const { client } = mockClient({
+        agentsListError: Object.assign(new Error('Forbidden'), { statusCode: 403 }),
+      });
+      const handler = new agents.default({ client, config });
+
+      try {
+        await handler.getType();
+        expect.fail('should have thrown');
+      } catch (err) {
+        expect(err.message).to.equal('Forbidden');
+      }
+    });
+
+    it('should not count clients the clients handler skips as created by the import', async () => {
+      for (const data of [
+        { AUTH0_EXCLUDED_CLIENTS: ['New App'] },
+        { AUTH0_EXCLUDED: ['clients'] },
+        { AUTH0_INCLUDED_ONLY: ['agents'] },
+      ]) {
+        config.data = { ...data, AUTH0_DRY_RUN: 'preview' };
+        const { client } = mockClient();
+        const handler = new agents.default({ client, config });
+
+        try {
+          await handler.dryRunChanges({
+            clients: [{ name: 'New App' }],
+            agents: [{ name: 'Agent A', clients: ['New App'] }],
+          });
+          expect.fail(`should have thrown for ${JSON.stringify(data)}`);
+        } catch (err) {
+          expect(err.message).to.include('"New App"');
+        }
       }
     });
   });

@@ -72,7 +72,7 @@ describe('#directory context agents', () => {
     const dir = path.join(testDataDir, 'directory', 'agentsDuplicateNames');
     cleanThenMkdir(dir);
     const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
-    // agent_id is already stripped by export unless AUTH0_EXPORT_IDENTIFIERS is set
+    // File names never use agent_id, which is not written to the exported files
     context.assets.agents = [
       { name: 'my-agent', metadata: { n: 1 } },
       { name: 'my-agent', metadata: { n: 2 } },
@@ -91,6 +91,47 @@ describe('#directory context agents', () => {
       name: 'my-agent',
       metadata: { n: 2 },
     });
+  });
+
+  it('should not overwrite files when numbered or sanitized names collide', async () => {
+    const dir = path.join(testDataDir, 'directory', 'agentsFileCollisions');
+    cleanThenMkdir(dir);
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+    context.assets.agents = [
+      { name: 'my-agent', metadata: { n: 1 } },
+      { name: 'my-agent', metadata: { n: 2 } },
+      { name: 'my-agent-1', metadata: { n: 3 } },
+      { name: 'a/b', metadata: { n: 4 } },
+      { name: 'a-b', metadata: { n: 5 } },
+    ];
+
+    await handler.dump(context);
+
+    const agentsDir = path.join(dir, constants.AGENTS_DIRECTORY);
+    const files = fs.readdirSync(agentsDir).sort();
+    expect(files).to.have.length(5);
+    expect(loadJSON(path.join(agentsDir, 'my-agent-1.json'))).to.deep.equal({
+      name: 'my-agent-1',
+      metadata: { n: 3 },
+    });
+    const written = files.map((f) => loadJSON(path.join(agentsDir, f)).metadata.n).sort();
+    expect(written).to.deep.equal([1, 2, 3, 4, 5]);
+  });
+
+  it('should remove files of agents no longer on the tenant', async () => {
+    const dir = path.join(testDataDir, 'directory', 'agentsStaleFiles');
+    cleanThenMkdir(dir);
+    const agentsDir = path.join(dir, constants.AGENTS_DIRECTORY);
+    fs.ensureDirSync(agentsDir);
+    fs.writeFileSync(path.join(agentsDir, 'Deleted Agent.json'), '{"name":"Deleted Agent"}');
+    fs.writeFileSync(path.join(agentsDir, 'README.md'), 'notes');
+
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+    context.assets.agents = [{ name: 'Kept Agent', metadata: {} }];
+
+    await handler.dump(context);
+
+    expect(fs.readdirSync(agentsDir).sort()).to.deep.equal(['Kept Agent.json', 'README.md']);
   });
 
   it('should not create the agents folder when agents are not enabled', async () => {
