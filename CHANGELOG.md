@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.3.0] - 2026-11-05
+
 ### Added
 
 - Add support for `agents` (agents as principals). [#1528]
@@ -2074,7 +2076,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1531]: https://github.com/auth0/auth0-deploy-cli/issues/1531
 [#1532]: https://github.com/auth0/auth0-deploy-cli/issues/1532
 [#1533]: https://github.com/auth0/auth0-deploy-cli/issues/1533
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v9.2.0...HEAD
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v9.3.0...HEAD
+[9.3.0]: https://github.com/auth0/auth0-deploy-cli/compare/v9.2.0...v9.3.0
 [9.2.0]: https://github.com/auth0/auth0-deploy-cli/compare/v9.1.0...v9.2.0
 [9.1.0]: https://github.com/auth0/auth0-deploy-cli/compare/v9.0.0...v9.1.0
 [9.0.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.45.0...v9.0.0
