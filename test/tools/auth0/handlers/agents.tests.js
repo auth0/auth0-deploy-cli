@@ -16,7 +16,13 @@ const notCalled = (name) => () => {
 };
 
 // Builds a mock client that records every write in `calls`
-function mockClient({ remoteAgents = [], remoteClients = [], agentsListError } = {}) {
+function mockClient({
+  remoteAgents = [],
+  remoteClients = [],
+  agentsListError,
+  createError,
+  clientUpdateError,
+} = {}) {
   const calls = [];
   let agentsState = [...remoteAgents];
 
@@ -28,6 +34,7 @@ function mockClient({ remoteAgents = [], remoteClients = [], agentsListError } =
       },
       create: (data) => {
         calls.push(['agents.create', data]);
+        if (createError) return Promise.reject(createError);
         const created = { ...data, agent_id: AGENT_NEW };
         agentsState = [...agentsState, created];
         return Promise.resolve(created);
@@ -44,8 +51,13 @@ function mockClient({ remoteAgents = [], remoteClients = [], agentsListError } =
     },
     clients: {
       list: (params) => mockPagedData(params, 'clients', remoteClients),
-      update: (id, data, options) => {
-        calls.push(['clients.update', id, options.additionalBodyParameters.agent_id]);
+      update: (id, data) => {
+        // Only the agent link may be sent
+        if (Object.keys(data).join() !== 'agent_id') {
+          return Promise.reject(new Error(`unexpected client update body ${JSON.stringify(data)}`));
+        }
+        calls.push(['clients.update', id, data.agent_id]);
+        if (clientUpdateError) return Promise.reject(clientUpdateError);
         return Promise.resolve({ client_id: id });
       },
     },
@@ -299,7 +311,7 @@ describe('#agents handler', () => {
       expect(calls.filter(([fn]) => fn === 'clients.update')).to.deep.equal([]);
     });
 
-    it('should unlink clients before deleting an agent so they are not cascade-deleted', async () => {
+    it('should unlink clients before deleting an agent so none points at the deleted agent', async () => {
       const { client, calls } = mockClient({
         remoteAgents: [{ agent_id: AGENT_A, name: 'Agent A', metadata: {} }],
         remoteClients: [{ client_id: 'c1', name: 'App One', agent_id: AGENT_A }],
@@ -859,6 +871,217 @@ describe('#agents handler', () => {
 
       const data = await handler.getType();
       expect(data[0]).to.not.have.property('agent_id');
+    });
+
+    it('should strip agent_id from client create and update payloads and warn', async () => {
+      const writes = [];
+      const auth0 = {
+        clients: {
+          create: (data) => {
+            writes.push(['create', data]);
+            return Promise.resolve({ data });
+          },
+          update: (id, data) => {
+            writes.push(['update', id, data]);
+            return Promise.resolve({ data });
+          },
+          delete: () => Promise.resolve({ data: [] }),
+          list: (params) =>
+            mockPagedData(params, 'clients', [{ client_id: 'c1', name: 'Old App' }]),
+        },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+      };
+      const handler = new clients.default({ client: pageClient(auth0), config });
+
+      const warnings = [];
+      const warnStub = sinon.stub(log, 'warn').callsFake((msg) => warnings.push(msg));
+      try {
+        await handler.processChanges({
+          clients: [
+            { name: 'Old App', description: 'updated', agent_id: AGENT_A },
+            { name: 'New App', agent_id: AGENT_B },
+          ],
+        });
+      } finally {
+        warnStub.restore();
+      }
+
+      expect(writes.map(([op]) => op).sort()).to.deep.equal(['create', 'update']);
+      writes.forEach((write) => expect(write[write.length - 1]).to.not.have.property('agent_id'));
+      expect(
+        warnings.some((w) => w.includes('Ignoring agent_id on client(s) "Old App", "New App"'))
+      ).to.equal(true);
+    });
+  });
+
+  describe('#agents client lifecycle and safety', () => {
+    const captureWarnings = async (fn) => {
+      const warnings = [];
+      const warnStub = sinon.stub(log, 'warn').callsFake((msg) => warnings.push(msg));
+      try {
+        await fn();
+      } finally {
+        warnStub.restore();
+      }
+      return warnings;
+    };
+
+    it('should fail the dry run like the import when a linked client is deleted by the same import', async () => {
+      const assets = {
+        clients: [{ name: 'Kept App' }],
+        agents: [{ name: 'Agent A', clients: ['Removed App'] }],
+      };
+      const remoteClients = [
+        { client_id: 'c1', name: 'Removed App' },
+        { client_id: 'c2', name: 'Kept App' },
+      ];
+
+      config.data = { AUTH0_ALLOW_DELETE: true, AUTH0_DRY_RUN: 'preview' };
+      try {
+        await new agents.default({
+          client: mockClient({ remoteClients }).client,
+          config,
+        }).dryRunChanges(assets);
+        expect.fail('should have thrown');
+      } catch (err) {
+        expect(err.message).to.include('"Removed App"');
+      }
+
+      // Without AUTH0_ALLOW_DELETE the clients handler keeps the client, so the preview passes
+      config.data = { AUTH0_ALLOW_DELETE: false, AUTH0_DRY_RUN: 'preview' };
+      const changes = await new agents.default({
+        client: mockClient({ remoteClients }).client,
+        config,
+      }).dryRunChanges(assets);
+      expect(changes.create.map((a) => a.name)).to.deep.equal(['Agent A']);
+    });
+
+    it('should never link, unlink or delete-unlink the Deploy CLI client', async () => {
+      const deployClient = { client_id: 'deployer', name: 'Deploy CLI' };
+
+      config.data = { AUTH0_ALLOW_DELETE: true, AUTH0_CLIENT_ID: 'deployer' };
+      // Removal from an agent
+      let mock = mockClient({
+        remoteAgents: [{ agent_id: AGENT_A, name: 'Agent A', metadata: {} }],
+        remoteClients: [{ ...deployClient, agent_id: AGENT_A }],
+      });
+      let warnings = await captureWarnings(() =>
+        new agents.default({ client: mock.client, config }).processChanges({
+          agents: [{ name: 'Agent A', clients: [] }],
+        })
+      );
+      expect(mock.calls.filter(([fn]) => fn === 'clients.update')).to.deep.equal([]);
+      expect(
+        warnings.some((w) => w.includes('Skipping agent link changes for client(s) "Deploy CLI"'))
+      ).to.be.true;
+
+      // Link to an agent
+      mock = mockClient({
+        remoteAgents: [{ agent_id: AGENT_A, name: 'Agent A', metadata: {} }],
+        remoteClients: [deployClient],
+      });
+      await new agents.default({ client: mock.client, config }).processChanges({
+        agents: [{ name: 'Agent A', clients: ['Deploy CLI'] }],
+      });
+      expect(mock.calls.filter(([fn]) => fn === 'clients.update')).to.deep.equal([]);
+
+      // Deleting the agent it is linked to still deletes the agent
+      mock = mockClient({
+        remoteAgents: [{ agent_id: AGENT_A, name: 'Agent A', metadata: {} }],
+        remoteClients: [{ ...deployClient, agent_id: AGENT_A }],
+      });
+      await new agents.default({ client: mock.client, config }).processChanges({ agents: [] });
+      expect(mock.calls).to.deep.equal([['agents.delete', AGENT_A]]);
+    });
+
+    it('should not count third-party clients as created when AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS is set', async () => {
+      config.data = { AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS: true, AUTH0_DRY_RUN: 'preview' };
+
+      try {
+        await new agents.default({ client: mockClient().client, config }).dryRunChanges({
+          clients: [{ name: 'New App' }],
+          agents: [{ name: 'Agent A', clients: ['New App'] }],
+        });
+        expect.fail('should have thrown');
+      } catch (err) {
+        expect(err.message).to.include('"New App"');
+      }
+
+      const changes = await new agents.default({
+        client: mockClient().client,
+        config,
+      }).dryRunChanges({
+        clients: [{ name: 'New App', is_first_party: true }],
+        agents: [{ name: 'Agent A', clients: ['New App'] }],
+      });
+      expect(changes.create.map((a) => a.name)).to.deep.equal(['Agent A']);
+    });
+
+    it('should surface a failed agent create', async () => {
+      const { client } = mockClient({ createError: new Error('create failed') });
+
+      try {
+        await new agents.default({ client, config }).processChanges({
+          agents: [{ name: 'Agent A' }],
+        });
+        expect.fail('should have thrown');
+      } catch (err) {
+        expect(err.message).to.include('Problem creating agents');
+        expect(err.message).to.include('create failed');
+      }
+    });
+
+    it('should surface a failed link and tell the user to re-run the import', async () => {
+      const { client } = mockClient({
+        remoteAgents: [{ agent_id: AGENT_A, name: 'Agent A', metadata: {} }],
+        remoteClients: [{ client_id: 'c1', name: 'App One' }],
+        clientUpdateError: Object.assign(new Error('link failed'), { statusCode: 400 }),
+      });
+
+      try {
+        await new agents.default({ client, config }).processChanges({
+          agents: [{ name: 'Agent A', clients: ['App One'] }],
+        });
+        expect.fail('should have thrown');
+      } catch (err) {
+        expect(err.message).to.include('Problem linking client "App One" to agent "Agent A"');
+        expect(err.message).to.include('Re-run the import to retry');
+      }
+    });
+
+    it('should make no link, create or delete calls when importing the same config again', async () => {
+      const remoteAgents = [{ agent_id: AGENT_A, name: 'Agent A', metadata: { team: 'x' } }];
+      const remoteClients = [{ client_id: 'c1', name: 'App One', agent_id: AGENT_A }];
+      const assets = () => ({
+        agents: [{ name: 'Agent A', clients: ['App One'], metadata: { team: 'x' } }],
+      });
+
+      for (let run = 0; run < 2; run += 1) {
+        const { client, calls } = mockClient({ remoteAgents, remoteClients });
+        await new agents.default({ client, config }).processChanges(assets());
+        // Matched agents are always PATCHed by the default handler; nothing else may happen
+        expect(calls.map(([fn]) => fn)).to.deep.equal(['agents.update']);
+      }
+    });
+
+    it('should name the reason when agents are configured but the API is not available', async () => {
+      const { client } = mockClient({
+        agentsListError: Object.assign(new Error('Not Found'), { statusCode: 404 }),
+      });
+
+      try {
+        await new agents.default({ client, config }).processChanges({
+          agents: [{ name: 'Agent A' }],
+        });
+        expect.fail('should have thrown');
+      } catch (err) {
+        expect(err.message).to.equal(
+          'Agents are configured but the Agents API is not available on this tenant (HTTP 404).'
+        );
+      }
     });
   });
 });

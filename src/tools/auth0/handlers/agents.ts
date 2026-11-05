@@ -51,18 +51,18 @@ export const findDuplicateNames = (agents: { name?: string }[]): string[] => {
   return [...duplicates];
 };
 
-// node-auth0 only types `agent_id` on clients from v7.7.0 (as `string | undefined`). Define it here so
-// this compiles with both 7.6.x and 7.7+, and allow null once a client has been unlinked.
-type ClientWithAgent = Omit<Management.Client, 'agent_id'> & {
+// Clients from the list call always have a client_id and name
+type ClientWithAgent = Management.Client & {
   client_id: string;
   name: string;
-  agent_id?: string | null;
 };
 
 type ClientLinkPlan = {
   links: { client: ClientWithAgent; agentId: string; agentName: string }[];
   // Clients dropped from an agent's `clients` list and not moving to another agent
   removals: { client: ClientWithAgent; agentName: string }[];
+  // Names of the Deploy CLI's own client, left out of links and removals
+  skippedDeployClient: string[];
 };
 
 const isInsufficientScopeError = (err): boolean =>
@@ -77,7 +77,8 @@ const quoteList = (names: string[]): string => names.map((n) => `"${n}"`).join('
 export default class AgentsHandler extends DefaultAPIHandler {
   existing: Agent[] | null;
 
-  private agentsNotEnabled = false;
+  // Why agents can't be read on this tenant, when the API reports they are unavailable
+  private agentsUnavailable: string | null = null;
 
   private tenantClients: ClientWithAgent[] | null = null;
 
@@ -100,7 +101,7 @@ export default class AgentsHandler extends DefaultAPIHandler {
   }
 
   async getType(): Promise<Agent[] | null> {
-    if (this.existing || this.agentsNotEnabled) return this.existing;
+    if (this.existing || this.agentsUnavailable) return this.existing;
 
     let agents: Management.AgentResponseContent[];
     try {
@@ -110,14 +111,15 @@ export default class AgentsHandler extends DefaultAPIHandler {
         log.debug(
           'Agents are not enabled for this tenant. Contact Auth0 support to enable the agents_as_principals_limited_ea feature.'
         );
-        this.agentsNotEnabled = true;
+        this.agentsUnavailable =
+          'not enabled for this tenant. Contact Auth0 support to enable the agents_as_principals_limited_ea feature';
         return null;
       }
       // Endpoint not available on this tenant or region; skip like other EA handlers so the
       // rest of the export still works
       if (err.statusCode === 404 || err.statusCode === 501) {
         log.debug(`Agents API is not available on this tenant (HTTP ${err.statusCode}).`);
-        this.agentsNotEnabled = true;
+        this.agentsUnavailable = `not available on this tenant (HTTP ${err.statusCode})`;
         return null;
       }
       throw err;
@@ -195,11 +197,11 @@ export default class AgentsHandler extends DefaultAPIHandler {
     const desiredLinks = this.getDesiredLinks(agents);
     const allowDelete = this.isDeleteAllowed();
 
-    // Only list clients when links or deletes need them
+    // Only list clients when links or deletes need them. The clients handler runs first in a real
+    // import, so check against the clients it will leave on the tenant and the ones it will create.
     let clients: ClientWithAgent[] | null = null;
     if (desiredLinks.size > 0) {
-      clients = await this.listClients();
-      // Clients created earlier in the same import do not exist on the tenant yet
+      clients = this.getClientsKeptByImport(assets, await this.listClients());
       this.assertClientsExist(agents, clients, this.getClientsCreatedByImport(assets));
     }
 
@@ -208,16 +210,24 @@ export default class AgentsHandler extends DefaultAPIHandler {
 
     if (clients) {
       const agentIdByName = new Map(existing.map((a) => [a.name, a.agent_id]));
-      const { removals } = this.planClientLinks(desiredLinks, agentIdByName, clients);
+      const { removals, skippedDeployClient } = this.planClientLinks(
+        desiredLinks,
+        agentIdByName,
+        clients
+      );
       this.reportRemovals(removals, allowDelete);
+      this.reportSkippedDeployClient(skippedDeployClient);
     }
 
     if (allowDelete && changes.del.length > 0) {
-      const tenantClients = clients || (await this.listClients());
+      const tenantClients =
+        clients || this.getClientsKeptByImport(assets, await this.listClients());
       changes.del.forEach((agent) => {
-        const linked = tenantClients
-          .filter((c) => c.agent_id === agent.agent_id)
-          .map((c) => c.name);
+        const linkedClients = tenantClients.filter((c) => c.agent_id === agent.agent_id);
+        this.reportSkippedDeployClient(
+          linkedClients.filter((c) => this.isDeployClient(c)).map((c) => c.name)
+        );
+        const linked = linkedClients.filter((c) => !this.isDeployClient(c)).map((c) => c.name);
         if (linked.length > 0) {
           log.warn(
             `Deleting agent "${agent.name}" will first unlink client(s) ${quoteList(
@@ -287,9 +297,7 @@ export default class AgentsHandler extends DefaultAPIHandler {
 
     if (existing === null) {
       if (agents.length === 0) return null;
-      throw new Error(
-        'Agents are configured but are not enabled for this tenant. Contact Auth0 support to enable the agents_as_principals_limited_ea feature.'
-      );
+      throw new Error(`Agents are configured but the Agents API is ${this.agentsUnavailable}.`);
     }
 
     return existing;
@@ -321,17 +329,47 @@ export default class AgentsHandler extends DefaultAPIHandler {
     );
   }
 
-  // Names of clients the clients handler will create or update in this import
-  private getClientsCreatedByImport(assets: Assets): string[] {
+  // Whether the clients handler processes `assets.clients` in this import
+  private isClientsHandlerRunning(assets: Assets): boolean {
     const excludedTypes: string[] = this.config('AUTH0_EXCLUDED') || [];
     const includedOnly: string[] | undefined = this.config('AUTH0_INCLUDED_ONLY');
-    if (excludedTypes.includes('clients')) return [];
-    if (includedOnly !== undefined && !includedOnly.includes('clients')) return [];
+    if (excludedTypes.includes('clients')) return false;
+    if (includedOnly !== undefined && !includedOnly.includes('clients')) return false;
+    return Array.isArray(assets.clients);
+  }
+
+  // The client the Deploy CLI authenticates with; the clients handler never modifies it
+  private isDeployClient(client: { client_id?: string }): boolean {
+    const deployClientId = this.config('AUTH0_CLIENT_ID');
+    return !!deployClientId && client.client_id === deployClientId;
+  }
+
+  // Names of clients the clients handler will create or update in this import.
+  // Same filters as the clients handler applies to its changes.
+  private getClientsCreatedByImport(assets: Assets): string[] {
+    if (!this.isClientsHandlerRunning(assets)) return [];
 
     const excludedClients = this.getExcludedClientNames(assets);
     return (assets.clients || [])
+      .filter((c) => !shouldExcludeThirdPartyClients(this.config) || c.is_first_party)
       .map((c) => c.name as string)
       .filter((name) => name !== undefined && !excludedClients.includes(name));
+  }
+
+  // Tenant clients still there after the clients handler runs: with AUTH0_ALLOW_DELETE it deletes
+  // the managed clients missing from the config. tenantClients is already filtered by listClients.
+  private getClientsKeptByImport(
+    assets: Assets,
+    tenantClients: ClientWithAgent[]
+  ): ClientWithAgent[] {
+    if (!this.isClientsHandlerRunning(assets) || !this.isDeleteAllowed()) return tenantClients;
+
+    const configured = assets.clients || [];
+    return tenantClients.filter(
+      (client) =>
+        this.isDeployClient(client) ||
+        configured.some((c) => c.client_id === client.client_id || c.name === client.name)
+    );
   }
 
   private getExcludedClientNames(assets?: Assets): string[] {
@@ -358,18 +396,14 @@ export default class AgentsHandler extends DefaultAPIHandler {
 
     return clients.filter(
       (client) =>
-        !isDynamicCimdClient(client as Management.Client) &&
+        !isDynamicCimdClient(client) &&
         !excludedClients.includes(client.name) &&
         (!shouldExcludeThirdPartyClients(this.config) || client.is_first_party)
     );
   }
 
   private setClientAgent(client: ClientWithAgent, agentId: string | null) {
-    return this.client.clients.update(
-      client.client_id,
-      {},
-      { additionalBodyParameters: { agent_id: agentId } }
-    );
+    return this.client.clients.update(client.client_id, { agent_id: agentId });
   }
 
   // DELETE /agents/{id} keeps linked clients but leaves their agent_id pointing at
@@ -377,10 +411,11 @@ export default class AgentsHandler extends DefaultAPIHandler {
   // tenantClients is loaded by processChanges before deletes run; never list here.
   private async deleteAgent(agentId: string): Promise<void> {
     const linked = (this.tenantClients || []).filter((c) => c.agent_id === agentId);
+    this.reportSkippedDeployClient(linked.filter((c) => this.isDeployClient(c)).map((c) => c.name));
 
-    for (const client of linked) {
+    for (const client of linked.filter((c) => !this.isDeployClient(c))) {
       await this.setClientAgent(client, null);
-      client.agent_id = null;
+      delete client.agent_id;
       log.info(`Unlinked client "${client.name}" from deleted agent [${agentId}]`);
     }
 
@@ -419,7 +454,26 @@ export default class AgentsHandler extends DefaultAPIHandler {
 
     // A client dropped by one agent but linked to another is a move, not a removal
     const moving = new Set(links.map(({ client }) => client.client_id));
-    return { links, removals: dropped.filter(({ client }) => !moving.has(client.client_id)) };
+    const removals = dropped.filter(({ client }) => !moving.has(client.client_id));
+
+    // Like the clients handler, never modify the client the Deploy CLI authenticates with
+    const skippedDeployClient = [...links, ...removals]
+      .filter(({ client }) => this.isDeployClient(client))
+      .map(({ client }) => client.name);
+    return {
+      links: links.filter(({ client }) => !this.isDeployClient(client)),
+      removals: removals.filter(({ client }) => !this.isDeployClient(client)),
+      skippedDeployClient: [...new Set(skippedDeployClient)],
+    };
+  }
+
+  private reportSkippedDeployClient(names: string[]): void {
+    if (names.length === 0) return;
+    log.warn(
+      `Skipping agent link changes for client(s) ${quoteList(
+        names
+      )}: the Deploy CLI uses this client to access the Management API, so it is never modified.`
+    );
   }
 
   // Removing a client from an agent is destructive, like organizations' client associations
@@ -436,12 +490,13 @@ export default class AgentsHandler extends DefaultAPIHandler {
     // Re-list agents to pick up IDs of agents created in this run
     const agentIdByName = new Map((await this.listAgents()).map((a) => [a.name, a.agent_id]));
     const allowDelete = this.isDeleteAllowed();
-    const { links, removals } = this.planClientLinks(
+    const { links, removals, skippedDeployClient } = this.planClientLinks(
       desiredLinks,
       agentIdByName,
       this.tenantClients || []
     );
     this.reportRemovals(removals, allowDelete);
+    this.reportSkippedDeployClient(skippedDeployClient);
 
     const retryConfig = this.getRetryConfig();
 
@@ -452,7 +507,7 @@ export default class AgentsHandler extends DefaultAPIHandler {
           retryWithExponentialBackoff(() => this.setClientAgent(client, null), retryConfig)
             .then(() => {
               log.info(`Unlinked client "${client.name}" from agent "${agentName}"`);
-              client.agent_id = null;
+              delete client.agent_id;
             })
             .catch((err) => {
               throw new Error(

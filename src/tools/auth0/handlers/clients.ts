@@ -707,6 +707,8 @@ export default class ClientHandler extends DefaultAPIHandler {
       id: 'client_id',
       identifiers: ['client_id', 'name'],
       objectFields: ['client_metadata'],
+      // agent_id is stripped from payloads, so it is never a change
+      ignoreDryRunFields: ['agent_id'],
       stripCreateFields: [
         'external_metadata_type',
         'external_metadata_created_by',
@@ -842,6 +844,19 @@ export default class ClientHandler extends DefaultAPIHandler {
 
     // Do nothing if not set
     if (!clients) return;
+
+    // agent_id is a tenant-specific id and is stripped from payloads; agent links are managed
+    // by the agents handler. Warn so a configured agent_id isn't silently ignored.
+    const clientsWithAgentId = clients
+      .filter((client) => client.agent_id !== undefined)
+      .map((client) => `"${client.name}"`);
+    if (clientsWithAgentId.length > 0) {
+      log.warn(
+        `Ignoring agent_id on client(s) ${clientsWithAgentId.join(
+          ', '
+        )}. Link clients to agents with the clients list of each agent instead.`
+      );
+    }
 
     assets.clients = await this.sanitizeMapClientReferences(this.client, clients);
 
