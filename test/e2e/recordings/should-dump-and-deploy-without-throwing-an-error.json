@@ -4123,6 +4123,18 @@
     {
         "scope": "https://deploy-cli-dev.eu.auth0.com:443",
         "method": "GET",
+        "path": "/api/v2/agents?take=100",
+        "body": "",
+        "status": 200,
+        "response": {
+            "agents": []
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
         "path": "/api/v2/token-exchange-profiles?take=50",
         "body": "",
         "status": 200,
@@ -6482,6 +6494,18 @@
         "status": 200,
         "response": {
             "client_profiles": []
+        },
+        "rawHeaders": [],
+        "responseIsBinary": false
+    },
+    {
+        "scope": "https://deploy-cli-dev.eu.auth0.com:443",
+        "method": "GET",
+        "path": "/api/v2/agents?take=100",
+        "body": "",
+        "status": 200,
+        "response": {
+            "agents": []
         },
         "rawHeaders": [],
         "responseIsBinary": false
