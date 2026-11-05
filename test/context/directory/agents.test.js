@@ -118,6 +118,43 @@ describe('#directory context agents', () => {
     expect(written).to.deep.equal([1, 2, 3, 4, 5]);
   });
 
+  it('should not overwrite files of agents whose names differ only by case', async () => {
+    const dir = path.join(testDataDir, 'directory', 'agentsCaseCollisions');
+    cleanThenMkdir(dir);
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+    context.assets.agents = [
+      { name: 'Agent', metadata: { n: 6 } },
+      { name: 'agent', metadata: { n: 7 } },
+    ];
+
+    await handler.dump(context);
+
+    const agentsDir = path.join(dir, constants.AGENTS_DIRECTORY);
+    const files = fs.readdirSync(agentsDir);
+    expect(new Set(files.map((f) => f.toLowerCase())).size).to.equal(2);
+    const written = files.map((f) => loadJSON(path.join(agentsDir, f)).metadata.n).sort();
+    expect(written).to.deep.equal([6, 7]);
+  });
+
+  it('should replace a stale file whose name differs only by case', async () => {
+    const dir = path.join(testDataDir, 'directory', 'agentsCaseStale');
+    cleanThenMkdir(dir);
+    const agentsDir = path.join(dir, constants.AGENTS_DIRECTORY);
+    fs.ensureDirSync(agentsDir);
+    fs.writeFileSync(path.join(agentsDir, 'agent.json'), '{"name":"agent","metadata":{"n":0}}');
+
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+    context.assets.agents = [{ name: 'Agent', metadata: { n: 1 } }];
+
+    await handler.dump(context);
+
+    expect(fs.readdirSync(agentsDir)).to.deep.equal(['Agent.json']);
+    expect(loadJSON(path.join(agentsDir, 'Agent.json'))).to.deep.equal({
+      name: 'Agent',
+      metadata: { n: 1 },
+    });
+  });
+
   it('should remove files of agents no longer on the tenant', async () => {
     const dir = path.join(testDataDir, 'directory', 'agentsStaleFiles');
     cleanThenMkdir(dir);

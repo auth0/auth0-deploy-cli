@@ -786,6 +786,33 @@ describe('#agents handler', () => {
       }
     });
 
+    for (const statusCode of [404, 501]) {
+      it(`should skip agents without failing the export when /agents returns ${statusCode}`, async () => {
+        const { client } = mockClient({
+          agentsListError: Object.assign(new Error('Not available'), { statusCode }),
+        });
+        const handler = new agents.default({ client, config });
+
+        expect(await handler.load()).to.deep.equal({ agents: null });
+      });
+    }
+
+    it('should apply a removed metadata key when the preview is applied (--dry-run --apply)', async () => {
+      for (const dryRun of [undefined, true, 'preview']) {
+        config.data = { AUTH0_DRY_RUN: dryRun };
+        const { client, calls } = mockClient({
+          remoteAgents: [{ agent_id: AGENT_A, name: 'Agent A', metadata: { a: 1, b: 2 } }],
+        });
+        const handler = new agents.default({ client, config });
+
+        await handler.processChanges({ agents: [{ name: 'Agent A', metadata: { a: 1 } }] });
+
+        expect(calls, `AUTH0_DRY_RUN=${dryRun}`).to.deep.equal([
+          ['agents.update', AGENT_A, { name: 'Agent A', metadata: { a: 1 } }],
+        ]);
+      }
+    });
+
     it('should rethrow 403 errors that are not a disabled feature', async () => {
       const { client } = mockClient({
         agentsListError: Object.assign(new Error('Forbidden'), { statusCode: 403 }),

@@ -113,6 +113,13 @@ export default class AgentsHandler extends DefaultAPIHandler {
         this.agentsNotEnabled = true;
         return null;
       }
+      // Endpoint not available on this tenant or region; skip like other EA handlers so the
+      // rest of the export still works
+      if (err.statusCode === 404 || err.statusCode === 501) {
+        log.debug(`Agents API is not available on this tenant (HTTP ${err.statusCode}).`);
+        this.agentsNotEnabled = true;
+        return null;
+      }
       throw err;
     }
 
@@ -197,16 +204,7 @@ export default class AgentsHandler extends DefaultAPIHandler {
     }
 
     const changes = await super.dryRunChanges(assets);
-
-    // `metadata` is replaced as a whole on update, so a key removed from the config is a change
-    // even though the generic comparison only looks at keys present in the config
-    agents.forEach((agent) => {
-      if (agent.metadata === undefined) return;
-      const remote = existing.find((a) => a.name === agent.name);
-      if (!remote || isEqual(remote.metadata || {}, agent.metadata)) return;
-      if (changes.update.some((a) => a.name === agent.name)) return;
-      changes.update.push({ ...agent, agent_id: remote.agent_id });
-    });
+    this.addMetadataUpdates(agents, existing, changes);
 
     if (clients) {
       const agentIdByName = new Map(existing.map((a) => [a.name, a.agent_id]));
@@ -255,6 +253,8 @@ export default class AgentsHandler extends DefaultAPIHandler {
     }
 
     const { del, update, create, conflicts } = await this.calcChanges(assets);
+    // With --dry-run --apply, calcChanges uses the dry-run comparison, so apply what the preview showed
+    this.addMetadataUpdates(agents, existing, { del, update, create, conflicts });
 
     // Deletes unlink clients first. Load them before the delete pool starts: listing clients
     // also uses the pool, so listing from inside a delete task can deadlock it.
@@ -293,6 +293,18 @@ export default class AgentsHandler extends DefaultAPIHandler {
     }
 
     return existing;
+  }
+
+  // `metadata` is replaced as a whole on update, so a key removed from the config is a change
+  // even though the dry-run comparison only looks at keys present in the config
+  private addMetadataUpdates(agents: Asset[], existing: Agent[], changes: CalculatedChanges): void {
+    agents.forEach((agent) => {
+      if (agent.metadata === undefined) return;
+      const remote = existing.find((a) => a.name === agent.name);
+      if (!remote || isEqual(remote.metadata || {}, agent.metadata)) return;
+      if ([...changes.update, ...changes.conflicts].some((a) => a.name === agent.name)) return;
+      changes.update.push({ ...agent, agent_id: remote.agent_id });
+    });
   }
 
   private isDeleteAllowed(): boolean {
