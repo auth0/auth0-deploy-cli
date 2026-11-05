@@ -39,6 +39,43 @@ describe('#YAML context flowVaultConnections', () => {
     expect(context.assets.flowVaultConnections).to.deep.equal(target);
   });
 
+  it('should apply keyword mappings to setup', async () => {
+    const dir = path.join(testDataDir, 'yaml', 'flowVaultConnectionsSetupMappings');
+    cleanThenMkdir(dir);
+
+    const yaml = `
+    flowVaultConnections:
+      -
+        name: 'Token Con'
+        app_id: HTTP
+        setup:
+          type: BEARER
+          token: '##TOKEN##'
+      -
+        name: 'Object Con'
+        app_id: HTTP
+        setup: '@@SETUP_CONFIG@@'
+    `;
+
+    const yamlFile = path.join(dir, 'flowVaultConnection.yaml');
+    fs.writeFileSync(yamlFile, yaml);
+
+    const config = {
+      AUTH0_INPUT_FILE: yamlFile,
+      AUTH0_KEYWORD_REPLACE_MAPPINGS: {
+        TOKEN: 'secret-token',
+        SETUP_CONFIG: { type: 'BEARER', token: 'object-token' },
+      },
+    };
+    const context = new Context(config, mockMgmtClient());
+    await context.loadAssetsFromLocal();
+
+    expect(context.assets.flowVaultConnections).to.deep.equal([
+      { name: 'Token Con', app_id: 'HTTP', setup: { type: 'BEARER', token: 'secret-token' } },
+      { name: 'Object Con', app_id: 'HTTP', setup: { type: 'BEARER', token: 'object-token' } },
+    ]);
+  });
+
   it('should dump flowVaultConnections', async () => {
     const dir = path.join(testDataDir, 'yaml', 'flowVaultConnections');
     cleanThenMkdir(dir);
@@ -56,6 +93,11 @@ describe('#YAML context flowVaultConnections', () => {
 
     const dumped = await handler.dump(context);
 
-    expect(dumped).to.deep.equal({ flowVaultConnections });
+    expect(dumped).to.deep.equal({
+      flowVaultConnections: [
+        { name: 'Auth0 M2M Con #1', app_id: 'AUTH0' },
+        { name: 'HTTP Con #1', app_id: 'HTTP' },
+      ],
+    });
   });
 });
