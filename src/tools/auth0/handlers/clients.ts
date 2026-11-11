@@ -792,7 +792,39 @@ export default class ClientHandler extends DefaultAPIHandler {
     }
 
     await this.getType();
-    return super.dryRunChanges({ ...assets, clients: this.getManagedConfigClients(clients) });
+    const changes = await super.dryRunChanges({
+      ...assets,
+      clients: this.getManagedConfigClients(clients),
+    });
+
+    const filterClients = this.getManagedClientFilter(assets);
+    return {
+      del: filterClients(changes.del as Client[]),
+      update: filterClients(changes.update as Client[]),
+      create: filterClients(changes.create as Client[]),
+      conflicts: filterClients(changes.conflicts as Client[]),
+    };
+  }
+
+  /*
+   * Filter out, for both import and dry run:
+   * - The client used to access Auth0 Management API
+   * - Clients in the exclusion list
+   * - Third-party clients when AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS is enabled
+   */
+  private getManagedClientFilter(assets: Assets): (list: Client[]) => Client[] {
+    const excludedClients = (assets.exclude && assets.exclude.clients) || [];
+    const currentClient = this.config('AUTH0_CLIENT_ID') || '';
+    const excludeThirdParty = shouldExcludeThirdPartyClients(this.config);
+
+    return (list) =>
+      list.filter(
+        (item) =>
+          item.client_id !== currentClient &&
+          item.name &&
+          !excludedClients.includes(item.name) &&
+          (!excludeThirdParty || item.is_first_party)
+      );
   }
 
   async calcChanges(assets: Assets): Promise<CalculatedChanges> {
@@ -860,28 +892,9 @@ export default class ClientHandler extends DefaultAPIHandler {
 
     assets.clients = await this.sanitizeMapClientReferences(this.client, clients);
 
-    const excludedClients = (assets.exclude && assets.exclude.clients) || [];
-
     const { del, update, create, conflicts } = await this.calcChanges(assets);
 
-    // Always filter out the client we are using to access Auth0 Management API
-    // As it could cause problems if it gets deleted or updated etc
-    const currentClient = this.config('AUTH0_CLIENT_ID') || '';
-
-    /*
-     * Filter out:
-     * - The client used to access Auth0 Management API
-     * - Clients in the exclusion list
-     * - Third-party clients when AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS is enabled
-     */
-    const filterClients = (list: Client[]): Client[] =>
-      list.filter(
-        (item) =>
-          item.client_id !== currentClient &&
-          item.name &&
-          !excludedClients.includes(item.name) &&
-          (!shouldExcludeThirdPartyClients(this.config) || item.is_first_party)
-      );
+    const filterClients = this.getManagedClientFilter(assets);
 
     // Sanitize client fields
     const sanitizeClientFields = (list: Client[]): Client[] => {

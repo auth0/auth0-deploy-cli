@@ -904,11 +904,14 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     // Dynamic CIMD clients are not managed by deploy-cli, so names must not resolve to them.
     const managedClients = excludeDynamicCimdClients(clients);
 
+    // connections.list omits enabled_clients; getType() enriches them so excluded clients stay enabled.
+    const existingWithEnabledClients = (await this.getType()) ?? [];
+
     const formatted = connections.map((connection) => {
       const enabledClients = getEnabledClients(
         assets,
         connection,
-        existingConnections,
+        existingWithEnabledClients,
         managedClients
       );
 
@@ -960,11 +963,14 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     // Dynamic CIMD clients are not managed by deploy-cli, so names must not resolve to them.
     const managedClients = excludeDynamicCimdClients(clients);
 
+    // connections.list omits enabled_clients; getType() enriches them so excluded clients stay enabled.
+    const existingWithEnabledClients = (await this.getType()) ?? [];
+
     const formatted = connections.map((connection) => {
       const enabledClients = getEnabledClients(
         assets,
         connection,
-        existingConnections,
+        existingWithEnabledClients,
         managedClients
       );
 
