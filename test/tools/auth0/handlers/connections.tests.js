@@ -2999,3 +2999,75 @@ describe('#connections dryRunChanges', () => {
     expect(changes.del.some((c) => c.name === 'email')).to.be.true;
   });
 });
+
+describe('#connections excluded clients', () => {
+  // connections.list omits enabled_clients, so an excluded client enabled on the tenant must be
+  // read from the enabled-clients endpoint or it is dropped from the computed list.
+  const config = (key) => ({ AUTH0_CLIENT_ID: 'client_id' }[key]);
+
+  const buildHandler = () => {
+    const auth0 = {
+      connections: {
+        list: (params) =>
+          mockPagedData(params, 'connections', [
+            { id: 'con_1', name: 'github-conn', strategy: 'github' },
+          ]),
+        clients: {
+          get: async () => mockPagedData({}, 'clients', [{ client_id: 'ca' }, { client_id: 'cx' }]),
+        },
+        _getRestClient: () => ({}),
+      },
+      clients: {
+        list: (params) =>
+          mockPagedData(params, 'clients', [
+            { name: 'App A', client_id: 'ca' },
+            { name: 'App X', client_id: 'cx' },
+            { name: 'App N', client_id: 'cn' },
+          ]),
+      },
+    };
+    return new connections.default({ client: pageClient(auth0), config });
+  };
+
+  const exclude = { clients: ['App X'] };
+
+  it('should not report a dry-run change when the config omits an excluded enabled client', async () => {
+    const changes = await buildHandler().dryRunChanges({
+      connections: [{ name: 'github-conn', strategy: 'github', enabled_clients: ['App A'] }],
+      exclude,
+    });
+
+    expect(changes.update).to.deep.equal([]);
+  });
+
+  it('should not report a dry-run change when the config names an excluded enabled client', async () => {
+    const changes = await buildHandler().dryRunChanges({
+      connections: [
+        { name: 'github-conn', strategy: 'github', enabled_clients: ['App A', 'App X'] },
+      ],
+      exclude,
+    });
+
+    expect(changes.update).to.deep.equal([]);
+  });
+
+  it('should report a dry-run change for the same config when nothing is excluded', async () => {
+    const changes = await buildHandler().dryRunChanges({
+      connections: [{ name: 'github-conn', strategy: 'github', enabled_clients: ['App A'] }],
+    });
+
+    expect(changes.update.map((c) => c.name)).to.deep.equal(['github-conn']);
+  });
+
+  it('should keep an excluded enabled client when an import changes the other enabled clients', async () => {
+    const changes = await buildHandler().calcChanges({
+      connections: [
+        { name: 'github-conn', strategy: 'github', enabled_clients: ['App A', 'App N'] },
+      ],
+      exclude,
+    });
+
+    expect(changes.update).to.have.length(1);
+    expect(changes.update[0].enabled_clients).to.have.members(['ca', 'cn', 'cx']);
+  });
+});

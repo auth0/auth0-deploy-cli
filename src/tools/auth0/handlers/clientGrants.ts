@@ -155,8 +155,6 @@ export default class ClientGrantsHandler extends DefaultHandler {
     const clients = await paginate<Client>(this.client.clients.list, {
       paginate: true,
     });
-    const excludedClientsByNames = (assets.exclude && assets.exclude.clients) || [];
-    const excludedClients = convertClientNamesToIds(excludedClientsByNames, clients);
 
     // Convert clients by name to the id. Dynamic CIMD clients are not managed by deploy-cli,
     // so a name must not resolve to them.
@@ -167,14 +165,6 @@ export default class ClientGrantsHandler extends DefaultHandler {
       if (found) grant.client_id = found.client_id;
       return grant;
     });
-
-    // Always filter out the client we are using to access Auth0 Management API
-    const currentClient = this.config('AUTH0_CLIENT_ID');
-
-    // Build a set of third-party client IDs for efficient lookup
-    const thirdPartyClientIds = new Set(
-      clients.filter((c) => c.is_first_party === false).map((c) => c.client_id)
-    );
 
     const { del, update, create, conflicts } = await this.calcChanges({
       ...assets,
@@ -216,7 +206,58 @@ export default class ClientGrantsHandler extends DefaultHandler {
         .filter((g): g is ClientGrant => g !== undefined),
     ];
 
-    const filterGrants = (list: ClientGrant[]) => {
+    const filterGrants = this.getGrantFilter(assets, clients);
+
+    const changes: CalculatedChanges = {
+      // @ts-ignore because this expects `client_id` and that's not yet typed on Asset
+      del: filterGrants(adjustedDel),
+      // @ts-ignore because this expects `client_id` and that's not yet typed on Asset
+      update: filterGrants(adjustedUpdate),
+      // @ts-ignore because this expects `client_id` and that's not yet typed on Asset
+      create: filterGrants(adjustedCreate),
+      // @ts-ignore because this expects `client_id` and that's not yet typed on Asset
+      conflicts: filterGrants(conflicts),
+    };
+
+    await super.processChanges(assets, {
+      ...changes,
+    });
+  }
+
+  async dryRunChanges(assets: Assets): Promise<CalculatedChanges> {
+    if (!assets.clientGrants) return super.dryRunChanges(assets);
+
+    // Clients are only needed to resolve excluded names and find third-party clients
+    const needsClients =
+      !!assets.exclude?.clients?.length || shouldExcludeThirdPartyClients(this.config);
+    const clients = needsClients
+      ? await paginate<Client>(this.client.clients.list, { paginate: true })
+      : [];
+    const filterGrants = this.getGrantFilter(assets, clients);
+    const changes = await super.dryRunChanges(assets);
+
+    return {
+      del: filterGrants(changes.del as ClientGrant[]),
+      update: filterGrants(changes.update as ClientGrant[]),
+      create: filterGrants(changes.create as ClientGrant[]),
+      conflicts: filterGrants(changes.conflicts as ClientGrant[]),
+    };
+  }
+
+  // Grants that neither import nor dry run touch: management client, excluded clients, system and third-party grants
+  private getGrantFilter(assets: Assets, clients: Client[]) {
+    const excludedClientsByNames = (assets.exclude && assets.exclude.clients) || [];
+    const excludedClients = convertClientNamesToIds(excludedClientsByNames, clients);
+
+    // Always filter out the client we are using to access Auth0 Management API
+    const currentClient = this.config('AUTH0_CLIENT_ID');
+
+    // Build a set of third-party client IDs for efficient lookup
+    const thirdPartyClientIds = new Set(
+      clients.filter((c) => c.is_first_party === false).map((c) => c.client_id)
+    );
+
+    return (list: ClientGrant[]): ClientGrant[] => {
       let filtered = list;
 
       // Filter out the current client (Auth0 Management API client)
@@ -241,20 +282,5 @@ export default class ClientGrantsHandler extends DefaultHandler {
 
       return filtered;
     };
-
-    const changes: CalculatedChanges = {
-      // @ts-ignore because this expects `client_id` and that's not yet typed on Asset
-      del: filterGrants(adjustedDel),
-      // @ts-ignore because this expects `client_id` and that's not yet typed on Asset
-      update: filterGrants(adjustedUpdate),
-      // @ts-ignore because this expects `client_id` and that's not yet typed on Asset
-      create: filterGrants(adjustedCreate),
-      // @ts-ignore because this expects `client_id` and that's not yet typed on Asset
-      conflicts: filterGrants(conflicts),
-    };
-
-    await super.processChanges(assets, {
-      ...changes,
-    });
   }
 }

@@ -1300,4 +1300,109 @@ describe('#clientGrants handler', () => {
       AUTH0_ALLOW_DELETE: true,
     };
   });
+
+  describe('#clientGrants dryRunChanges exclusions', () => {
+    const dryRunConfig = (extra = {}) => {
+      const data = { AUTH0_CLIENT_ID: 'deploy_client', AUTH0_ALLOW_DELETE: true, ...extra };
+      return (key) => data[key];
+    };
+
+    const tenantClients = [
+      { name: 'App A', client_id: 'a', is_first_party: true },
+      { name: 'App B', client_id: 'b', is_first_party: true },
+      { name: 'Third Party App', client_id: 't', is_first_party: false },
+    ];
+    const audience = 'https://tenant/api/v2/';
+
+    const buildHandler = (grants, handlerConfig) => {
+      const auth0 = {
+        clientGrants: { list: (params) => mockPagedData(params, 'client_grants', grants) },
+        clients: {
+          list: (params) =>
+            mockPagedData(
+              params,
+              'clients',
+              params.is_first_party ? tenantClients.filter((c) => c.is_first_party) : tenantClients
+            ),
+        },
+        pool,
+      };
+      return new clientGrants.default({ client: pageClient(auth0), config: handlerConfig });
+    };
+
+    it('should leave grants of excluded clients, the management client and system grants out of deletes', async () => {
+      const handler = buildHandler(
+        [
+          { id: 'ga', client_id: 'a', audience },
+          { id: 'gb', client_id: 'b', audience },
+          { id: 'gdeploy', client_id: 'deploy_client', audience },
+          { id: 'gsys', client_id: 'a', audience: 'https://system/', is_system: true },
+        ],
+        dryRunConfig()
+      );
+
+      const changes = await handler.dryRunChanges({
+        clientGrants: [],
+        exclude: { clients: ['App B'] },
+      });
+
+      expect(changes.del.map((g) => g.id)).to.deep.equal(['ga']);
+    });
+
+    it('should leave grants of excluded clients out of updates and creates', async () => {
+      const handler = buildHandler(
+        [
+          { id: 'ga', client_id: 'a', audience, scope: ['read:logs'] },
+          { id: 'gb', client_id: 'b', audience, scope: ['read:logs'] },
+        ],
+        dryRunConfig()
+      );
+
+      const changes = await handler.dryRunChanges({
+        clientGrants: [
+          { client_id: 'a', audience, scope: ['read:logs', 'read:users'] },
+          { client_id: 'b', audience, scope: ['read:logs', 'read:users'] },
+          { client_id: 'b', audience: 'https://other/', scope: ['read:logs'] },
+          { client_id: 'a', audience: 'https://other/', scope: ['read:logs'] },
+        ],
+        exclude: { clients: ['App B'] },
+      });
+
+      expect(changes.update.map((g) => g.id)).to.deep.equal(['ga']);
+      expect(changes.create.map((g) => `${g.client_id} ${g.audience}`)).to.deep.equal([
+        'a https://other/',
+      ]);
+    });
+
+    it('should report grants of every client but system grants when nothing is excluded', async () => {
+      const handler = buildHandler(
+        [
+          { id: 'ga', client_id: 'a', audience },
+          { id: 'gb', client_id: 'b', audience },
+          { id: 'gsys', client_id: 'a', audience: 'https://system/', is_system: true },
+        ],
+        dryRunConfig()
+      );
+
+      const changes = await handler.dryRunChanges({ clientGrants: [] });
+
+      expect(changes.del.map((g) => g.id)).to.have.members(['ga', 'gb']);
+    });
+
+    it('should leave grants of third-party clients out of the changes when AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS is true', async () => {
+      const handler = buildHandler(
+        [{ id: 'ga', client_id: 'a', audience }],
+        dryRunConfig({ AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS: true })
+      );
+
+      const changes = await handler.dryRunChanges({
+        clientGrants: [
+          { client_id: 'a', audience },
+          { client_id: 't', audience },
+        ],
+      });
+
+      expect(changes.create).to.deep.equal([]);
+    });
+  });
 });

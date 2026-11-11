@@ -2593,4 +2593,84 @@ describe('#clients handler', () => {
       ]);
     });
   });
+
+  describe('#clients dryRunChanges exclusions', () => {
+    const dryRunConfig = (extra = {}) => {
+      const data = { AUTH0_CLIENT_ID: 'deploy_client', AUTH0_ALLOW_DELETE: true, ...extra };
+      return (key) => data[key];
+    };
+
+    const buildHandler = (tenantClients, handlerConfig) => {
+      const auth0 = {
+        clients: { list: (params) => mockPagedData(params, 'clients', tenantClients) },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+      return new clients.default({ client: pageClient(auth0), config: handlerConfig });
+    };
+
+    const tenantClients = [
+      { client_id: 'a', name: 'App A', description: 'old', is_first_party: true },
+      { client_id: 'b', name: 'App B', description: 'old', is_first_party: true },
+      { client_id: 'deploy_client', name: 'Deploy Client', is_first_party: true },
+      { client_id: 'stale', name: 'Stale App', is_first_party: true },
+    ];
+
+    it('should leave excluded clients and the management client out of deletes', async () => {
+      const handler = buildHandler(tenantClients, dryRunConfig());
+
+      const changes = await handler.dryRunChanges({
+        clients: [{ name: 'App A', description: 'old', is_first_party: true }],
+        exclude: { clients: ['App B'] },
+      });
+
+      expect(changes.del.map((c) => c.name)).to.deep.equal(['Stale App']);
+    });
+
+    it('should leave excluded clients out of updates and creates', async () => {
+      const handler = buildHandler(tenantClients, dryRunConfig());
+
+      const changes = await handler.dryRunChanges({
+        clients: [
+          { name: 'App A', description: 'new', is_first_party: true },
+          { name: 'App B', description: 'new', is_first_party: true },
+          { name: 'Excluded New', is_first_party: true },
+          { name: 'Brand New', is_first_party: true },
+        ],
+        exclude: { clients: ['App B', 'Excluded New'] },
+      });
+
+      expect(changes.update.map((c) => c.name)).to.deep.equal(['App A']);
+      expect(changes.create.map((c) => c.name)).to.deep.equal(['Brand New']);
+    });
+
+    it('should report excluded clients when nothing is excluded', async () => {
+      const handler = buildHandler(tenantClients, dryRunConfig());
+
+      const changes = await handler.dryRunChanges({
+        clients: [{ name: 'App A', description: 'old', is_first_party: true }],
+      });
+
+      expect(changes.del.map((c) => c.name)).to.have.members(['App B', 'Stale App']);
+    });
+
+    it('should leave third-party clients out of the changes when AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS is true', async () => {
+      const handler = buildHandler(
+        tenantClients,
+        dryRunConfig({ AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS: true })
+      );
+
+      const changes = await handler.dryRunChanges({
+        clients: [
+          { name: 'Third Party New', is_first_party: false },
+          { name: 'First Party New', is_first_party: true },
+        ],
+      });
+
+      expect(changes.create.map((c) => c.name)).to.deep.equal(['First Party New']);
+    });
+  });
 });
