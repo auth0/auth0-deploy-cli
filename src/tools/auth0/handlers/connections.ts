@@ -8,6 +8,7 @@ import {
   getEnabledClients,
   sleep,
   filterIncluded,
+  UNRESOLVED_PLACEHOLDER_REGEX,
 } from '../../utils';
 import { CalculatedChanges, Asset, Assets, Auth0APIClient } from '../../../types';
 import { ConfigFunction } from '../../../configFactory';
@@ -46,12 +47,18 @@ const connectionOptionsSchema = {
   },
 };
 
-const oidcOktaStrategies = new Set(['oidc', 'okta']);
-const oidcOktaOnlyConnectionOptionFields = [
-  'token_endpoint_auth_signing_alg',
-  'id_token_signed_response_algs',
-  'token_endpoint_jwtca_aud_format',
-  'id_token_session_expiry_supported',
+// Option fields that are only valid for the listed strategies.
+const strategyRestrictedConnectionOptionFields = [
+  {
+    fields: ['id_token_signed_response_algs', 'id_token_session_expiry_supported'],
+    strategies: ['oidc', 'okta'],
+    label: '"oidc" and "okta"',
+  },
+  {
+    fields: ['token_endpoint_auth_signing_alg', 'token_endpoint_jwtca_aud_format'],
+    strategies: ['oidc', 'okta', 'samlp'],
+    label: '"oidc", "okta" and "samlp"',
+  },
 ];
 
 export const schema = {
@@ -219,6 +226,23 @@ export const addExcludedConnectionPropertiesToChanges = ({
     ...proposedChanges,
     update: newProposedUpdates,
   };
+};
+
+// Export masks options.client_secret, and Auth0 replaces options as a whole on update, so an unresolved
+// placeholder would be stripped and wipe the stored secret. Reuse the stored secret instead.
+// exported only for unit testing purposes
+export const restoreMaskedClientSecret = (
+  connection: Asset,
+  existingConnections: Asset[] | null
+): Pick<Asset, 'options'> | {} => {
+  const secret = connection.options?.client_secret;
+  if (typeof secret !== 'string' || !UNRESOLVED_PLACEHOLDER_REGEX.test(secret)) return {};
+
+  const existingSecret = existingConnections?.find((c) => c.name === connection.name)?.options
+    ?.client_secret;
+  if (!existingSecret) return {};
+
+  return { options: { ...connection.options, client_secret: existingSecret } };
 };
 
 /**
@@ -482,21 +506,22 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
       if (!connection?.options) return;
 
       const strategy = connection?.strategy ?? 'unknown';
-      if (oidcOktaStrategies.has(strategy)) return;
 
-      const unsupportedFields = oidcOktaOnlyConnectionOptionFields.filter(
-        (field) => field in connection.options
-      );
+      const errors: string[] = [];
+      for (const { fields, strategies, label } of strategyRestrictedConnectionOptionFields) {
+        if (strategies.includes(strategy)) continue;
 
-      if (unsupportedFields.length > 0) {
-        throw new ValidationError(
+        const unsupportedFields = fields.filter((field) => field in connection.options);
+        if (unsupportedFields.length === 0) continue;
+
+        errors.push(
           `Connection "${connection.name}": option(s) ${unsupportedFields
             .map((field) => `"${field}"`)
-            .join(
-              ', '
-            )} are only supported for strategies "oidc" and "okta". Found strategy "${strategy}".`
+            .join(', ')} are only supported for strategies ${label}. Found strategy "${strategy}".`
         );
       }
+
+      if (errors.length > 0) throw new ValidationError(errors.join(' '));
     });
 
     await super.validate(assets);
@@ -912,9 +937,14 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
         managedClients
       );
 
-      return {
+      const withOptions = {
         ...connection,
         ...this.getFormattedOptions(connection, managedClients),
+      };
+
+      return {
+        ...withOptions,
+        ...restoreMaskedClientSecret(withOptions, existingConnections),
         ...(enabledClients !== undefined && { enabled_clients: enabledClients }),
       };
     });
@@ -968,9 +998,14 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
         managedClients
       );
 
-      return {
+      const withOptions = {
         ...connection,
         ...this.getFormattedOptions(connection, managedClients),
+      };
+
+      return {
+        ...withOptions,
+        ...restoreMaskedClientSecret(withOptions, existingConnections),
         ...(enabledClients !== undefined && { enabled_clients: enabledClients }),
       };
     });
