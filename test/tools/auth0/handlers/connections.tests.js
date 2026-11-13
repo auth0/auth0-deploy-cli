@@ -6,6 +6,7 @@ const { expect } = require('chai');
 const sinon = require('sinon');
 const connections = require('../../../../src/tools/auth0/handlers/connections');
 const utils = require('../../../../src/tools/utils');
+const log = require('../../../../src/logger').default;
 const { mockPagedData } = require('../../../utils');
 
 const pool = {
@@ -19,6 +20,18 @@ const pool = {
     const result = task.generator(task.data);
     return { promise: () => Promise.resolve(result) };
   },
+};
+
+// Runs every task and waits for it, so tests can assert on the calls made by processChanges.
+const sequentialPool = {
+  addEachTask: ({ data, generator }) => ({
+    promise: async () => {
+      for (const item of data || []) {
+        await generator(item);
+      }
+    },
+  }),
+  addSingleTask: pool.addSingleTask,
 };
 
 describe('#connections handler', () => {
@@ -288,7 +301,28 @@ describe('#connections handler', () => {
       await stageFn.apply(handler, [{ connections: data }]);
     });
 
-    it('should reject oidc/okta-only options for non-oidc/okta strategies', async () => {
+    it('should allow token endpoint options on samlp connections', async () => {
+      const handler = new connections.default({ client: {}, config });
+      const stageFn = Object.getPrototypeOf(handler).validate;
+      const data = [
+        {
+          name: 'saml-connection',
+          strategy: 'samlp',
+          cross_app_access_requesting_app: { active: true },
+          options: {
+            client_id: 'idp-client',
+            client_secret: 'idp-secret',
+            token_endpoint_auth_method: 'private_key_jwt',
+            token_endpoint_auth_signing_alg: 'RS256',
+            token_endpoint_jwtca_aud_format: 'issuer',
+          },
+        },
+      ];
+
+      await stageFn.apply(handler, [{ connections: data }]);
+    });
+
+    it('should reject id_token options on samlp connections', async () => {
       const handler = new connections.default({ client: {}, config });
       const stageFn = Object.getPrototypeOf(handler).validate;
       const data = [
@@ -298,7 +332,6 @@ describe('#connections handler', () => {
           options: {
             token_endpoint_auth_signing_alg: 'RS256',
             id_token_signed_response_algs: ['RS256'],
-            token_endpoint_jwtca_aud_format: 'issuer',
             id_token_session_expiry_supported: true,
           },
         },
@@ -309,8 +342,60 @@ describe('#connections handler', () => {
         throw new Error('Expected validation to fail');
       } catch (err) {
         expect(err).to.be.an('object');
+        expect(err.message).to.include('"id_token_signed_response_algs"');
+        expect(err.message).to.include('"id_token_session_expiry_supported"');
+        expect(err.message).to.not.include('"token_endpoint_auth_signing_alg"');
         expect(err.message).to.include('only supported for strategies "oidc" and "okta"');
         expect(err.message).to.include('Found strategy "samlp"');
+      }
+    });
+
+    it('should report all unsupported options when both restriction groups are violated', async () => {
+      const handler = new connections.default({ client: {}, config });
+      const stageFn = Object.getPrototypeOf(handler).validate;
+      const data = [
+        {
+          name: 'ad-connection',
+          strategy: 'ad',
+          options: {
+            id_token_signed_response_algs: ['RS256'],
+            token_endpoint_auth_signing_alg: 'RS256',
+          },
+        },
+      ];
+
+      try {
+        await stageFn.apply(handler, [{ connections: data }]);
+        throw new Error('Expected validation to fail');
+      } catch (err) {
+        expect(err.message).to.include('"id_token_signed_response_algs"');
+        expect(err.message).to.include('"token_endpoint_auth_signing_alg"');
+      }
+    });
+
+    it('should reject token endpoint options on strategies other than oidc/okta/samlp', async () => {
+      const handler = new connections.default({ client: {}, config });
+      const stageFn = Object.getPrototypeOf(handler).validate;
+      const data = [
+        {
+          name: 'ad-connection',
+          strategy: 'ad',
+          options: {
+            token_endpoint_auth_signing_alg: 'RS256',
+            token_endpoint_jwtca_aud_format: 'issuer',
+          },
+        },
+      ];
+
+      try {
+        await stageFn.apply(handler, [{ connections: data }]);
+        throw new Error('Expected validation to fail');
+      } catch (err) {
+        expect(err).to.be.an('object');
+        expect(err.message).to.include('"token_endpoint_auth_signing_alg"');
+        expect(err.message).to.include('"token_endpoint_jwtca_aud_format"');
+        expect(err.message).to.include('only supported for strategies "oidc", "okta" and "samlp"');
+        expect(err.message).to.include('Found strategy "ad"');
       }
     });
   });
@@ -945,6 +1030,178 @@ describe('#connections handler', () => {
         expect(changes.create[0].enabled_clients).to.have.members(['managed1', 'dynamic1']);
         expect(changes.create[0].options.idpinitiated.client_id).to.equal('managed1');
       }
+    });
+
+    describe('masked client_secret', () => {
+      const MASK = '##CONNECTIONS_SAMLP_SECRET##';
+
+      const run = async (
+        existingOptions,
+        localOptions,
+        { strategy = 'samlp', existingStrategy = strategy } = {}
+      ) => {
+        const auth0 = {
+          connections: {
+            list: (params) =>
+              mockPagedData(params, 'connections', [
+                {
+                  id: 'con_saml',
+                  name: 'saml-xaa',
+                  strategy: existingStrategy,
+                  options: existingOptions,
+                },
+              ]),
+          },
+          clients: { list: (params) => mockPagedData(params, 'clients', []) },
+          pool,
+        };
+        const handler = new connections.default({ client: pageClient(auth0), config });
+        handler.scimHandler = scimHandlerMock;
+        const assets = {
+          connections: [{ name: 'saml-xaa', strategy, options: localOptions }],
+        };
+        return [await handler.calcChanges(assets), await handler.dryRunChanges(assets)];
+      };
+
+      it('should reuse the stored client_secret when the exported placeholder is unresolved', async () => {
+        for (const changes of await run(
+          { client_id: 'old-id', client_secret: 'stored-secret' },
+          { client_id: 'new-id', client_secret: MASK }
+        )) {
+          expect(changes.update).to.have.lengthOf(1);
+          expect(changes.update[0].options.client_secret).to.equal('stored-secret');
+          expect(changes.update[0].options.client_id).to.equal('new-id');
+        }
+      });
+
+      it('should leave the placeholder when no secret is stored', async () => {
+        for (const changes of await run(
+          { client_id: 'old-id' },
+          { client_id: 'new-id', client_secret: MASK }
+        )) {
+          expect(changes.update[0].options.client_secret).to.equal(MASK);
+        }
+      });
+
+      it('should not override an explicit client_secret', async () => {
+        for (const changes of await run(
+          { client_id: 'old-id', client_secret: 'stored-secret' },
+          { client_id: 'new-id', client_secret: 'new-secret' }
+        )) {
+          expect(changes.update[0].options.client_secret).to.equal('new-secret');
+        }
+      });
+
+      it('should not override an explicit empty client_secret', async () => {
+        for (const changes of await run(
+          { client_id: 'old-id', client_secret: 'stored-secret' },
+          { client_id: 'new-id', client_secret: '' }
+        )) {
+          expect(changes.update[0].options.client_secret).to.equal('');
+        }
+      });
+
+      it('should not override an explicit null client_secret', async () => {
+        for (const changes of await run(
+          { client_id: 'old-id', client_secret: 'stored-secret' },
+          { client_id: 'new-id', client_secret: null }
+        )) {
+          expect(changes.update[0].options.client_secret).to.equal(null);
+        }
+      });
+
+      it('should reuse the stored client_secret for non-samlp strategies too', async () => {
+        for (const changes of await run(
+          { client_id: 'old-id', client_secret: 'stored-oidc-secret' },
+          { client_id: 'new-id', client_secret: '##CONNECTIONS_OIDC_SECRET##' },
+          { strategy: 'oidc' }
+        )) {
+          expect(changes.update[0].options.client_secret).to.equal('stored-oidc-secret');
+        }
+      });
+
+      it('should not copy a secret from a stored connection with a different strategy', async () => {
+        for (const changes of await run(
+          { client_id: 'old-id', client_secret: 'stored-secret' },
+          { client_id: 'new-id', client_secret: MASK },
+          { strategy: 'samlp', existingStrategy: 'oidc' }
+        )) {
+          expect(changes.update[0].options.client_secret).to.equal(MASK);
+        }
+      });
+
+      it('should warn when the stored client_secret is reused', async () => {
+        const warn = sinon.stub(log, 'warn');
+        try {
+          await run(
+            { client_id: 'old-id', client_secret: 'stored-secret' },
+            { client_id: 'new-id', client_secret: MASK }
+          );
+          const messages = warn.getCalls().map((c) => String(c.args[0]));
+          expect(messages.some((m) => m.includes('saml-xaa') && m.includes(MASK))).to.equal(true);
+          expect(messages.some((m) => m.includes('CONNECTIONS_SAMLP_SECRET'))).to.equal(true);
+        } finally {
+          warn.restore();
+        }
+      });
+
+      it('should send the stored client_secret in the update payload', async () => {
+        const auth0 = {
+          connections: {
+            create: () => Promise.resolve({ data: {} }),
+            update: () => Promise.resolve({}),
+            delete: () => Promise.resolve({ data: [] }),
+            list: (params) =>
+              mockPagedData(params, 'connections', [
+                {
+                  id: 'con_saml',
+                  name: 'saml-xaa',
+                  strategy: 'samlp',
+                  options: { client_id: 'old-id', client_secret: 'stored-secret' },
+                },
+              ]),
+            _getRestClient: () => ({}),
+          },
+          clients: { list: (params) => mockPagedData(params, 'clients', []) },
+          pool: sequentialPool,
+        };
+        const handler = new connections.default({ client: pageClient(auth0), config });
+        handler.scimHandler = scimHandlerMock;
+
+        await handler.processChanges({
+          connections: [
+            {
+              name: 'saml-xaa',
+              strategy: 'samlp',
+              options: { client_id: 'new-id', client_secret: MASK },
+            },
+          ],
+        });
+
+        // Updates are routed through the SCIM override, which receives the final payload.
+        expect(scimHandlerMock.updateOverride.calledOnce).to.equal(true);
+        const [connectionId, payload] = scimHandlerMock.updateOverride.firstCall.args;
+        expect(connectionId).to.equal('con_saml');
+        expect(payload.options.client_secret).to.equal('stored-secret');
+        expect(payload.options.client_id).to.equal('new-id');
+      });
+
+      it('should ignore connections without options or without a matching stored connection', () => {
+        const existing = [{ name: 'a', options: { client_secret: 'stored' } }];
+        expect(connections.restoreMaskedClientSecret({ name: 'a' }, existing)).to.deep.equal({});
+        expect(
+          connections.restoreMaskedClientSecret(
+            { name: 'b', options: { client_secret: MASK } },
+            existing
+          )
+        ).to.deep.equal({});
+        expect(
+          connections.restoreMaskedClientSecret(
+            { name: 'a', options: { client_secret: MASK } },
+            null
+          )
+        ).to.deep.equal({});
+      });
     });
 
     it('should process directory provisioning create and update operations', async () => {

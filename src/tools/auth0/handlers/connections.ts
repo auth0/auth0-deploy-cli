@@ -8,6 +8,7 @@ import {
   getEnabledClients,
   sleep,
   filterIncluded,
+  isUnresolvedPlaceholder,
 } from '../../utils';
 import { CalculatedChanges, Asset, Assets, Auth0APIClient } from '../../../types';
 import { ConfigFunction } from '../../../configFactory';
@@ -46,12 +47,18 @@ const connectionOptionsSchema = {
   },
 };
 
-const oidcOktaStrategies = new Set(['oidc', 'okta']);
-const oidcOktaOnlyConnectionOptionFields = [
-  'token_endpoint_auth_signing_alg',
-  'id_token_signed_response_algs',
-  'token_endpoint_jwtca_aud_format',
-  'id_token_session_expiry_supported',
+// Option fields that are only valid for the listed strategies.
+const strategyRestrictedConnectionOptionFields = [
+  {
+    fields: ['id_token_signed_response_algs', 'id_token_session_expiry_supported'],
+    strategies: ['oidc', 'okta'],
+    label: '"oidc" and "okta"',
+  },
+  {
+    fields: ['token_endpoint_auth_signing_alg', 'token_endpoint_jwtca_aud_format'],
+    strategies: ['oidc', 'okta', 'samlp'],
+    label: '"oidc", "okta" and "samlp"',
+  },
 ];
 
 export const schema = {
@@ -219,6 +226,28 @@ export const addExcludedConnectionPropertiesToChanges = ({
     ...proposedChanges,
     update: newProposedUpdates,
   };
+};
+
+// An unresolved client_secret placeholder would be stripped and wipe the stored secret, since options is replaced whole.
+// exported only for unit testing purposes
+export const restoreMaskedClientSecret = (
+  connection: Asset,
+  existingConnections: Asset[] | null
+): Pick<Asset, 'options'> | {} => {
+  const secret = connection.options?.client_secret;
+  if (!isUnresolvedPlaceholder(secret)) return {};
+
+  const existingSecret = existingConnections?.find(
+    (c) => c.name === connection.name && c.strategy === connection.strategy
+  )?.options?.client_secret;
+  if (!existingSecret) return {};
+
+  const keywordName = secret.replace(/^(##|@@)|(##|@@)$/g, '');
+  log.warn(
+    `Reusing the stored options.client_secret for connection "${connection.name}" because ${secret} is unresolved. ` +
+      `To set a new value, define ${keywordName} in AUTH0_KEYWORD_REPLACE_MAPPINGS.`
+  );
+  return { options: { ...connection.options, client_secret: existingSecret } };
 };
 
 /**
@@ -482,21 +511,22 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
       if (!connection?.options) return;
 
       const strategy = connection?.strategy ?? 'unknown';
-      if (oidcOktaStrategies.has(strategy)) return;
 
-      const unsupportedFields = oidcOktaOnlyConnectionOptionFields.filter(
-        (field) => field in connection.options
-      );
+      const errors: string[] = [];
+      for (const { fields, strategies, label } of strategyRestrictedConnectionOptionFields) {
+        if (strategies.includes(strategy)) continue;
 
-      if (unsupportedFields.length > 0) {
-        throw new ValidationError(
+        const unsupportedFields = fields.filter((field) => field in connection.options);
+        if (unsupportedFields.length === 0) continue;
+
+        errors.push(
           `Connection "${connection.name}": option(s) ${unsupportedFields
             .map((field) => `"${field}"`)
-            .join(
-              ', '
-            )} are only supported for strategies "oidc" and "okta". Found strategy "${strategy}".`
+            .join(', ')} are only supported for strategies ${label}. Found strategy "${strategy}".`
         );
       }
+
+      if (errors.length > 0) throw new ValidationError(errors.join(' '));
     });
 
     await super.validate(assets);
@@ -912,9 +942,14 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
         managedClients
       );
 
-      return {
+      const withOptions = {
         ...connection,
         ...this.getFormattedOptions(connection, managedClients),
+      };
+
+      return {
+        ...withOptions,
+        ...restoreMaskedClientSecret(withOptions, existingConnections),
         ...(enabledClients !== undefined && { enabled_clients: enabledClients }),
       };
     });
@@ -968,9 +1003,14 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
         managedClients
       );
 
-      return {
+      const withOptions = {
         ...connection,
         ...this.getFormattedOptions(connection, managedClients),
+      };
+
+      return {
+        ...withOptions,
+        ...restoreMaskedClientSecret(withOptions, existingConnections),
         ...(enabledClients !== undefined && { enabled_clients: enabledClients }),
       };
     });
