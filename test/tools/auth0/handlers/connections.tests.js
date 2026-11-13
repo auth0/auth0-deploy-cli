@@ -6,6 +6,7 @@ const { expect } = require('chai');
 const sinon = require('sinon');
 const connections = require('../../../../src/tools/auth0/handlers/connections');
 const utils = require('../../../../src/tools/utils');
+const log = require('../../../../src/logger').default;
 const { mockPagedData } = require('../../../utils');
 
 const pool = {
@@ -19,6 +20,18 @@ const pool = {
     const result = task.generator(task.data);
     return { promise: () => Promise.resolve(result) };
   },
+};
+
+// Runs every task and waits for it, so tests can assert on the calls made by processChanges.
+const sequentialPool = {
+  addEachTask: ({ data, generator }) => ({
+    promise: async () => {
+      for (const item of data || []) {
+        await generator(item);
+      }
+    },
+  }),
+  addSingleTask: pool.addSingleTask,
 };
 
 describe('#connections handler', () => {
@@ -1022,7 +1035,11 @@ describe('#connections handler', () => {
     describe('masked client_secret', () => {
       const MASK = '##CONNECTIONS_SAMLP_SECRET##';
 
-      const run = async (existingOptions, localOptions) => {
+      const run = async (
+        existingOptions,
+        localOptions,
+        { strategy = 'samlp', existingStrategy = strategy } = {}
+      ) => {
         const auth0 = {
           connections: {
             list: (params) =>
@@ -1030,7 +1047,7 @@ describe('#connections handler', () => {
                 {
                   id: 'con_saml',
                   name: 'saml-xaa',
-                  strategy: 'samlp',
+                  strategy: existingStrategy,
                   options: existingOptions,
                 },
               ]),
@@ -1041,7 +1058,7 @@ describe('#connections handler', () => {
         const handler = new connections.default({ client: pageClient(auth0), config });
         handler.scimHandler = scimHandlerMock;
         const assets = {
-          connections: [{ name: 'saml-xaa', strategy: 'samlp', options: localOptions }],
+          connections: [{ name: 'saml-xaa', strategy, options: localOptions }],
         };
         return [await handler.calcChanges(assets), await handler.dryRunChanges(assets)];
       };
@@ -1082,6 +1099,91 @@ describe('#connections handler', () => {
         )) {
           expect(changes.update[0].options.client_secret).to.equal('');
         }
+      });
+
+      it('should not override an explicit null client_secret', async () => {
+        for (const changes of await run(
+          { client_id: 'old-id', client_secret: 'stored-secret' },
+          { client_id: 'new-id', client_secret: null }
+        )) {
+          expect(changes.update[0].options.client_secret).to.equal(null);
+        }
+      });
+
+      it('should reuse the stored client_secret for non-samlp strategies too', async () => {
+        for (const changes of await run(
+          { client_id: 'old-id', client_secret: 'stored-oidc-secret' },
+          { client_id: 'new-id', client_secret: '##CONNECTIONS_OIDC_SECRET##' },
+          { strategy: 'oidc' }
+        )) {
+          expect(changes.update[0].options.client_secret).to.equal('stored-oidc-secret');
+        }
+      });
+
+      it('should not copy a secret from a stored connection with a different strategy', async () => {
+        for (const changes of await run(
+          { client_id: 'old-id', client_secret: 'stored-secret' },
+          { client_id: 'new-id', client_secret: MASK },
+          { strategy: 'samlp', existingStrategy: 'oidc' }
+        )) {
+          expect(changes.update[0].options.client_secret).to.equal(MASK);
+        }
+      });
+
+      it('should warn when the stored client_secret is reused', async () => {
+        const warn = sinon.stub(log, 'warn');
+        try {
+          await run(
+            { client_id: 'old-id', client_secret: 'stored-secret' },
+            { client_id: 'new-id', client_secret: MASK }
+          );
+          const messages = warn.getCalls().map((c) => String(c.args[0]));
+          expect(messages.some((m) => m.includes('saml-xaa') && m.includes(MASK))).to.equal(true);
+          expect(messages.some((m) => m.includes('CONNECTIONS_SAMLP_SECRET'))).to.equal(true);
+        } finally {
+          warn.restore();
+        }
+      });
+
+      it('should send the stored client_secret in the update payload', async () => {
+        const auth0 = {
+          connections: {
+            create: () => Promise.resolve({ data: {} }),
+            update: () => Promise.resolve({}),
+            delete: () => Promise.resolve({ data: [] }),
+            list: (params) =>
+              mockPagedData(params, 'connections', [
+                {
+                  id: 'con_saml',
+                  name: 'saml-xaa',
+                  strategy: 'samlp',
+                  options: { client_id: 'old-id', client_secret: 'stored-secret' },
+                },
+              ]),
+            _getRestClient: () => ({}),
+          },
+          clients: { list: (params) => mockPagedData(params, 'clients', []) },
+          pool: sequentialPool,
+        };
+        const handler = new connections.default({ client: pageClient(auth0), config });
+        handler.scimHandler = scimHandlerMock;
+
+        await handler.processChanges({
+          connections: [
+            {
+              name: 'saml-xaa',
+              strategy: 'samlp',
+              options: { client_id: 'new-id', client_secret: MASK },
+            },
+          ],
+        });
+
+        // Updates are routed through the SCIM override, which receives the final payload.
+        expect(scimHandlerMock.updateOverride.calledOnce).to.equal(true);
+        const [connectionId, payload] = scimHandlerMock.updateOverride.firstCall.args;
+        expect(connectionId).to.equal('con_saml');
+        expect(payload.options.client_secret).to.equal('stored-secret');
+        expect(payload.options.client_id).to.equal('new-id');
       });
 
       it('should ignore connections without options or without a matching stored connection', () => {

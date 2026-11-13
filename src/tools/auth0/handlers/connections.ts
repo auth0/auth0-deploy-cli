@@ -8,7 +8,7 @@ import {
   getEnabledClients,
   sleep,
   filterIncluded,
-  UNRESOLVED_PLACEHOLDER_REGEX,
+  isUnresolvedPlaceholder,
 } from '../../utils';
 import { CalculatedChanges, Asset, Assets, Auth0APIClient } from '../../../types';
 import { ConfigFunction } from '../../../configFactory';
@@ -228,20 +228,25 @@ export const addExcludedConnectionPropertiesToChanges = ({
   };
 };
 
-// Export masks options.client_secret, and Auth0 replaces options as a whole on update, so an unresolved
-// placeholder would be stripped and wipe the stored secret. Reuse the stored secret instead.
+// An unresolved client_secret placeholder would be stripped and wipe the stored secret, since options is replaced whole.
 // exported only for unit testing purposes
 export const restoreMaskedClientSecret = (
   connection: Asset,
   existingConnections: Asset[] | null
 ): Pick<Asset, 'options'> | {} => {
   const secret = connection.options?.client_secret;
-  if (typeof secret !== 'string' || !UNRESOLVED_PLACEHOLDER_REGEX.test(secret)) return {};
+  if (!isUnresolvedPlaceholder(secret)) return {};
 
-  const existingSecret = existingConnections?.find((c) => c.name === connection.name)?.options
-    ?.client_secret;
+  const existingSecret = existingConnections?.find(
+    (c) => c.name === connection.name && c.strategy === connection.strategy
+  )?.options?.client_secret;
   if (!existingSecret) return {};
 
+  const keywordName = secret.replace(/^(##|@@)|(##|@@)$/g, '');
+  log.warn(
+    `Reusing the stored options.client_secret for connection "${connection.name}" because ${secret} is unresolved. ` +
+      `To set a new value, define ${keywordName} in AUTH0_KEYWORD_REPLACE_MAPPINGS.`
+  );
   return { options: { ...connection.options, client_secret: existingSecret } };
 };
 
