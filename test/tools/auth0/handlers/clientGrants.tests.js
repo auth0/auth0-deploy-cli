@@ -1364,6 +1364,7 @@ describe('#clientGrants handler', () => {
           { client_id: 'b', audience, scope: ['read:logs', 'read:users'] },
           { client_id: 'b', audience: 'https://other/', scope: ['read:logs'] },
           { client_id: 'a', audience: 'https://other/', scope: ['read:logs'] },
+          { client_id: 'deploy_client', audience: 'https://other/', scope: ['read:logs'] },
         ],
         exclude: { clients: ['App B'] },
       });
