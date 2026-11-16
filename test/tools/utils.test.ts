@@ -6,6 +6,7 @@ import {
   writeSkippingUnavailableOidcSupport,
 } from '../../src/tools/utils';
 import { hasKeywordMarkers, mapClientID2NameSorted } from '../../src/utils';
+import { notEnabledError } from '../utils';
 
 describe('#getEnabledClients', () => {
   const mockExclusions = {};
@@ -213,11 +214,24 @@ describe('#sortGuardianFactors', () => {
 });
 
 describe('#writeSkippingUnavailableOidcSupport', () => {
-  const notEnabled = (message = 'oidc_support is not available for this tenant.') =>
-    Object.assign(new Error('Forbidden'), {
-      statusCode: 403,
-      body: { errorCode: 'feature_not_enabled', message },
-    });
+  const writeThatThrows = async (thrown: Error) => {
+    let calls = 0;
+    let error;
+    try {
+      await writeSkippingUnavailableOidcSupport(
+        { oidc_support: {} },
+        'oidc_support',
+        'client "a"',
+        async () => {
+          calls += 1;
+          throw thrown;
+        }
+      );
+    } catch (err) {
+      error = err;
+    }
+    return { calls, error };
+  };
 
   it('should return the result of a successful write without retrying', async () => {
     let calls = 0;
@@ -242,7 +256,7 @@ describe('#writeSkippingUnavailableOidcSupport', () => {
       'client "a"',
       async (payload) => {
         payloads.push(payload);
-        if (payload.oidc_support) throw notEnabled();
+        if (payload.oidc_support) throw notEnabledError();
         return 'retried';
       }
     );
@@ -261,7 +275,7 @@ describe('#writeSkippingUnavailableOidcSupport', () => {
       'profile',
       async (payload) => {
         payloads.push(payload);
-        if (payload.client_configuration.oidc_support) throw notEnabled();
+        if (payload.client_configuration.oidc_support) throw notEnabledError();
         return null;
       }
     );
@@ -278,7 +292,7 @@ describe('#writeSkippingUnavailableOidcSupport', () => {
         'client "a"',
         async () => {
           calls += 1;
-          throw notEnabled();
+          throw notEnabledError();
         }
       );
     } catch (err) {
@@ -298,7 +312,7 @@ describe('#writeSkippingUnavailableOidcSupport', () => {
         'client "a"',
         async () => {
           calls += 1;
-          throw notEnabled('Client Profiles is not enabled');
+          throw notEnabledError('Client Profiles is not enabled');
         }
       );
     } catch (err) {
@@ -308,24 +322,40 @@ describe('#writeSkippingUnavailableOidcSupport', () => {
     expect(calls).to.equal(1);
   });
 
-  it('should rethrow non-403 errors', async () => {
-    let error;
-    try {
-      await writeSkippingUnavailableOidcSupport(
-        { oidc_support: {} },
-        'oidc_support',
-        'client "a"',
-        async () => {
-          throw Object.assign(new Error('Bad'), {
-            statusCode: 400,
-            body: { errorCode: 'invalid_body', message: 'oidc_support invalid' },
-          });
-        }
-      );
-    } catch (err) {
-      error = err;
-    }
+  it('should rethrow non-403 errors without retrying', async () => {
+    const { calls, error } = await writeThatThrows(
+      Object.assign(new Error('Bad'), {
+        statusCode: 400,
+        body: { errorCode: 'invalid_body', message: 'oidc_support invalid' },
+      })
+    );
     expect(error).to.be.an('error');
+    expect(calls).to.equal(1);
+  });
+
+  it('should rethrow a 400 feature_not_enabled error without retrying', async () => {
+    const { calls, error } = await writeThatThrows(
+      Object.assign(new Error('Bad'), {
+        statusCode: 400,
+        body: {
+          errorCode: 'feature_not_enabled',
+          message: 'oidc_support is not available for this tenant.',
+        },
+      })
+    );
+    expect(error).to.be.an('error');
+    expect(calls).to.equal(1);
+  });
+
+  it('should rethrow a 403 with a different errorCode without retrying', async () => {
+    const { calls, error } = await writeThatThrows(
+      Object.assign(new Error('Forbidden'), {
+        statusCode: 403,
+        body: { errorCode: 'insufficient_scope', message: 'Insufficient scope for oidc_support' },
+      })
+    );
+    expect(error).to.be.an('error');
+    expect(calls).to.equal(1);
   });
 
   it('should surface the error when the retry also fails', async () => {
@@ -336,7 +366,7 @@ describe('#writeSkippingUnavailableOidcSupport', () => {
         'oidc_support',
         'client "a"',
         async (payload) => {
-          if (payload.oidc_support) throw notEnabled();
+          if (payload.oidc_support) throw notEnabledError();
           throw new Error('still failing');
         }
       );

@@ -2621,7 +2621,7 @@ describe('#clients handler', () => {
         expect(valid).to.equal(true);
       });
 
-      it('should reject null since the API only clears it on non-OIDC-conformant clients', () => {
+      it('should reject null', () => {
         const valid = ajv.validate(clients.schema, [{ name: 'c', oidc_support: null }]);
         expect(valid).to.equal(false);
       });

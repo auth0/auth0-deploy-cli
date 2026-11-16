@@ -497,11 +497,13 @@ The Deploy CLI supports the `oidc_support` property on clients, which controls w
 - `oidc_support.allowed_scopes` (array): Optional scopes the client may request: `profile`, `email`, `address`, `phone`. `openid` is implied by `is_allowed: true` and is not a valid entry.
 - `oidc_support.allow_all_scopes` (boolean): Allows all of the optional scopes above.
 
-When `is_allowed` is `true`, set exactly one of `allowed_scopes` or `allow_all_scopes`. When `is_allowed` is `false`, set neither. `oidc_support` is replaced as a whole on update, so always provide the complete value.
+When `is_allowed` is `true`, set exactly one of `allowed_scopes` or `allow_all_scopes`. When `is_allowed` is `false`, set neither. `oidc_support` is replaced as a whole on update, so always provide the complete value. It cannot be cleared from config; set it to the value you want.
 
 For [CIMD clients](#clients-client-id-metadata-document), `oidc_support` is applied when the client is updated. The first deploy only registers the client, so deploy again to apply it.
 
-**Export behavior:** a client that has no stored value is returned by the Management API with a default (`{ is_allowed: false }` for strict third-party clients, otherwise `{ is_allowed: true, allow_all_scopes: true }`), so exports include `oidc_support` for every OIDC-conformant client.
+On a tenant without the feature, `--dry-run` still lists a client that sets `oidc_support` as an update, because the field is only skipped when the import writes it.
+
+**Export behavior:** a client that has no stored value is returned by the Management API with a default (`{ is_allowed: false }` for strict third-party clients, otherwise `{ is_allowed: true, allow_all_scopes: true }`), so exports include `oidc_support` for every OIDC-conformant client. Importing an export writes these values to the tenant, so the defaults are stored as explicit values.
 
 **YAML Example**
 
