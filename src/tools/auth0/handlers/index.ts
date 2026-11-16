@@ -50,6 +50,7 @@ import * as featureFlags from './featureFlags';
 import * as variations from './variations';
 import * as segments from './segments';
 import * as experiments from './experiments';
+import * as portals from './portals';
 import * as clientAuthCredentials from './clientAuthCredentials';
 import * as clientAuthCredentialsPre from './clientAuthCredentialsPre';
 import * as agents from './agents';
@@ -111,6 +112,7 @@ const auth0ApiHandlers: { [key in AssetTypes]: any } = {
   variations,
   segments,
   experiments,
+  portals,
   clientAuthCredentials,
   agents,
   // clientAuthCredentialsPre is a deploy-only pre-pass handler (order 40) — not a user-facing

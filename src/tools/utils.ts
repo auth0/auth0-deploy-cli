@@ -73,6 +73,74 @@ export function convertClientNameToId(name: string, clients: Asset[]): string {
   return (found && found.client_id) || name;
 }
 
+// Applies fn to the form_id of every form component on a portal's pages, including in sections.
+export function mapPortalFormIds(portal: Asset, fn: (formId: string) => string): Asset {
+  const mapComponents = (components: any): any =>
+    Array.isArray(components)
+      ? components.map((component) => {
+          const config = component?.config;
+          if (
+            component?.type === 'page:component:auth0:form' &&
+            typeof config?.form_id === 'string'
+          ) {
+            return { ...component, config: { ...config, form_id: fn(config.form_id) } };
+          }
+          if (Array.isArray(config?.children)) {
+            return {
+              ...component,
+              config: { ...config, children: mapComponents(config.children) },
+            };
+          }
+          return component;
+        })
+      : components;
+
+  const standard = portal.pages?.standard;
+  if (!Array.isArray(standard)) return portal;
+  return {
+    ...portal,
+    pages: {
+      ...portal.pages,
+      standard: standard.map((page) =>
+        Array.isArray(page?.components)
+          ? { ...page, components: mapComponents(page.components) }
+          : page
+      ),
+    },
+  };
+}
+
+export const portalHasForms = (portal: Asset): boolean => {
+  let found = false;
+  mapPortalFormIds(portal, (formId) => {
+    found = true;
+    return formId;
+  });
+  return found;
+};
+
+// Resolves application and form names in portals to their ids; unmatched values are kept as is.
+export const resolvePortalReferences = (
+  portals: Asset[],
+  clients: Asset[],
+  forms: Asset[]
+): Asset[] =>
+  portals.map((portal) => {
+    const withClient = portal.client?.client_id
+      ? {
+          ...portal,
+          client: {
+            ...portal.client,
+            client_id: convertClientNameToId(portal.client.client_id, clients),
+          },
+        }
+      : portal;
+    return mapPortalFormIds(
+      withClient,
+      (name) => forms.find((form) => form.name === name)?.id || name
+    );
+  });
+
 export function convertActionNameToId(name: string, actions: Asset[]): string {
   const found = actions.find((a) => a.name === name);
   return (found && found.id) || name;

@@ -28,6 +28,7 @@ import { FeatureFlag } from './tools/auth0/handlers/featureFlags';
 import { Variation } from './tools/auth0/handlers/variations';
 import { Segment } from './tools/auth0/handlers/segments';
 import { Experiment } from './tools/auth0/handlers/experiments';
+import { Portal } from './tools/auth0/handlers/portals';
 
 type SharedPaginationParams = {
   checkpoint?: boolean;
@@ -186,6 +187,7 @@ export type Assets = Partial<{
   segments: Segment[] | null;
   experiments: Experiment[] | null;
   agents: Asset[] | null;
+  portals: Partial<Portal>[] | null;
 }>;
 
 export type CalculatedChanges = {
@@ -264,7 +266,8 @@ export type AssetTypes =
   | 'segments'
   | 'experiments'
   | 'clientAuthCredentials'
-  | 'agents';
+  | 'agents'
+  | 'portals';
 
 export type KeywordMappings = { [key: string]: (string | number)[] | string | number };
 
