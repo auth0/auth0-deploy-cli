@@ -7,7 +7,7 @@ import { calculateChanges } from '../../calculateChanges';
 import { getConnectionProfile } from './connectionProfiles';
 import { getUserAttributeProfiles } from './userAttributeProfiles';
 import log from '../../../logger';
-import { shouldExcludeThirdPartyClients } from '../../utils';
+import { shouldExcludeThirdPartyClients, writeSkippingUnavailableOidcSupport } from '../../utils';
 
 const multiResourceRefreshTokenPoliciesSchema = {
   type: ['array', 'null'],
@@ -139,6 +139,20 @@ const tokenVaultPrivilegedAccessSchema = {
       },
     },
   },
+};
+
+// Shared with client profiles. Requires this feature to be enabled on the tenant.
+export const oidcSupportSchema = {
+  type: 'object',
+  properties: {
+    is_allowed: { type: 'boolean' },
+    allow_all_scopes: { type: 'boolean' },
+    allowed_scopes: {
+      type: 'array',
+      items: { type: 'string', enum: ['profile', 'email', 'address', 'phone'] },
+    },
+  },
+  required: ['is_allowed'],
 };
 
 export const schema = {
@@ -484,6 +498,7 @@ export const schema = {
         description:
           'Indicates the security mode for a Third Party Client, to apply new security semantics and improvements.',
       },
+      oidc_support: oidcSupportSchema,
       redirection_policy: {
         type: 'string',
         enum: ['allow_always', 'open_redirect_protection'],
@@ -997,7 +1012,12 @@ export default class ClientHandler extends DefaultAPIHandler {
     client: Client
   ): Promise<Management.RegisterCimdClientResponseContent | Client> {
     if (!this.isCimdClient(client)) {
-      return this.client.clients.create(client as Management.CreateClientRequestContent);
+      return writeSkippingUnavailableOidcSupport(
+        client,
+        'oidc_support',
+        `client "${client.name}"`,
+        (payload) => this.client.clients.create(payload as Management.CreateClientRequestContent)
+      );
     }
 
     const externalClientId = client.external_client_id!;
@@ -1026,6 +1046,7 @@ export default class ClientHandler extends DefaultAPIHandler {
       'skip_non_verifiable_callback_uri_confirmation_prompt',
       'jwt_configuration',
       'refresh_token',
+      'oidc_support',
     ]) as Management.UpdateClientRequestContent;
   }
 
@@ -1056,14 +1077,24 @@ export default class ClientHandler extends DefaultAPIHandler {
         }
       }
 
-      return this.client.clients.update(clientId, payload);
+      return writeSkippingUnavailableOidcSupport(
+        payload,
+        'oidc_support',
+        `client "${client.name || clientId}"`,
+        (body) => this.client.clients.update(clientId, body)
+      );
     }
 
     const updatePayload = this.getCIMDEditableFields(client);
     const registrationClientId = client.client_id || clientId;
 
     if (registrationClientId && Object.keys(updatePayload).length > 0) {
-      return this.client.clients.update(registrationClientId, updatePayload);
+      return writeSkippingUnavailableOidcSupport(
+        updatePayload,
+        'oidc_support',
+        `client "${client.name || registrationClientId}"`,
+        (body) => this.client.clients.update(registrationClientId, body)
+      );
     }
 
     return client;

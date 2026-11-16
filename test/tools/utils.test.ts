@@ -1,5 +1,10 @@
 import { expect } from 'chai';
-import { getEnabledClients, isDryRun, sortGuardianFactors } from '../../src/tools/utils';
+import {
+  getEnabledClients,
+  isDryRun,
+  sortGuardianFactors,
+  writeSkippingUnavailableOidcSupport,
+} from '../../src/tools/utils';
 import { hasKeywordMarkers, mapClientID2NameSorted } from '../../src/utils';
 
 describe('#getEnabledClients', () => {
@@ -204,5 +209,140 @@ describe('#sortGuardianFactors', () => {
     const sorted = sortGuardianFactors(factors);
     expect(sorted[0].name).to.equal(undefined);
     expect(sorted[1].name).to.equal('abc');
+  });
+});
+
+describe('#writeSkippingUnavailableOidcSupport', () => {
+  const notEnabled = (message = 'oidc_support is not available for this tenant.') =>
+    Object.assign(new Error('Forbidden'), {
+      statusCode: 403,
+      body: { errorCode: 'feature_not_enabled', message },
+    });
+
+  it('should return the result of a successful write without retrying', async () => {
+    let calls = 0;
+    const result = await writeSkippingUnavailableOidcSupport(
+      { name: 'a', oidc_support: { is_allowed: false } },
+      'oidc_support',
+      'client "a"',
+      async () => {
+        calls += 1;
+        return 'ok';
+      }
+    );
+    expect(result).to.equal('ok');
+    expect(calls).to.equal(1);
+  });
+
+  it('should retry without the field when the tenant does not have the feature', async () => {
+    const payloads: any[] = [];
+    const result = await writeSkippingUnavailableOidcSupport(
+      { name: 'a', oidc_support: { is_allowed: false } },
+      'oidc_support',
+      'client "a"',
+      async (payload) => {
+        payloads.push(payload);
+        if (payload.oidc_support) throw notEnabled();
+        return 'retried';
+      }
+    );
+    expect(result).to.equal('retried');
+    expect(payloads).to.deep.equal([
+      { name: 'a', oidc_support: { is_allowed: false } },
+      { name: 'a' },
+    ]);
+  });
+
+  it('should strip a nested field without touching its siblings', async () => {
+    const payloads: any[] = [];
+    await writeSkippingUnavailableOidcSupport(
+      { client_configuration: { oidc_support: { default_value: {} }, other: 1 } },
+      'client_configuration.oidc_support',
+      'profile',
+      async (payload) => {
+        payloads.push(payload);
+        if (payload.client_configuration.oidc_support) throw notEnabled();
+        return null;
+      }
+    );
+    expect(payloads[1]).to.deep.equal({ client_configuration: { other: 1 } });
+  });
+
+  it('should rethrow when the payload has no oidc_support', async () => {
+    let calls = 0;
+    let error;
+    try {
+      await writeSkippingUnavailableOidcSupport(
+        { name: 'a' },
+        'oidc_support',
+        'client "a"',
+        async () => {
+          calls += 1;
+          throw notEnabled();
+        }
+      );
+    } catch (err) {
+      error = err;
+    }
+    expect(error).to.be.an('error');
+    expect(calls).to.equal(1);
+  });
+
+  it('should rethrow a feature_not_enabled error about something else without retrying', async () => {
+    let calls = 0;
+    let error;
+    try {
+      await writeSkippingUnavailableOidcSupport(
+        { oidc_support: {} },
+        'oidc_support',
+        'client "a"',
+        async () => {
+          calls += 1;
+          throw notEnabled('Client Profiles is not enabled');
+        }
+      );
+    } catch (err) {
+      error = err;
+    }
+    expect(error).to.be.an('error');
+    expect(calls).to.equal(1);
+  });
+
+  it('should rethrow non-403 errors', async () => {
+    let error;
+    try {
+      await writeSkippingUnavailableOidcSupport(
+        { oidc_support: {} },
+        'oidc_support',
+        'client "a"',
+        async () => {
+          throw Object.assign(new Error('Bad'), {
+            statusCode: 400,
+            body: { errorCode: 'invalid_body', message: 'oidc_support invalid' },
+          });
+        }
+      );
+    } catch (err) {
+      error = err;
+    }
+    expect(error).to.be.an('error');
+  });
+
+  it('should surface the error when the retry also fails', async () => {
+    let error;
+    try {
+      await writeSkippingUnavailableOidcSupport(
+        { name: 'a', oidc_support: {} },
+        'oidc_support',
+        'client "a"',
+        async (payload) => {
+          if (payload.oidc_support) throw notEnabled();
+          throw new Error('still failing');
+        }
+      );
+    } catch (err) {
+      error = err;
+    }
+    expect(error.message).to.equal('still failing');
   });
 });

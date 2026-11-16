@@ -487,6 +487,48 @@ clients:
 }
 ```
 
+## Clients (OIDC support)
+
+The Deploy CLI supports the `oidc_support` property on clients, which controls whether a client may use OpenID Connect flows and which optional profile scopes it may request. It is mainly used to opt strict third-party clients in to OIDC.
+
+> ⚠️ **NOTE:** This feature must be enabled on the tenant. The property is only available on OIDC-conformant clients (`oidc_conformant: true`). If the feature isn't enabled for the tenant, the Deploy CLI skips `oidc_support` for that client, logs a warning, and applies the rest of the client's configuration.
+
+- `oidc_support.is_allowed` (boolean, required): Whether the client may use OIDC.
+- `oidc_support.allowed_scopes` (array): Optional scopes the client may request: `profile`, `email`, `address`, `phone`. `openid` is implied by `is_allowed: true` and is not a valid entry.
+- `oidc_support.allow_all_scopes` (boolean): Allows all of the optional scopes above.
+
+When `is_allowed` is `true`, set exactly one of `allowed_scopes` or `allow_all_scopes`. When `is_allowed` is `false`, set neither. `oidc_support` is replaced as a whole on update, so always provide the complete value.
+
+For [CIMD clients](#clients-client-id-metadata-document), `oidc_support` is applied when the client is updated. The first deploy only registers the client, so deploy again to apply it.
+
+**Export behavior:** a client that has no stored value is returned by the Management API with a default (`{ is_allowed: false }` for strict third-party clients, otherwise `{ is_allowed: true, allow_all_scopes: true }`), so exports include `oidc_support` for every OIDC-conformant client.
+
+**YAML Example**
+
+```yaml
+clients:
+  - name: My Third-Party Application
+    oidc_conformant: true
+    oidc_support:
+      is_allowed: true
+      allowed_scopes:
+        - profile
+        - email
+```
+
+**Directory Example**
+
+```json
+{
+  "name": "My Third-Party Application",
+  "oidc_conformant": true,
+  "oidc_support": {
+    "is_allowed": true,
+    "allowed_scopes": ["profile", "email"]
+  }
+}
+```
+
 ## Databases
 
 When managing database connections, the values of `options.customScripts` point to specific javascript files relative to
@@ -2407,6 +2449,7 @@ Client profiles are matched by `name`. Renaming a profile replaces it (delete, t
 | `client_configuration.organization_require_behavior`     | `object`         | No       | `{ default_value: "no_prompt" \| "pre_login_prompt" \| "post_login_prompt" }`: organization prompt behavior.                                                          |
 | `client_configuration.organization_discovery_methods`    | `object`         | No       | `{ default_value: ("email" \| "organization_name")[] }`: how the organization is discovered. Only allowed when `organization_require_behavior` is `pre_login_prompt`. |
 | `client_configuration.require_proof_of_possession`       | `object`         | No       | `{ default_value: boolean }`: when `true`, governed clients must provide a DPoP proof.                                                                                |
+| `client_configuration.oidc_support`                      | `object`         | No       | `{ default_value: {...} }`: OIDC support for governed clients. See [Clients (OIDC support)](#clients-oidc-support).                                                   |
 | `apply_policy.external_metadata_type`                    | `string`         | Yes      | Registration type to match. Currently only `cimd`.                                                                                                                    |
 | `apply_policy.external_metadata_created_by`              | `string`         | Yes      | How the client was registered. Currently only `client`.                                                                                                               |
 
@@ -2435,6 +2478,12 @@ clientProfiles:
           - organization_name
       require_proof_of_possession:
         default_value: true
+      oidc_support:
+        default_value:
+          is_allowed: true
+          allowed_scopes:
+            - profile
+            - email
     apply_policy:
       external_metadata_type: cimd
       external_metadata_created_by: client
@@ -2459,7 +2508,10 @@ Each client profile is stored as a separate JSON file named after its `name` (e.
     "organization_usage": { "default_value": "allow" },
     "organization_require_behavior": { "default_value": "pre_login_prompt" },
     "organization_discovery_methods": { "default_value": ["email", "organization_name"] },
-    "require_proof_of_possession": { "default_value": true }
+    "require_proof_of_possession": { "default_value": true },
+    "oidc_support": {
+      "default_value": { "is_allowed": true, "allowed_scopes": ["profile", "email"] }
+    }
   },
   "apply_policy": {
     "external_metadata_type": "cimd",

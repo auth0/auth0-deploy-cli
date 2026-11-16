@@ -4,7 +4,7 @@ import pageClient from '../../../../src/tools/auth0/client';
 const Ajv = require('ajv');
 const { expect } = require('chai');
 const clients = require('../../../../src/tools/auth0/handlers/clients');
-const { mockPagedData } = require('../../../utils');
+const { mockPagedData, notEnabledError, withCapturedWarnings } = require('../../../utils');
 
 const pool = {
   addEachTask: (data) => {
@@ -2572,6 +2572,233 @@ describe('#clients handler', () => {
       expect(updatePayloads['client1']).to.have.property('b2b_integration_configuration');
       expect(updatePayloads['client1'].b2b_integration_configuration).to.deep.equal({
         integration_type: 'third_party',
+      });
+    });
+  });
+
+  describe('#clients oidc_support', () => {
+    const mockAuth0 = (overrides = {}, existing = []) => ({
+      clients: {
+        create: (data) => Promise.resolve({ data }),
+        update: (clientId, data) => Promise.resolve({ data }),
+        delete: () => Promise.resolve({ data: {} }),
+        list: (params) => mockPagedData(params, 'clients', existing),
+        ...overrides,
+      },
+      connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+      userAttributeProfiles: {
+        list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+      },
+      pool,
+    });
+
+    const runProcessChanges = async (auth0, assets) => {
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      await Object.getPrototypeOf(handler).processChanges.apply(handler, [assets]);
+    };
+
+    describe('schema', () => {
+      const ajv = new Ajv({ useDefaults: true, nullable: true });
+
+      it('should accept is_allowed with allow_all_scopes', () => {
+        const valid = ajv.validate(clients.schema, [
+          { name: 'c', oidc_support: { is_allowed: true, allow_all_scopes: true } },
+        ]);
+        expect(valid).to.equal(true);
+      });
+
+      it('should accept is_allowed with allowed_scopes', () => {
+        const valid = ajv.validate(clients.schema, [
+          { name: 'c', oidc_support: { is_allowed: true, allowed_scopes: ['profile', 'email'] } },
+        ]);
+        expect(valid).to.equal(true);
+      });
+
+      it('should accept is_allowed false on its own', () => {
+        const valid = ajv.validate(clients.schema, [
+          { name: 'c', oidc_support: { is_allowed: false } },
+        ]);
+        expect(valid).to.equal(true);
+      });
+
+      it('should reject null since the API only clears it on non-OIDC-conformant clients', () => {
+        const valid = ajv.validate(clients.schema, [{ name: 'c', oidc_support: null }]);
+        expect(valid).to.equal(false);
+      });
+
+      it('should reject openid as an allowed scope', () => {
+        const valid = ajv.validate(clients.schema, [
+          { name: 'c', oidc_support: { is_allowed: true, allowed_scopes: ['openid'] } },
+        ]);
+        expect(valid).to.equal(false);
+      });
+
+      it('should reject a missing is_allowed', () => {
+        const valid = ajv.validate(clients.schema, [
+          { name: 'c', oidc_support: { allow_all_scopes: true } },
+        ]);
+        expect(valid).to.equal(false);
+      });
+    });
+
+    it('should send oidc_support when creating a client', async () => {
+      let created;
+      const auth0 = mockAuth0({
+        create: (data) => {
+          created = data;
+          return Promise.resolve({ data });
+        },
+      });
+
+      await runProcessChanges(auth0, {
+        clients: [{ name: 'strictClient', oidc_support: { is_allowed: false } }],
+      });
+
+      expect(created.oidc_support).to.deep.equal({ is_allowed: false });
+    });
+
+    it('should send oidc_support when updating a client', async () => {
+      let updated;
+      const auth0 = mockAuth0(
+        {
+          update: (clientId, data) => {
+            updated = data;
+            return Promise.resolve({ data });
+          },
+        },
+        [{ client_id: 'client1', name: 'c', oidc_support: { is_allowed: false } }]
+      );
+
+      await runProcessChanges(auth0, {
+        clients: [
+          {
+            client_id: 'client1',
+            name: 'c',
+            oidc_support: { is_allowed: true, allowed_scopes: ['profile'] },
+          },
+        ],
+      });
+
+      expect(updated.oidc_support).to.deep.equal({ is_allowed: true, allowed_scopes: ['profile'] });
+    });
+
+    it('should create without oidc_support and warn when the tenant does not have it enabled', async () => {
+      const payloads = [];
+      const auth0 = mockAuth0({
+        create: (data) => {
+          payloads.push(data);
+          if (data.oidc_support) return Promise.reject(notEnabledError());
+          return Promise.resolve({ data });
+        },
+      });
+
+      const warnings = await withCapturedWarnings(() =>
+        runProcessChanges(auth0, {
+          clients: [{ name: 'someClient', oidc_support: { is_allowed: false } }],
+        })
+      );
+
+      expect(payloads).to.have.length(2);
+      expect(payloads[1]).to.not.have.property('oidc_support');
+      expect(payloads[1].name).to.equal('someClient');
+      expect(warnings.some((w) => w.includes('oidc_support') && w.includes('someClient'))).to.equal(
+        true
+      );
+    });
+
+    it('should update without oidc_support and warn when the tenant does not have it enabled', async () => {
+      const payloads = [];
+      const auth0 = mockAuth0(
+        {
+          update: (clientId, data) => {
+            payloads.push(data);
+            if (data.oidc_support) return Promise.reject(notEnabledError());
+            return Promise.resolve({ data });
+          },
+        },
+        [{ client_id: 'client1', name: 'c', description: 'old' }]
+      );
+
+      const warnings = await withCapturedWarnings(() =>
+        runProcessChanges(auth0, {
+          clients: [
+            {
+              client_id: 'client1',
+              name: 'c',
+              description: 'new',
+              oidc_support: { is_allowed: false },
+            },
+          ],
+        })
+      );
+
+      expect(payloads).to.have.length(2);
+      expect(payloads[1]).to.not.have.property('oidc_support');
+      expect(payloads[1].description).to.equal('new');
+      expect(warnings.some((w) => w.includes('oidc_support'))).to.equal(true);
+    });
+
+    describe('CIMD clients', () => {
+      const cimdUrl = 'https://mcpserver.example.com/client.json';
+      const existingCimd = [
+        { client_id: 'client1', name: 'MCP Tool Server', external_client_id: cimdUrl },
+      ];
+      const localCimd = {
+        name: 'MCP Tool Server',
+        external_client_id: cimdUrl,
+        description: 'updated description',
+        oidc_support: { is_allowed: true, allowed_scopes: ['profile'] },
+      };
+
+      it('should send oidc_support when updating a CIMD client', async () => {
+        const updates = [];
+        const auth0 = mockAuth0(
+          {
+            update: (clientId, data) => {
+              updates.push({ clientId, data });
+              return Promise.resolve({ data });
+            },
+          },
+          existingCimd
+        );
+
+        await runProcessChanges(auth0, { clients: [localCimd] });
+
+        expect(updates).to.deep.equal([
+          {
+            clientId: 'client1',
+            data: {
+              description: 'updated description',
+              oidc_support: { is_allowed: true, allowed_scopes: ['profile'] },
+            },
+          },
+        ]);
+      });
+
+      it('should update a CIMD client without oidc_support and warn when the tenant does not have it enabled', async () => {
+        const payloads = [];
+        const auth0 = mockAuth0(
+          {
+            update: (clientId, data) => {
+              payloads.push(data);
+              if (data.oidc_support) return Promise.reject(notEnabledError());
+              return Promise.resolve({ data });
+            },
+          },
+          existingCimd
+        );
+
+        const warnings = await withCapturedWarnings(() =>
+          runProcessChanges(auth0, { clients: [localCimd] })
+        );
+
+        expect(payloads).to.deep.equal([
+          { description: 'updated description', oidc_support: localCimd.oidc_support },
+          { description: 'updated description' },
+        ]);
+        expect(
+          warnings.some((w) => w.includes('oidc_support') && w.includes('MCP Tool Server'))
+        ).to.equal(true);
       });
     });
   });
