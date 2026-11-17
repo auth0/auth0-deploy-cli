@@ -1113,6 +1113,15 @@ describe('#portals handler', () => {
       expect(changes.update).to.deep.equal([]);
     });
 
+    it('should not report a client_id-only change when the other difference is an ignored field', async () => {
+      config.data.AUTH0_IGNORE_DRY_RUN_FIELDS = { portals: ['name'] };
+      const { client } = mockClient({ remote: [portalA()] });
+      const changes = await new portals.default({ client, config }).dryRunChanges({
+        portals: [exportedA({ name: 'Renamed', client: { ...CLIENT, client_id: 'other' } })],
+      });
+      expect(changes.update).to.deep.equal([]);
+    });
+
     it('should still preview a real change alongside an unapplied client_id change', async () => {
       const { client } = mockClient({ remote: [portalA()] });
       const changes = await new portals.default({ client, config }).dryRunChanges({

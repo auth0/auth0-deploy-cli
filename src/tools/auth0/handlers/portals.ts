@@ -258,7 +258,15 @@ export default class PortalsHandler extends DefaultAPIHandler {
   private onlyClientDiffers(portal: Asset, remote: Asset): boolean {
     const { client: _localClient, ...local } = portal;
     const { client: _remoteClient, ...rest } = remote;
-    return getObjectDifferences(omitBy(local, isNil), rest, '', this.type).length === 0;
+    return (
+      getObjectDifferences(
+        omitBy(local, isNil),
+        rest,
+        '',
+        this.type,
+        this.getEffectiveIgnoreDryRunFields()
+      ).length === 0
+    );
   }
 
   // The dry-run diff only compares fields set locally and ignores the write-only secret, so add
