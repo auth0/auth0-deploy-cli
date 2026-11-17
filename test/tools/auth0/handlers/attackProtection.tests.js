@@ -231,7 +231,7 @@ describe('#attackProtection handler', () => {
       ]);
     });
 
-    it('should strip form_submission_mode and form_submission_behavior from bruteForceProtection before update', async () => {
+    it('should send form_submission_mode and strip form_submission_behavior from bruteForceProtection before update', async () => {
       let capturedPayload;
       const auth0 = {
         attackProtection: {
@@ -273,7 +273,7 @@ describe('#attackProtection handler', () => {
               max_attempts: 10,
               mode: 'count_per_identifier_and_ip',
               shields: ['block', 'user_notification'],
-              form_submission_mode: 'auto',
+              form_submission_mode: 'manual',
               form_submission_behavior: 'auto_submit',
             },
           },
@@ -286,8 +286,8 @@ describe('#attackProtection handler', () => {
         max_attempts: 10,
         mode: 'count_per_identifier_and_ip',
         shields: ['block', 'user_notification'],
+        form_submission_mode: 'manual',
       });
-      expect(capturedPayload).to.not.have.property('form_submission_mode');
       expect(capturedPayload).to.not.have.property('form_submission_behavior');
     });
 

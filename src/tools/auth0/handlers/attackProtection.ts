@@ -57,6 +57,14 @@ export const schema = {
     },
     bruteForceProtection: {
       type: 'object',
+      properties: {
+        form_submission_mode: {
+          type: 'string',
+          enum: ['auto', 'manual'],
+          description:
+            'Whether the unblock form is submitted automatically when the link is opened or must be submitted manually by the user',
+        },
+      },
     },
     captcha: {
       type: 'object',
@@ -388,8 +396,8 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
     }
 
     if (attackProtection.bruteForceProtection) {
-      // Strip fields returned by GET but rejected by PATCH
-      const { form_submission_mode, form_submission_behavior, ...bruteForcePayload } =
+      // Strip the legacy form_submission_behavior field, rejected by PATCH but present in older exports
+      const { form_submission_behavior, ...bruteForcePayload } =
         attackProtection.bruteForceProtection as any;
       updates.push(this.client.attackProtection.bruteForceProtection.update(bruteForcePayload));
     }
