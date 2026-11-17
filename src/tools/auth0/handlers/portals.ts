@@ -2,7 +2,13 @@ import { Management } from 'auth0';
 import { isEqual, isNil, omitBy, pick } from 'lodash';
 import DefaultAPIHandler, { order } from './default';
 import ValidationError from '../../validationError';
-import { duplicateItems, portalHasForms, resolvePortalReferences } from '../../utils';
+import {
+  duplicateItems,
+  isDryRun,
+  isUnresolvedPlaceholder,
+  portalHasForms,
+  resolvePortalReferences,
+} from '../../utils';
 import { paginate } from '../client';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
 import log from '../../../logger';
@@ -36,9 +42,10 @@ export const schema = {
           client_secret: { type: 'string' },
         },
       },
-      navigation: { type: 'object' },
-      pages: { type: 'object' },
-      custom_code: { type: 'object' },
+      // An empty value (YAML `navigation:` or JSON null) is treated like a missing block.
+      navigation: { type: ['object', 'null'] },
+      pages: { type: ['object', 'null'] },
+      custom_code: { type: ['object', 'null'] },
       created_at: { type: 'string' },
       updated_at: { type: 'string' },
     },
@@ -47,6 +54,10 @@ export const schema = {
 };
 
 export type Portal = Management.Portal;
+
+// An unmapped ##KEYWORD## is stripped before the API call, so it does not count as a secret.
+const hasSecret = (portal: Asset): boolean =>
+  !!portal.client?.client_secret && !isUnresolvedPlaceholder(portal.client.client_secret);
 
 const withoutSecret = (item: Asset): Asset => {
   if (!item.client?.client_secret) return item;
@@ -100,7 +111,9 @@ export default class PortalsHandler extends DefaultAPIHandler {
       const reason = this.listCapped
         ? `, but it is not among the first ${PORTALS_LIST_LIMIT} portals the API lists, so it cannot be matched or updated`
         : '';
-      throw new Error(`A portal with slug "${data.slug}" already exists on the tenant${reason}.`);
+      throw new Error(
+        `A portal with slug "${data.slug}" already exists on the tenant${reason}.\n${err.message}`
+      );
     }
   }
 
@@ -112,9 +125,9 @@ export default class PortalsHandler extends DefaultAPIHandler {
 
   // The client block must carry the write-only secret on every PATCH, so it is only sent when the
   // config supplies one. Warns when that leaves a client_id change unapplied.
-  private isClientSent(portal: Asset, existing: Asset | undefined): boolean {
-    if (portal.client?.client_secret) return true;
-    if (portal.client && existing?.client?.client_id !== portal.client.client_id) {
+  private isClientSent(portal: Asset, existing: Asset | undefined, warn = true): boolean {
+    if (hasSecret(portal)) return true;
+    if (warn && portal.client && existing?.client?.client_id !== portal.client.client_id) {
       log.warn(
         `Portal "${portal.slug}": client_id changed but no client.client_secret is configured; the client is left unchanged.`
       );
@@ -124,9 +137,10 @@ export default class PortalsHandler extends DefaultAPIHandler {
 
   // Blocks missing from the config but set on the tenant. They are cleared only with deletes on;
   // otherwise they are kept with a warning. Returns the blocks to clear.
-  private blocksToClear(portal: Asset, existing: Asset | undefined): string[] {
+  private blocksToClear(portal: Asset, existing: Asset | undefined, warn = true): string[] {
     const missing = CLEARABLE_FIELDS.filter((field) => isNil(portal[field]) && existing?.[field]);
     if (this.isDeleteAllowed()) return missing;
+    if (!warn) return [];
     missing.forEach((field) =>
       log.warn(
         `Portal "${portal.slug}": ${field} is set on the tenant but missing from the config. Set 'AUTH0_ALLOW_DELETE' to true to clear it.`
@@ -147,11 +161,11 @@ export default class PortalsHandler extends DefaultAPIHandler {
 
   // The secret is write-only and required by the API on create, so fail before any call is made.
   private assertSecretsPresent(toCreate: Asset[]): void {
-    const missing = toCreate.filter((portal) => !portal.client?.client_secret);
+    const missing = toCreate.filter((portal) => !hasSecret(portal));
     if (missing.length === 0) return;
     const slugs = missing.map((portal) => `"${portal.slug}"`).join(', ');
     throw new ValidationError(
-      `Cannot create portal(s) ${slugs} without client.client_secret. The secret is write-only and never exported; add it to the configuration, e.g. with a ##KEYWORD## mapping.`
+      `Cannot create portal(s) ${slugs} without client.client_secret. The secret is write-only and never exported; add it to the configuration, e.g. with a ##KEYWORD## mapping defined in AUTH0_KEYWORD_REPLACE_MAPPINGS.`
     );
   }
 
@@ -233,14 +247,39 @@ export default class PortalsHandler extends DefaultAPIHandler {
     }
   }
 
+  // Empty local fields count as missing, so an empty block that clears nothing is no difference.
   private onlyClientDiffers(portal: Asset, remote: Asset): boolean {
     const { client: _localClient, ...local } = portal;
     const { client: _remoteClient, ...rest } = remote;
     return isEqual(omitBy(local, isNil), pick(rest, Object.keys(omitBy(local, isNil))));
   }
 
-  // Mirrors processChanges: same create check, and a config that drops a block the tenant has
-  // is previewed as an update because the real import would clear it.
+  // The dry-run diff only compares fields set locally and ignores the write-only secret, so add
+  // what the import sends anyway: a cleared block and a configured secret. A client_id-only
+  // difference is not applied without a secret, so it is not an update.
+  private adjustDryRunUpdates(
+    portals: Asset[],
+    existing: Asset[],
+    changes: CalculatedChanges,
+    warn: boolean
+  ): CalculatedChanges {
+    const update = [...changes.update];
+    portals.forEach((portal) => {
+      const remote = existing.find((item) => item.slug === portal.slug);
+      if (!remote) return;
+      const clientSent = this.isClientSent(portal, remote, warn);
+      const clearsBlocks = this.blocksToClear(portal, remote, warn).length > 0;
+      const index = update.findIndex((item) => item.slug === portal.slug);
+      if (index !== -1 && !clientSent && !clearsBlocks && this.onlyClientDiffers(portal, remote)) {
+        update.splice(index, 1);
+      } else if (index === -1 && (clientSent || clearsBlocks)) {
+        update.push({ ...portal, id: remote.id });
+      }
+    });
+    return { ...changes, update };
+  }
+
+  // Mirrors processChanges: same create check and the same updates.
   async dryRunChanges(assets: Assets): Promise<CalculatedChanges> {
     const { portals } = assets;
     if (!portals) return super.dryRunChanges(assets);
@@ -251,22 +290,9 @@ export default class PortalsHandler extends DefaultAPIHandler {
       return { del: [], create: [], conflicts: [], update: [] };
     }
 
-    const changes = await super.dryRunChanges(assets);
-    this.assertSecretsPresent(changes.create);
-
-    portals.forEach((portal) => {
-      const remote = existing.find((item) => item.slug === portal.slug);
-      if (!remote) return;
-      const clientSent = this.isClientSent(portal, remote);
-      const clearsBlocks = this.blocksToClear(portal, remote).length > 0;
-      const index = changes.update.findIndex((item) => item.slug === portal.slug);
-      // A client_id-only difference is not applied without a secret, so it is not an update.
-      if (index !== -1 && !clientSent && !clearsBlocks && this.onlyClientDiffers(portal, remote)) {
-        changes.update.splice(index, 1);
-      } else if (index === -1 && clearsBlocks) {
-        changes.update.push({ ...portal, id: remote.id });
-      }
-    });
+    const diff = await super.dryRunChanges(assets);
+    this.assertSecretsPresent(diff.create);
+    const changes = this.adjustDryRunUpdates(portals, existing, diff, true);
 
     // The preview is printed, so keep the configured secret out of it.
     return {
@@ -274,6 +300,15 @@ export default class PortalsHandler extends DefaultAPIHandler {
       create: changes.create.map(withoutSecret),
       update: changes.update.map(withoutSecret),
     };
+  }
+
+  // Applying after a preview diffs with the dry-run calculation, so it needs the same updates.
+  // Warnings come from buildUpdatePayload, as in a plain import.
+  async calcChanges(assets: Assets): Promise<CalculatedChanges> {
+    const changes = await super.calcChanges(assets);
+    if (!isDryRun(this.config) || !assets.portals) return changes;
+    const existing = await this.getType();
+    return existing ? this.adjustDryRunUpdates(assets.portals, existing, changes, false) : changes;
   }
 
   @order('95')

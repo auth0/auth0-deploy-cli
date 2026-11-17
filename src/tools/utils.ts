@@ -322,6 +322,10 @@ export const obfuscateSensitiveValues = (
 // Uppercase-only to avoid false positives on lowercase Auth0 template variables like @@password@@
 const UNRESOLVED_PLACEHOLDER_REGEX = /^(##[A-Z0-9_]+##|@@[A-Z0-9_]+@@)$/;
 
+// True for a ##...## or @@...@@ keyword that no mapping replaced.
+export const isUnresolvedPlaceholder = (value: unknown): boolean =>
+  typeof value === 'string' && UNRESOLVED_PLACEHOLDER_REGEX.test(value);
+
 // Recursively collects all fields in an asset that still contain an unresolved
 // ##...## (string) or @@...@@ (array) keyword placeholder.
 const collectUnresolvedPlaceholders = (
@@ -334,7 +338,7 @@ const collectUnresolvedPlaceholders = (
   Object.keys(data).forEach((key) => {
     const fullPath = parentPath ? `${parentPath}.${key}` : key;
     const value = data[key];
-    if (typeof value === 'string' && UNRESOLVED_PLACEHOLDER_REGEX.test(value)) {
+    if (isUnresolvedPlaceholder(value)) {
       found.push({ path: fullPath, value });
     } else if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
       found.push(...collectUnresolvedPlaceholders(value, fullPath));

@@ -167,6 +167,14 @@ describe('#portals handler', () => {
       expect(valid).to.equal(true);
     });
 
+    ['navigation', 'pages', 'custom_code'].forEach((field) => {
+      it(`should accept an empty (null) ${field}`, () => {
+        expect(
+          ajv.validate(portals.schema, [{ slug: 'empty', name: 'Empty', [field]: null }])
+        ).to.equal(true);
+      });
+    });
+
     it('should fail validation without slug', () => {
       expect(ajv.validate(portals.schema, [{ name: 'No Slug' }])).to.equal(false);
     });
@@ -484,6 +492,45 @@ describe('#portals handler', () => {
       expect(err.message).to.not.include('not among');
     });
 
+    it('should refuse to create a portal with an unmapped secret keyword before any call', async () => {
+      const { client, writes } = mockClient({ remote: [] });
+      const err = await rejection(() =>
+        new portals.default({ client, config }).processChanges({
+          portals: [configured({ client: { ...CLIENT, client_secret: '##UNMAPPED_SECRET##' } })],
+        })
+      );
+      expect(err.message).to.include(
+        'Cannot create portal(s) "support" without client.client_secret'
+      );
+      expect(writes()).to.deep.equal([]);
+    });
+
+    it('should not delete the old portal when a renamed one has an unmapped secret keyword', async () => {
+      const { client, writes } = mockClient({ remote: [portalA()] });
+      await rejection(() =>
+        new portals.default({ client, config }).processChanges({
+          portals: [
+            configured({
+              slug: 'support-renamed',
+              client: { ...CLIENT, client_secret: '@@UNMAPPED_SECRET@@' },
+            }),
+          ],
+        })
+      );
+      expect(writes()).to.deep.equal([]);
+    });
+
+    it('should keep the original error message on a slug conflict', async () => {
+      const { client } = mockClient({
+        remote: [],
+        createError: httpError(409, 'portal_conflict: slug taken'),
+      });
+      const err = await rejection(() =>
+        new portals.default({ client, config }).processChanges({ portals: [configured()] })
+      );
+      expect(err.message).to.include('portal_conflict: slug taken');
+    });
+
     it('should not leave the secret in the error raised for a failed create', async () => {
       const { client } = mockClient({ remote: [], createError: httpError(409, 'slug exists') });
       const handler = new portals.default({ client, config });
@@ -644,6 +691,52 @@ describe('#portals handler', () => {
       });
       const logged = [...infoStub.args, ...warnStub.args].map(([m]) => String(m)).join('\n');
       expect(logged).to.not.include('s3cret');
+    });
+  });
+
+  describe('#portals processChanges after a dry run (apply)', () => {
+    beforeEach(() => {
+      config.data.AUTH0_DRY_RUN = true;
+    });
+
+    // The missing case omits the key entirely: the dry-run diff only compares keys set locally.
+    const { custom_code: _dropped, ...withoutCustomCode } = exportedA();
+    [
+      ['missing from', withoutCustomCode],
+      ['left empty in', exportedA({ custom_code: null })],
+    ].forEach(([label, portal]) => {
+      it(`should clear a block ${label} the config when deletes are allowed`, async () => {
+        const { client, writes } = mockClient({ remote: [portalA()] });
+        await new portals.default({ client, config }).processChanges({ portals: [portal] });
+        expect(writes()).to.have.length(1);
+        const [name, id, payload] = writes()[0];
+        expect(name).to.equal('portals.update');
+        expect(id).to.equal(PORTAL_A);
+        expect(payload.custom_code).to.equal(null);
+      });
+    });
+
+    it('should apply a secret rotation', async () => {
+      const { client, writes } = mockClient({ remote: [portalA()] });
+      await new portals.default({ client, config }).processChanges({
+        portals: [exportedA({ client: { ...CLIENT, client_secret: 'rotated' } })],
+      });
+      expect(writes()).to.have.length(1);
+      expect(writes()[0][2].client).to.deep.equal({ ...CLIENT, client_secret: 'rotated' });
+    });
+
+    it('should not send a client_id-only change without a secret', async () => {
+      const { client, writes } = mockClient({ remote: [portalA()] });
+      await new portals.default({ client, config }).processChanges({
+        portals: [exportedA({ client: { ...CLIENT, client_id: 'other' } })],
+      });
+      expect(writes()).to.deep.equal([]);
+    });
+
+    it('should make no calls for an unchanged portal', async () => {
+      const { client, writes } = mockClient({ remote: [portalA()] });
+      await new portals.default({ client, config }).processChanges({ portals: [exportedA()] });
+      expect(writes()).to.deep.equal([]);
     });
   });
 
@@ -864,12 +957,65 @@ describe('#portals handler', () => {
       expect(changes.del.map((p) => p.slug)).to.deep.equal(['partners']);
     });
 
-    it('should not report an update when only the write-only secret is configured', async () => {
+    it('should report an update when a secret is configured, since the import sends it', async () => {
       const { client } = mockClient({ remote: [portalA()] });
       const changes = await new portals.default({ client, config }).dryRunChanges({
         portals: [exportedA({ client: { ...CLIENT, client_secret: 's3cret' } })],
       });
+      expect(changes.update.map((p) => p.slug)).to.deep.equal(['support']);
+    });
+
+    it('should not report an update for an unmapped secret keyword', async () => {
+      const { client } = mockClient({ remote: [portalA()] });
+      const changes = await new portals.default({ client, config }).dryRunChanges({
+        portals: [exportedA({ client: { ...CLIENT, client_secret: '##UNMAPPED_SECRET##' } })],
+      });
       expect(changes.update).to.deep.equal([]);
+    });
+
+    it('should fail a create with an unmapped secret keyword, like the import', async () => {
+      const { client } = mockClient({ remote: [] });
+      const err = await rejection(() =>
+        new portals.default({ client, config }).dryRunChanges({
+          portals: [
+            {
+              slug: 'new-one',
+              name: 'New',
+              client: { ...CLIENT, client_secret: '##UNMAPPED_SECRET##' },
+            },
+          ],
+        })
+      );
+      expect(err.message).to.include(
+        'Cannot create portal(s) "new-one" without client.client_secret'
+      );
+    });
+
+    it('should not report an update for empty blocks the tenant does not have', async () => {
+      const { client } = mockClient({ remote: [portalB()] });
+      const changes = await new portals.default({ client, config }).dryRunChanges({
+        portals: [
+          {
+            slug: 'partners',
+            name: 'Partners',
+            client: { ...CLIENT },
+            navigation: null,
+            pages: null,
+            custom_code: null,
+          },
+        ],
+      });
+      expect(changes.update).to.deep.equal([]);
+    });
+
+    it('should not report an update for an empty block when deletes are not allowed', async () => {
+      config.data.AUTH0_ALLOW_DELETE = false;
+      const { client } = mockClient({ remote: [portalA()] });
+      const changes = await new portals.default({ client, config }).dryRunChanges({
+        portals: [exportedA({ custom_code: null })],
+      });
+      expect(changes.update).to.deep.equal([]);
+      expect(warnStub.args.map(([m]) => m).join()).to.include('custom_code is set on the tenant');
     });
 
     it('should keep the configured secret out of the preview', async () => {
