@@ -49,13 +49,20 @@ async function dump(context: DirectoryContext): Promise<void> {
   const fileNames = portals.map((portal) => sanitize(`${portal.slug}.json`));
 
   // Remove files of portals no longer on the tenant, otherwise the next import recreates them.
-  const expectedFiles = new Set(fileNames);
-  getFiles(portalsFolder, ['.json'])
-    .filter((file) => !expectedFiles.has(path.basename(file)))
-    .forEach((file) => {
-      log.info(`Removing ${file}`);
-      fs.removeSync(file);
-    });
+  // At the list limit some portals are not returned, so their files cannot be told apart.
+  if (portals.length >= constants.PORTALS_LIST_LIMIT) {
+    log.warn(
+      `Not removing files of portals missing from the export: the API lists at most ${constants.PORTALS_LIST_LIMIT} portals.`
+    );
+  } else {
+    const expectedFiles = new Set(fileNames);
+    getFiles(portalsFolder, ['.json'])
+      .filter((file) => !expectedFiles.has(path.basename(file)))
+      .forEach((file) => {
+        log.info(`Removing ${file}`);
+        fs.removeSync(file);
+      });
+  }
 
   // clientsOrig is always an array, so only trust it when clients were exported; it keeps the
   // client ids that are stripped from the exported clients.

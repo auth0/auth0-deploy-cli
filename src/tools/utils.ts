@@ -110,6 +110,13 @@ export function mapPortalFormIds(portal: Asset, fn: (formId: string) => string):
   };
 }
 
+// Drops the write-only client secret, e.g. before a portal is printed or exported.
+export const withoutSecret = (portal: Asset): Asset => {
+  if (!portal.client?.client_secret) return portal;
+  const { client_secret, ...client } = portal.client;
+  return { ...portal, client };
+};
+
 export const portalHasForms = (portal: Asset): boolean => {
   let found = false;
   mapPortalFormIds(portal, (formId) => {

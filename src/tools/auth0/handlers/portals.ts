@@ -1,5 +1,5 @@
 import { Management } from 'auth0';
-import { isEqual, isNil, omitBy, pick } from 'lodash';
+import { isNil, omitBy } from 'lodash';
 import DefaultAPIHandler, { order } from './default';
 import ValidationError from '../../validationError';
 import {
@@ -8,13 +8,15 @@ import {
   isUnresolvedPlaceholder,
   portalHasForms,
   resolvePortalReferences,
+  withoutSecret,
 } from '../../utils';
 import { paginate } from '../client';
+import constants from '../../constants';
+import { getObjectDifferences } from '../../calculateDryRunChanges';
 import { Asset, Assets, CalculatedChanges } from '../../../types';
 import log from '../../../logger';
 
-// GET /portals is not paginated and returns at most this many portals.
-const PORTALS_LIST_LIMIT = 50;
+const { PORTALS_LIST_LIMIT } = constants;
 
 // Optional blocks the API clears only when sent as null; omitting them leaves them unchanged.
 const CLEARABLE_FIELDS = ['navigation', 'pages', 'custom_code'];
@@ -35,6 +37,7 @@ export const schema = {
       name: { type: 'string', minLength: 1, maxLength: 150 },
       client: {
         type: 'object',
+        required: ['token_endpoint_auth_method', 'client_id'],
         properties: {
           token_endpoint_auth_method: { type: 'string' },
           client_id: { type: 'string' },
@@ -58,12 +61,6 @@ export type Portal = Management.Portal;
 // An unmapped ##KEYWORD## is stripped before the API call, so it does not count as a secret.
 const hasSecret = (portal: Asset): boolean =>
   !!portal.client?.client_secret && !isUnresolvedPlaceholder(portal.client.client_secret);
-
-const withoutSecret = (item: Asset): Asset => {
-  if (!item.client?.client_secret) return item;
-  const { client_secret, ...client } = item.client;
-  return { ...item, client };
-};
 
 const unavailableMessage =
   'Universal Portals are not enabled for this tenant (or the environment); skipping portals.';
@@ -245,13 +242,23 @@ export default class PortalsHandler extends DefaultAPIHandler {
           .join(', ')}.`
       );
     }
+
+    // Checked here, before any handler writes, so a full import is not left half applied.
+    // Portals whose slug is not on the tenant will be created and need a secret.
+    if (portals.every(hasSecret)) return;
+    const existing = await this.getType();
+    if (existing === null) return;
+    // Matched like the import: by id, then by slug.
+    const isOnTenant = (portal: Asset) =>
+      existing.some((item) => (portal.id && item.id === portal.id) || item.slug === portal.slug);
+    this.assertSecretsPresent(portals.filter((portal) => !isOnTenant(portal)));
   }
 
   // Empty local fields count as missing, so an empty block that clears nothing is no difference.
   private onlyClientDiffers(portal: Asset, remote: Asset): boolean {
     const { client: _localClient, ...local } = portal;
     const { client: _remoteClient, ...rest } = remote;
-    return isEqual(omitBy(local, isNil), pick(rest, Object.keys(omitBy(local, isNil))));
+    return getObjectDifferences(omitBy(local, isNil), rest, '', this.type).length === 0;
   }
 
   // The dry-run diff only compares fields set locally and ignores the write-only secret, so add
@@ -279,7 +286,7 @@ export default class PortalsHandler extends DefaultAPIHandler {
     return { ...changes, update };
   }
 
-  // Mirrors processChanges: same create check and the same updates.
+  // Mirrors processChanges: the same updates.
   async dryRunChanges(assets: Assets): Promise<CalculatedChanges> {
     const { portals } = assets;
     if (!portals) return super.dryRunChanges(assets);
@@ -291,7 +298,6 @@ export default class PortalsHandler extends DefaultAPIHandler {
     }
 
     const diff = await super.dryRunChanges(assets);
-    this.assertSecretsPresent(diff.create);
     const changes = this.adjustDryRunUpdates(portals, existing, diff, true);
 
     // The preview is printed, so keep the configured secret out of it.
@@ -333,8 +339,6 @@ export default class PortalsHandler extends DefaultAPIHandler {
       : [];
     const resolved = resolvePortalReferences(portals, clients, forms);
 
-    const changes = await this.calcChanges({ ...assets, portals: resolved });
-    this.assertSecretsPresent(changes.create);
-    await super.processChanges(assets, changes);
+    await super.processChanges(assets, await this.calcChanges({ ...assets, portals: resolved }));
   }
 }

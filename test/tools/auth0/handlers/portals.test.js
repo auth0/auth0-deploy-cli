@@ -175,6 +175,17 @@ describe('#portals handler', () => {
       });
     });
 
+    it('should fail validation for a client without client_id or auth method', () => {
+      expect(
+        ajv.validate(portals.schema, [
+          { slug: 'a', name: 'A', client: { token_endpoint_auth_method: 'client_secret_post' } },
+        ])
+      ).to.equal(false);
+      expect(
+        ajv.validate(portals.schema, [{ slug: 'a', name: 'A', client: { client_id: 'abc' } }])
+      ).to.equal(false);
+    });
+
     it('should fail validation without slug', () => {
       expect(ajv.validate(portals.schema, [{ name: 'No Slug' }])).to.equal(false);
     });
@@ -200,13 +211,14 @@ describe('#portals handler', () => {
   });
 
   describe('#portals validate', () => {
-    const handler = new portals.default({ client: {}, config });
+    const handler = new portals.default({ client: mockClient({ remote: [] }).client, config });
+    const SECRET_CLIENT = { ...CLIENT, client_secret: 's3cret' };
 
     it('should allow portals sharing a name, since names are not unique', async () => {
       await handler.validate({
         portals: [
-          { slug: 'one', name: 'Same Name' },
-          { slug: 'two', name: 'Same Name' },
+          { slug: 'one', name: 'Same Name', client: SECRET_CLIENT },
+          { slug: 'two', name: 'Same Name', client: SECRET_CLIENT },
         ],
       });
     });
@@ -241,6 +253,7 @@ describe('#portals handler', () => {
           {
             slug: 'legacy',
             name: 'Legacy',
+            client: SECRET_CLIENT,
             navigation: {
               sidebar: {
                 components: [
@@ -280,6 +293,7 @@ describe('#portals handler', () => {
           {
             slug: 'modern',
             name: 'Modern',
+            client: SECRET_CLIENT,
             navigation: {
               sidebar: {
                 components: [
@@ -294,6 +308,35 @@ describe('#portals handler', () => {
         ],
       });
       expect(warnStub.called).to.equal(false);
+    });
+
+    it('should allow portals without a secret that already exist on the tenant', async () => {
+      const { client } = mockClient({ remote: [portalA()] });
+      await new portals.default({ client, config }).validate({
+        portals: [{ slug: 'support', name: 'Support Portal', client: { ...CLIENT } }],
+      });
+    });
+
+    it('should match an existing portal by id when its slug changes', async () => {
+      const { client } = mockClient({ remote: [portalA()] });
+      await new portals.default({ client, config }).validate({
+        portals: [{ id: PORTAL_A, slug: 'renamed', name: 'Renamed', client: { ...CLIENT } }],
+      });
+    });
+
+    it('should not list portals when every portal has a secret', async () => {
+      const { client, calls } = mockClient({ remote: [] });
+      await new portals.default({ client, config }).validate({
+        portals: [{ slug: 'new', name: 'New', client: SECRET_CLIENT }],
+      });
+      expect(calls).to.deep.equal([]);
+    });
+
+    it('should skip the secret check when the feature is not enabled', async () => {
+      const { client } = mockClient({ listError: httpError(403, 'not enabled') });
+      await new portals.default({ client, config }).validate({
+        portals: [{ slug: 'new', name: 'New', client: { ...CLIENT } }],
+      });
     });
 
     it('should do nothing when portals are not configured', async () => {
@@ -440,11 +483,11 @@ describe('#portals handler', () => {
     });
 
     it('should refuse to create a portal without a client secret before making any call', async () => {
-      const { client, writes } = mockClient({ remote: [portalB()] });
+      const { client } = mockClient({ remote: [portalB()] });
       const handler = new portals.default({ client, config });
 
       const err = await rejection(async () => {
-        await handler.processChanges({
+        await handler.validate({
           portals: [
             { slug: 'partners', name: 'Partners' },
             { slug: 'new-one', name: 'New', client: { ...CLIENT } },
@@ -454,7 +497,6 @@ describe('#portals handler', () => {
       expect(err.message).to.include('"new-one"');
       expect(err.message).to.include('client.client_secret');
       expect(err.message).to.not.include('"partners"');
-      expect(writes()).to.deep.equal([]);
     });
 
     it('should explain a slug conflict on a tenant above the list limit', async () => {
@@ -493,22 +535,21 @@ describe('#portals handler', () => {
     });
 
     it('should refuse to create a portal with an unmapped secret keyword before any call', async () => {
-      const { client, writes } = mockClient({ remote: [] });
+      const { client } = mockClient({ remote: [] });
       const err = await rejection(() =>
-        new portals.default({ client, config }).processChanges({
+        new portals.default({ client, config }).validate({
           portals: [configured({ client: { ...CLIENT, client_secret: '##UNMAPPED_SECRET##' } })],
         })
       );
       expect(err.message).to.include(
         'Cannot create portal(s) "support" without client.client_secret'
       );
-      expect(writes()).to.deep.equal([]);
     });
 
-    it('should not delete the old portal when a renamed one has an unmapped secret keyword', async () => {
-      const { client, writes } = mockClient({ remote: [portalA()] });
-      await rejection(() =>
-        new portals.default({ client, config }).processChanges({
+    it('should reject a slug rename with an unmapped secret keyword during validation', async () => {
+      const { client } = mockClient({ remote: [portalA()] });
+      const err = await rejection(() =>
+        new portals.default({ client, config }).validate({
           portals: [
             configured({
               slug: 'support-renamed',
@@ -517,7 +558,7 @@ describe('#portals handler', () => {
           ],
         })
       );
-      expect(writes()).to.deep.equal([]);
+      expect(err.message).to.include('"support-renamed"');
     });
 
     it('should keep the original error message on a slug conflict', async () => {
@@ -973,24 +1014,6 @@ describe('#portals handler', () => {
       expect(changes.update).to.deep.equal([]);
     });
 
-    it('should fail a create with an unmapped secret keyword, like the import', async () => {
-      const { client } = mockClient({ remote: [] });
-      const err = await rejection(() =>
-        new portals.default({ client, config }).dryRunChanges({
-          portals: [
-            {
-              slug: 'new-one',
-              name: 'New',
-              client: { ...CLIENT, client_secret: '##UNMAPPED_SECRET##' },
-            },
-          ],
-        })
-      );
-      expect(err.message).to.include(
-        'Cannot create portal(s) "new-one" without client.client_secret'
-      );
-    });
-
     it('should not report an update for empty blocks the tenant does not have', async () => {
       const { client } = mockClient({ remote: [portalB()] });
       const changes = await new portals.default({ client, config }).dryRunChanges({
@@ -1030,16 +1053,6 @@ describe('#portals handler', () => {
       expect(changes.create[0].client).to.deep.equal(CLIENT);
     });
 
-    it('should fail where the real import would: create without a secret', async () => {
-      const { client } = mockClient({ remote: [] });
-      const err = await rejection(async () => {
-        await new portals.default({ client, config }).dryRunChanges({
-          portals: [{ slug: 'new-one', name: 'New', client: { ...CLIENT } }],
-        });
-      });
-      expect(err.message).to.include('client.client_secret');
-    });
-
     it('should preview an update when the config drops a block the tenant has', async () => {
       const { client } = mockClient({ remote: [portalA()] });
       const changes = await new portals.default({ client, config }).dryRunChanges({
@@ -1075,6 +1088,29 @@ describe('#portals handler', () => {
       });
       expect(changes.update).to.deep.equal([]);
       expect(warnStub.args.map(([m]) => m).join()).to.include('client_id changed');
+    });
+
+    it('should not report a client_id-only change when the tenant adds keys or reorders arrays', async () => {
+      const components = [
+        { type: 'sidebar:component:auth0:external_link:v2', config: { label: 'A', href: 'a' } },
+        { type: 'sidebar:component:auth0:external_link:v2', config: { label: 'B', href: 'b' } },
+      ];
+      const remote = {
+        ...portalA(),
+        navigation: { sidebar: { components } },
+        custom_code: { head: '<style></style>', added_by_api: true },
+      };
+      const { client } = mockClient({ remote: [remote] });
+      const changes = await new portals.default({ client, config }).dryRunChanges({
+        portals: [
+          exportedA({
+            client: { ...CLIENT, client_id: 'other' },
+            navigation: { sidebar: { components: [...components].reverse() } },
+            custom_code: { head: '<style></style>' },
+          }),
+        ],
+      });
+      expect(changes.update).to.deep.equal([]);
     });
 
     it('should still preview a real change alongside an unapplied client_id change', async () => {

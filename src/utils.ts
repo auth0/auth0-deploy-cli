@@ -5,7 +5,7 @@ import sanitizeName from 'sanitize-filename';
 import dotProp from 'dot-prop';
 import { forOwn, isObject } from 'lodash';
 import { loadFileAndReplaceKeywords, Auth0 } from './tools';
-import { mapPortalFormIds } from './tools/utils';
+import { mapPortalFormIds, withoutSecret } from './tools/utils';
 import log from './logger';
 import { Asset, Assets, Config, KeywordMappings } from './types';
 
@@ -245,12 +245,13 @@ export async function loadPortalReferences(
   }
 }
 
-// The shape written to config: no id or timestamps, and the application and forms by name.
+// The shape written to config: no id, timestamps or secret, and the application and forms by name.
 export const toExportedPortal = (
-  { id, created_at, updated_at, ...portal }: Asset,
+  { id, created_at, updated_at, ...asset }: Asset,
   clients: Asset[],
   forms: Asset[]
 ): Asset => {
+  const portal = withoutSecret(asset);
   const withClient = portal.client?.client_id
     ? {
         ...portal,

@@ -310,7 +310,9 @@ export const preserveKeywords = ({
       return false; // Default to false
     })();
 
-    if (!localAndRemoteValuesAreEqual) {
+    // A field the tenant does not return (e.g. a write-only secret) is not updated below, and
+    // printing the replaced local value could expose a secret, so only warn for real values.
+    if (!localAndRemoteValuesAreEqual && remoteValue !== undefined) {
       // eslint-disable-next-line no-console
       console.warn(
         `WARNING! The remote value with address of ${address} has value of "${remoteValue}" but will be preserved with "${localValueWithReplacement}" due to keyword preservation.`

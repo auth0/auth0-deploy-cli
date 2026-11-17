@@ -278,6 +278,50 @@ describe('#directory context portals', () => {
     expect(fs.readdirSync(portalsDir).sort()).to.deep.equal(['notes.txt', 'support.json']);
   });
 
+  it('should keep files of portals missing from the export when the list limit is reached', async () => {
+    const dir = path.join(testDataDir, 'directory', 'portalsAtLimit');
+    cleanThenMkdir(dir);
+    const portalsDir = path.join(dir, constants.PORTALS_DIRECTORY);
+    fs.ensureDirSync(portalsDir);
+    fs.writeFileSync(
+      path.join(portalsDir, 'hidden-by-the-api.json'),
+      '{"slug":"hidden-by-the-api"}'
+    );
+
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+    context.assets.portals = Array.from({ length: constants.PORTALS_LIST_LIMIT }, (_, i) => ({
+      slug: `portal-${i}`,
+      name: `Portal ${i}`,
+    }));
+
+    await handler.dump(context);
+
+    expect(fs.existsSync(path.join(portalsDir, 'hidden-by-the-api.json'))).to.equal(true);
+    expect(fs.readdirSync(portalsDir)).to.have.length(constants.PORTALS_LIST_LIMIT + 1);
+  });
+
+  it('should never write a client secret', async () => {
+    const dir = path.join(testDataDir, 'directory', 'portalsNoSecret');
+    cleanThenMkdir(dir);
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+    context.assets.portals = [
+      {
+        slug: 'support',
+        name: 'Support',
+        client: {
+          token_endpoint_auth_method: 'client_secret_post',
+          client_id: 'abc123',
+          client_secret: 'must-not-be-exported',
+        },
+      },
+    ];
+
+    await handler.dump(context);
+
+    const file = path.join(dir, constants.PORTALS_DIRECTORY, 'support.json');
+    expect(fs.readFileSync(file, 'utf8')).to.not.include('must-not-be-exported');
+  });
+
   it('should not write anything when portals are not available for the tenant', async () => {
     const dir = path.join(testDataDir, 'directory', 'portalsNone');
     cleanThenMkdir(dir);

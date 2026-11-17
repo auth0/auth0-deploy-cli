@@ -85,7 +85,11 @@ describe('#YAML context portals', () => {
         id: 'up_8RkL2mNpQ3sT4uV5wX6yZa',
         slug: 'support',
         name: 'Support Portal',
-        client: { token_endpoint_auth_method: 'client_secret_post', client_id: 'abc123' },
+        client: {
+          token_endpoint_auth_method: 'client_secret_post',
+          client_id: 'abc123',
+          client_secret: 'must-not-be-exported',
+        },
         custom_code: { head: '<style></style>' },
         created_at: '2026-11-01T00:00:00.000Z',
         updated_at: '2026-11-02T00:00:00.000Z',
