@@ -254,12 +254,12 @@ export const obfuscateSensitiveValues = (
 // Uppercase-only to avoid false positives on lowercase Auth0 template variables like @@password@@
 const UNRESOLVED_PLACEHOLDER_REGEX = /^(##[A-Z0-9_]+##|@@[A-Z0-9_]+@@)$/;
 
-export const isUnresolvedPlaceholder = (value: unknown): value is string =>
+const isUnresolvedPlaceholder = (value: unknown): value is string =>
   typeof value === 'string' && UNRESOLVED_PLACEHOLDER_REGEX.test(value);
 
 // Recursively collects all fields in an asset that still contain an unresolved
 // ##...## (string) or @@...@@ (array) keyword placeholder.
-const collectUnresolvedPlaceholders = (
+export const collectUnresolvedPlaceholders = (
   data: Asset | null,
   parentPath = ''
 ): { path: string; value: string }[] => {
@@ -277,6 +277,10 @@ const collectUnresolvedPlaceholders = (
   });
   return found;
 };
+
+// "##FOO_BAR##" -> "FOO_BAR", the key to define in AUTH0_KEYWORD_REPLACE_MAPPINGS.
+export const placeholderKeywordName = (value: string): string =>
+  value.replace(/^##|##$|^@@|@@$/g, '');
 
 // Throws an error if any field in the asset contains an unresolved ##...## or @@...@@ placeholder,
 // listing all offending fields so the user can fix them before deploying.
@@ -337,9 +341,8 @@ export const stripUnresolvedPlaceholders = (
   unresolved.forEach(({ path, value }) => {
     log.warn(
       `Stripping unresolved placeholder for ${resourceType} "${resourceName}" field "${path}": ${value}. ` +
-        `To use this value, define ${value.replace(
-          /^##|##$|^@@|@@$/g,
-          ''
+        `To use this value, define ${placeholderKeywordName(
+          value
         )} in AUTH0_KEYWORD_REPLACE_MAPPINGS. The field is omitted from the request.`
     );
     dotProp.delete(newAsset, path);

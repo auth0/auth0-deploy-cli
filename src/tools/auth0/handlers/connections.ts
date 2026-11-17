@@ -1,5 +1,5 @@
 import dotProp from 'dot-prop';
-import { chunk, keyBy } from 'lodash';
+import { chunk, cloneDeep, keyBy } from 'lodash';
 import { Management, ManagementError } from 'auth0';
 import DefaultAPIHandler, { order } from './default';
 import {
@@ -8,7 +8,8 @@ import {
   getEnabledClients,
   sleep,
   filterIncluded,
-  isUnresolvedPlaceholder,
+  collectUnresolvedPlaceholders,
+  placeholderKeywordName,
 } from '../../utils';
 import { CalculatedChanges, Asset, Assets, Auth0APIClient } from '../../../types';
 import { ConfigFunction } from '../../../configFactory';
@@ -228,26 +229,41 @@ export const addExcludedConnectionPropertiesToChanges = ({
   };
 };
 
-// An unresolved client_secret placeholder would be stripped and wipe the stored secret, since options is replaced whole.
+// Unresolved options placeholders are stripped before the update, and options is replaced whole, so the stored
+// value would be wiped. Reuse the stored value instead.
 // exported only for unit testing purposes
-export const restoreMaskedClientSecret = (
+export const restoreUnresolvedOptions = (
   connection: Asset,
-  existingConnections: Asset[] | null
+  existingConnections: Asset[] | null,
+  warned: Set<string>
 ): Pick<Asset, 'options'> | {} => {
-  const secret = connection.options?.client_secret;
-  if (!isUnresolvedPlaceholder(secret)) return {};
+  const unresolved = collectUnresolvedPlaceholders(connection.options ?? null);
+  if (unresolved.length === 0) return {};
 
-  const existingSecret = existingConnections?.find(
+  const storedOptions = existingConnections?.find(
     (c) => c.name === connection.name && c.strategy === connection.strategy
-  )?.options?.client_secret;
-  if (!existingSecret) return {};
+  )?.options;
+  if (!storedOptions) return {};
 
-  const keywordName = secret.replace(/^(##|@@)|(##|@@)$/g, '');
-  log.warn(
-    `Reusing the stored options.client_secret for connection "${connection.name}" because ${secret} is unresolved. ` +
-      `To set a new value, define ${keywordName} in AUTH0_KEYWORD_REPLACE_MAPPINGS.`
-  );
-  return { options: { ...connection.options, client_secret: existingSecret } };
+  const restorable = unresolved.filter(({ path }) => dotProp.get(storedOptions, path) != null);
+  if (restorable.length === 0) return {};
+
+  const options = cloneDeep(connection.options);
+  restorable.forEach(({ path, value }) => {
+    dotProp.set(options, path, dotProp.get(storedOptions, path));
+
+    const warnKey = `${connection.strategy}/${connection.name}/${path}`;
+    if (warned.has(warnKey)) return;
+    warned.add(warnKey);
+    log.warn(
+      `Reusing the stored options.${path} for connection "${connection.name}" because ${value} is unresolved. ` +
+        `To set a new value, define ${placeholderKeywordName(
+          value
+        )} in AUTH0_KEYWORD_REPLACE_MAPPINGS.`
+    );
+  });
+
+  return { options };
 };
 
 /**
@@ -454,6 +470,9 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
   // the local config, skipping an API call per remote-only connection on large
   // tenants. Null on export, where every connection is enriched.
   private enabledClientsEnrichmentFilter: Set<string> | null = null;
+
+  // Options fields already warned about by restoreUnresolvedOptions, so a preview + apply run warns once.
+  private warnedRestoredOptions = new Set<string>();
 
   constructor(config: DefaultAPIHandler) {
     super({
@@ -902,18 +921,8 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     return this.existing;
   }
 
-  async calcChanges(assets: Assets): Promise<CalculatedChanges> {
-    const { connections } = assets;
-
-    // Do nothing if not set
-    if (!connections)
-      return {
-        del: [],
-        create: [],
-        update: [],
-        conflicts: [],
-      };
-
+  // Shared by calcChanges and dryRunChanges so the real import and the preview send the same payload.
+  private async formatConnections(assets: Assets, connections: Asset[]) {
     // Scope getType() enrichment to the local config (see getType()).
     this.setEnabledClientsEnrichmentFilter(connections);
 
@@ -949,10 +958,27 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
 
       return {
         ...withOptions,
-        ...restoreMaskedClientSecret(withOptions, existingConnections),
+        ...restoreUnresolvedOptions(withOptions, existingConnections, this.warnedRestoredOptions),
         ...(enabledClients !== undefined && { enabled_clients: enabledClients }),
       };
     });
+
+    return { existingConnections, formatted };
+  }
+
+  async calcChanges(assets: Assets): Promise<CalculatedChanges> {
+    const { connections } = assets;
+
+    // Do nothing if not set
+    if (!connections)
+      return {
+        del: [],
+        create: [],
+        update: [],
+        conflicts: [],
+      };
+
+    const { existingConnections, formatted } = await this.formatConnections(assets, connections);
 
     const proposedChanges = await super.calcChanges({ ...assets, connections: formatted });
 
@@ -977,43 +1003,7 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
       };
     }
 
-    // Scope getType() enrichment to the local config (see getType()).
-    this.setEnabledClientsEnrichmentFilter(connections);
-
-    const clients = await paginate<Client>(this.client.clients.list, {
-      paginate: true,
-      include_totals: true,
-    });
-
-    const existingConnections = await paginate<Connection>(this.client.connections.list, {
-      checkpoint: true,
-      include_totals: true,
-    });
-
-    await this.scimHandler.createIdMap(existingConnections);
-
-    // Dynamic CIMD clients are not managed by deploy-cli, so names must not resolve to them.
-    const managedClients = excludeDynamicCimdClients(clients);
-
-    const formatted = connections.map((connection) => {
-      const enabledClients = getEnabledClients(
-        assets,
-        connection,
-        existingConnections,
-        managedClients
-      );
-
-      const withOptions = {
-        ...connection,
-        ...this.getFormattedOptions(connection, managedClients),
-      };
-
-      return {
-        ...withOptions,
-        ...restoreMaskedClientSecret(withOptions, existingConnections),
-        ...(enabledClients !== undefined && { enabled_clients: enabledClients }),
-      };
-    });
+    const { existingConnections, formatted } = await this.formatConnections(assets, connections);
 
     let proposedChanges = await super.dryRunChanges({ ...assets, connections: formatted });
 

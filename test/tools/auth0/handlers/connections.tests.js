@@ -1032,13 +1032,13 @@ describe('#connections handler', () => {
       }
     });
 
-    describe('masked client_secret', () => {
+    describe('unresolved options placeholders', () => {
       const MASK = '##CONNECTIONS_SAMLP_SECRET##';
 
       const run = async (
         existingOptions,
         localOptions,
-        { strategy = 'samlp', existingStrategy = strategy } = {}
+        { strategy = 'samlp', existingStrategy = strategy, handlerConfig = config } = {}
       ) => {
         const auth0 = {
           connections: {
@@ -1055,7 +1055,10 @@ describe('#connections handler', () => {
           clients: { list: (params) => mockPagedData(params, 'clients', []) },
           pool,
         };
-        const handler = new connections.default({ client: pageClient(auth0), config });
+        const handler = new connections.default({
+          client: pageClient(auth0),
+          config: handlerConfig,
+        });
         handler.scimHandler = scimHandlerMock;
         const assets = {
           connections: [{ name: 'saml-xaa', strategy, options: localOptions }],
@@ -1140,6 +1143,10 @@ describe('#connections handler', () => {
           const messages = warn.getCalls().map((c) => String(c.args[0]));
           expect(messages.some((m) => m.includes('saml-xaa') && m.includes(MASK))).to.equal(true);
           expect(messages.some((m) => m.includes('CONNECTIONS_SAMLP_SECRET'))).to.equal(true);
+          // run() previews and applies on the same handler, which should warn once.
+          expect(
+            messages.filter((m) => m.startsWith('Reusing the stored options.client_secret'))
+          ).to.have.lengthOf(1);
         } finally {
           warn.restore();
         }
@@ -1186,17 +1193,51 @@ describe('#connections handler', () => {
         expect(payload.options.client_id).to.equal('new-id');
       });
 
+      it('should reuse stored values for any unresolved options placeholder, including nested ones', async () => {
+        for (const changes of await run(
+          {
+            signingCert: 'stored-cert',
+            idpinitiated: { client_authorizequery: 'stored-query' },
+          },
+          {
+            signingCert: '##SAML_CERT##',
+            idpinitiated: { client_authorizequery: '##SAML_QUERY##', client_protocol: 'samlp' },
+          }
+        )) {
+          expect(changes.update[0].options.signingCert).to.equal('stored-cert');
+          expect(changes.update[0].options.idpinitiated).to.deep.equal({
+            client_authorizequery: 'stored-query',
+            client_protocol: 'samlp',
+          });
+        }
+      });
+
+      it('should send the stored client_secret when options.client_secret is also in EXCLUDED_PROPS', async () => {
+        const handlerConfig = (key) =>
+          key === undefined
+            ? { EXCLUDED_PROPS: { connections: ['options.client_secret'] } }
+            : config(key);
+        for (const changes of await run(
+          { client_id: 'old-id', client_secret: 'stored-secret' },
+          { client_id: 'new-id', client_secret: MASK },
+          { handlerConfig }
+        )) {
+          expect(changes.update[0].options.client_secret).to.equal('stored-secret');
+          expect(changes.update[0].options.client_id).to.equal('new-id');
+        }
+      });
+
       it('should ignore connections without options or without a matching stored connection', () => {
         const existing = [{ name: 'a', options: { client_secret: 'stored' } }];
-        expect(connections.restoreMaskedClientSecret({ name: 'a' }, existing)).to.deep.equal({});
+        expect(connections.restoreUnresolvedOptions({ name: 'a' }, existing)).to.deep.equal({});
         expect(
-          connections.restoreMaskedClientSecret(
+          connections.restoreUnresolvedOptions(
             { name: 'b', options: { client_secret: MASK } },
             existing
           )
         ).to.deep.equal({});
         expect(
-          connections.restoreMaskedClientSecret(
+          connections.restoreUnresolvedOptions(
             { name: 'a', options: { client_secret: MASK } },
             null
           )
