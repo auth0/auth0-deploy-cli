@@ -317,6 +317,34 @@ describe('#portals handler', () => {
       });
     });
 
+    it('should explain the list limit when a portal without a secret may be one the API does not list', async () => {
+      const remote = Array.from({ length: 50 }, (_, i) => ({
+        id: `up_${i}`,
+        slug: `portal-${i}`,
+        name: `Portal ${i}`,
+        client: CLIENT,
+        ...TS,
+      }));
+      const { client } = mockClient({ remote });
+      const err = await rejection(() =>
+        new portals.default({ client, config }).validate({
+          portals: [{ slug: 'hidden', name: 'Hidden', client: { ...CLIENT } }],
+        })
+      );
+      expect(err.message).to.include('Cannot create portal(s) "hidden"');
+      expect(err.message).to.include('beyond that limit');
+    });
+
+    it('should not mention the list limit below it', async () => {
+      const { client } = mockClient({ remote: [] });
+      const err = await rejection(() =>
+        new portals.default({ client, config }).validate({
+          portals: [{ slug: 'new', name: 'New', client: { ...CLIENT } }],
+        })
+      );
+      expect(err.message).to.not.include('beyond that limit');
+    });
+
     it('should match an existing portal by id when its slug changes', async () => {
       const { client } = mockClient({ remote: [portalA()] });
       await new portals.default({ client, config }).validate({
@@ -632,7 +660,7 @@ describe('#portals handler', () => {
       expect(warnStub.args.map(([m]) => m).join()).to.include('client_id changed');
     });
 
-    it('should clear blocks missing from the config when deletes are allowed', async () => {
+    it('should leave blocks out of the config unchanged, even when deletes are allowed', async () => {
       const { client, writes } = mockClient({ remote: [portalA()] });
       const handler = new portals.default({ client, config });
 
@@ -641,12 +669,36 @@ describe('#portals handler', () => {
       });
 
       const payload = writes()[0][2];
+      ['navigation', 'pages', 'custom_code'].forEach((field) =>
+        expect(payload).to.not.have.property(field)
+      );
+      expect(warnStub.called).to.equal(false);
+    });
+
+    it('should clear blocks set empty in the config when deletes are allowed', async () => {
+      const { client, writes } = mockClient({ remote: [portalA()] });
+      const handler = new portals.default({ client, config });
+
+      await handler.processChanges({
+        portals: [
+          {
+            slug: 'support',
+            name: 'Support Portal',
+            client: { ...CLIENT },
+            navigation: null,
+            pages: null,
+            custom_code: null,
+          },
+        ],
+      });
+
+      const payload = writes()[0][2];
       expect(payload.navigation).to.equal(null);
       expect(payload.pages).to.equal(null);
       expect(payload.custom_code).to.equal(null);
     });
 
-    it('should treat an empty YAML value (null) like an omitted block', async () => {
+    it('should clear only the block set empty and keep the others', async () => {
       const { client, writes } = mockClient({ remote: [portalA()] });
       const handler = new portals.default({ client, config });
 
@@ -678,13 +730,22 @@ describe('#portals handler', () => {
       );
     });
 
-    it('should not clear blocks, and should warn, when deletes are not allowed', async () => {
+    it('should not clear blocks set empty, and should warn, when deletes are not allowed', async () => {
       config.data.AUTH0_ALLOW_DELETE = false;
       const { client, writes } = mockClient({ remote: [portalA()] });
       const handler = new portals.default({ client, config });
 
       await handler.processChanges({
-        portals: [{ slug: 'support', name: 'Support Portal', client: { ...CLIENT } }],
+        portals: [
+          {
+            slug: 'support',
+            name: 'Support Portal',
+            client: { ...CLIENT },
+            navigation: null,
+            pages: null,
+            custom_code: null,
+          },
+        ],
       });
 
       const payload = writes()[0][2];
@@ -740,21 +801,26 @@ describe('#portals handler', () => {
       config.data.AUTH0_DRY_RUN = true;
     });
 
-    // The missing case omits the key entirely: the dry-run diff only compares keys set locally.
-    const { custom_code: _dropped, ...withoutCustomCode } = exportedA();
-    [
-      ['missing from', withoutCustomCode],
-      ['left empty in', exportedA({ custom_code: null })],
-    ].forEach(([label, portal]) => {
-      it(`should clear a block ${label} the config when deletes are allowed`, async () => {
-        const { client, writes } = mockClient({ remote: [portalA()] });
-        await new portals.default({ client, config }).processChanges({ portals: [portal] });
-        expect(writes()).to.have.length(1);
-        const [name, id, payload] = writes()[0];
-        expect(name).to.equal('portals.update');
-        expect(id).to.equal(PORTAL_A);
-        expect(payload.custom_code).to.equal(null);
+    it('should clear a block set empty in the config when deletes are allowed', async () => {
+      const { client, writes } = mockClient({ remote: [portalA()] });
+      await new portals.default({ client, config }).processChanges({
+        portals: [exportedA({ custom_code: null })],
       });
+      expect(writes()).to.have.length(1);
+      const [name, id, payload] = writes()[0];
+      expect(name).to.equal('portals.update');
+      expect(id).to.equal(PORTAL_A);
+      expect(payload.custom_code).to.equal(null);
+    });
+
+    it('should make no calls for a block left out of the config', async () => {
+      // The key is omitted entirely, as in a config that does not manage this block.
+      const { custom_code: _dropped, ...withoutCustomCode } = exportedA();
+      const { client, writes } = mockClient({ remote: [portalA()] });
+      await new portals.default({ client, config }).processChanges({
+        portals: [withoutCustomCode],
+      });
+      expect(writes()).to.deep.equal([]);
     });
 
     it('should apply a secret rotation', async () => {
@@ -1038,7 +1104,9 @@ describe('#portals handler', () => {
         portals: [exportedA({ custom_code: null })],
       });
       expect(changes.update).to.deep.equal([]);
-      expect(warnStub.args.map(([m]) => m).join()).to.include('custom_code is set on the tenant');
+      expect(warnStub.args.map(([m]) => m).join()).to.include(
+        'custom_code is empty in the config but set on the tenant'
+      );
     });
 
     it('should keep the configured secret out of the preview', async () => {
@@ -1053,16 +1121,15 @@ describe('#portals handler', () => {
       expect(changes.create[0].client).to.deep.equal(CLIENT);
     });
 
-    it('should preview an update when the config drops a block the tenant has', async () => {
+    it('should preview an update when the config empties a block the tenant has', async () => {
       const { client } = mockClient({ remote: [portalA()] });
       const changes = await new portals.default({ client, config }).dryRunChanges({
-        portals: [{ slug: 'support', name: 'Support Portal', client: { ...CLIENT } }],
+        portals: [exportedA({ custom_code: null })],
       });
       expect(changes.update.map((p) => p.slug)).to.deep.equal(['support']);
     });
 
-    it('should not preview clearing when deletes are not allowed', async () => {
-      config.data.AUTH0_ALLOW_DELETE = false;
+    it('should not preview an update for blocks left out of the config', async () => {
       const { client } = mockClient({ remote: [portalA()] });
       const changes = await new portals.default({ client, config }).dryRunChanges({
         portals: [{ slug: 'support', name: 'Support Portal', client: { ...CLIENT } }],
@@ -1070,14 +1137,23 @@ describe('#portals handler', () => {
       expect(changes.update).to.deep.equal([]);
     });
 
-    it('should warn like the real import when deletes are off and a block is missing', async () => {
+    it('should not preview clearing when deletes are not allowed', async () => {
+      config.data.AUTH0_ALLOW_DELETE = false;
+      const { client } = mockClient({ remote: [portalA()] });
+      const changes = await new portals.default({ client, config }).dryRunChanges({
+        portals: [exportedA({ custom_code: null })],
+      });
+      expect(changes.update).to.deep.equal([]);
+    });
+
+    it('should warn like the real import when deletes are off and a block is set empty', async () => {
       config.data.AUTH0_ALLOW_DELETE = false;
       const { client } = mockClient({ remote: [portalA()] });
       await new portals.default({ client, config }).dryRunChanges({
-        portals: [exportedA({ custom_code: undefined })],
+        portals: [exportedA({ custom_code: null })],
       });
       expect(warnStub.args.map(([m]) => m).join()).to.include(
-        'custom_code is set on the tenant but missing from the config'
+        'custom_code is empty in the config but set on the tenant'
       );
     });
 

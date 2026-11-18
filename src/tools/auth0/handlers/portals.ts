@@ -132,15 +132,15 @@ export default class PortalsHandler extends DefaultAPIHandler {
     return false;
   }
 
-  // Blocks missing from the config but set on the tenant. They are cleared only with deletes on;
-  // otherwise they are kept with a warning. Returns the blocks to clear.
+  // A block left out of the config is not managed. One set empty (null) in the config is cleared,
+  // only with deletes on; otherwise it is kept with a warning. Returns the blocks to clear.
   private blocksToClear(portal: Asset, existing: Asset | undefined, warn = true): string[] {
-    const missing = CLEARABLE_FIELDS.filter((field) => isNil(portal[field]) && existing?.[field]);
-    if (this.isDeleteAllowed()) return missing;
+    const emptied = CLEARABLE_FIELDS.filter((field) => portal[field] === null && existing?.[field]);
+    if (this.isDeleteAllowed()) return emptied;
     if (!warn) return [];
-    missing.forEach((field) =>
+    emptied.forEach((field) =>
       log.warn(
-        `Portal "${portal.slug}": ${field} is set on the tenant but missing from the config. Set 'AUTH0_ALLOW_DELETE' to true to clear it.`
+        `Portal "${portal.slug}": ${field} is empty in the config but set on the tenant. Set 'AUTH0_ALLOW_DELETE' to true to clear it.`
       )
     );
     return [];
@@ -161,8 +161,12 @@ export default class PortalsHandler extends DefaultAPIHandler {
     const missing = toCreate.filter((portal) => !hasSecret(portal));
     if (missing.length === 0) return;
     const slugs = missing.map((portal) => `"${portal.slug}"`).join(', ');
+    // At the list limit a portal that already exists may just not be listed.
+    const capped = this.listCapped
+      ? ` The API lists at most ${PORTALS_LIST_LIMIT} portals, so if one of these already exists it is beyond that limit and cannot be matched or updated.`
+      : '';
     throw new ValidationError(
-      `Cannot create portal(s) ${slugs} without client.client_secret. The secret is write-only and never exported; add it to the configuration, e.g. with a ##KEYWORD## mapping defined in AUTH0_KEYWORD_REPLACE_MAPPINGS.`
+      `Cannot create portal(s) ${slugs} without client.client_secret. The secret is write-only and never exported; add it to the configuration, e.g. with a ##KEYWORD## mapping defined in AUTH0_KEYWORD_REPLACE_MAPPINGS.${capped}`
     );
   }
 
