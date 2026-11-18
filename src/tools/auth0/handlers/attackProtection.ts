@@ -224,6 +224,8 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
         'captcha.recaptcha_enterprise.api_key',
         'captcha.recaptcha_enterprise.project_id',
         'captcha.recaptcha_v2.secret',
+        // Legacy field stripped on import and no longer returned by GET
+        'bruteForceProtection.form_submission_behavior',
       ],
     });
   }
