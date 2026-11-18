@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.4.0] - 2026-11-18
+
+### Added
+
+- Add support for Universal Portals (`portals`). [#1538]
+- Support the `oidc_support` property on `clients` and `client_configuration.oidc_support` on `clientProfiles`. When the feature is not enabled on the tenant, the field is skipped with a warning. [#1537]
+- Support `form_submission_mode` on `bruteForceProtection` for `attackProtection`. [#1539]
+- Support the Cross App Access (XAA) requesting app options on `samlp` connections. [#1535]
+
+### Changed
+
+- Reword availability notes in docs, schema descriptions and warning messages. [#1541]
+
+### Fixed
+
+- Keep the stored `options.client_secret` on `connections` when the exported `##CONNECTIONS_<STRATEGY>_SECRET##` placeholder is left unresolved. [#1535]
+- Apply client exclusions in dry-run for `clients` and `clientGrants`, and keep excluded clients enabled on `connections`. [#1536]
+
 ## [9.3.0] - 2026-11-05
 
 ### Added
@@ -2076,7 +2094,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1531]: https://github.com/auth0/auth0-deploy-cli/issues/1531
 [#1532]: https://github.com/auth0/auth0-deploy-cli/issues/1532
 [#1533]: https://github.com/auth0/auth0-deploy-cli/issues/1533
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v9.3.0...HEAD
+[#1535]: https://github.com/auth0/auth0-deploy-cli/issues/1535
+[#1536]: https://github.com/auth0/auth0-deploy-cli/issues/1536
+[#1537]: https://github.com/auth0/auth0-deploy-cli/issues/1537
+[#1538]: https://github.com/auth0/auth0-deploy-cli/issues/1538
+[#1539]: https://github.com/auth0/auth0-deploy-cli/issues/1539
+[#1541]: https://github.com/auth0/auth0-deploy-cli/issues/1541
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v9.4.0...HEAD
+[9.4.0]: https://github.com/auth0/auth0-deploy-cli/compare/v9.3.0...v9.4.0
 [9.3.0]: https://github.com/auth0/auth0-deploy-cli/compare/v9.2.0...v9.3.0
 [9.2.0]: https://github.com/auth0/auth0-deploy-cli/compare/v9.1.0...v9.2.0
 [9.1.0]: https://github.com/auth0/auth0-deploy-cli/compare/v9.0.0...v9.1.0
