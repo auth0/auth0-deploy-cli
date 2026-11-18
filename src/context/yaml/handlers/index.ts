@@ -49,6 +49,7 @@ import featureFlags from './featureFlags';
 import variations from './variations';
 import segments from './segments';
 import experiments from './experiments';
+import portals from './portals';
 import clientAuthCredentials from './clientAuthCredentials';
 import agents from './agents';
 
@@ -114,6 +115,7 @@ const yamlHandlers: { [key in AssetTypes]: YAMLHandler<{ [key: string]: unknown 
   variations,
   segments,
   experiments,
+  portals,
   clientAuthCredentials,
   agents,
 };

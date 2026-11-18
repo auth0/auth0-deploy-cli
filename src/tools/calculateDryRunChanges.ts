@@ -14,7 +14,7 @@ import chalk from 'chalk';
 import fs from 'node:fs/promises';
 import log from '../logger';
 import { Asset, Assets, Auth0APIClient, CalculatedChanges } from '../types';
-import { convertClientNameToId } from './utils';
+import { convertClientNameToId, portalHasForms, resolvePortalReferences } from './utils';
 import { paginate } from './auth0/client';
 import sessionDurationsToMinutes from '../sessionDurationsToMinutes';
 
@@ -513,6 +513,13 @@ export async function dryRunFormatAssets(
       }
       return clientGrant;
     });
+  }
+
+  if (localAssets.portals) {
+    const forms = localAssets.portals.some(portalHasForms)
+      ? await paginate<Management.FormSummary>(authAPIclient.forms.list, { paginate: true })
+      : [];
+    localAssets.portals = resolvePortalReferences(localAssets.portals, clientsRemoteData, forms);
   }
 
   if (localAssets.resourceServers) {

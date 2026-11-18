@@ -73,6 +73,81 @@ export function convertClientNameToId(name: string, clients: Asset[]): string {
   return (found && found.client_id) || name;
 }
 
+// Applies fn to the form_id of every form component on a portal's pages, including in sections.
+export function mapPortalFormIds(portal: Asset, fn: (formId: string) => string): Asset {
+  const mapComponents = (components: any): any =>
+    Array.isArray(components)
+      ? components.map((component) => {
+          const config = component?.config;
+          if (
+            component?.type === 'page:component:auth0:form' &&
+            typeof config?.form_id === 'string'
+          ) {
+            return { ...component, config: { ...config, form_id: fn(config.form_id) } };
+          }
+          if (Array.isArray(config?.children)) {
+            return {
+              ...component,
+              config: { ...config, children: mapComponents(config.children) },
+            };
+          }
+          return component;
+        })
+      : components;
+
+  const standard = portal.pages?.standard;
+  if (!Array.isArray(standard)) return portal;
+  return {
+    ...portal,
+    pages: {
+      ...portal.pages,
+      standard: standard.map((page) =>
+        Array.isArray(page?.components)
+          ? { ...page, components: mapComponents(page.components) }
+          : page
+      ),
+    },
+  };
+}
+
+// Drops the write-only client secret, e.g. before a portal is printed or exported.
+export const withoutSecret = (portal: Asset): Asset => {
+  if (!portal.client?.client_secret) return portal;
+  const { client_secret, ...client } = portal.client;
+  return { ...portal, client };
+};
+
+export const portalHasForms = (portal: Asset): boolean => {
+  let found = false;
+  mapPortalFormIds(portal, (formId) => {
+    found = true;
+    return formId;
+  });
+  return found;
+};
+
+// Resolves application and form names in portals to their ids; unmatched values are kept as is.
+export const resolvePortalReferences = (
+  portals: Asset[],
+  clients: Asset[],
+  forms: Asset[]
+): Asset[] =>
+  portals.map((portal) => {
+    const withClient = portal.client?.client_id
+      ? {
+          ...portal,
+          client: {
+            ...portal.client,
+            client_id: convertClientNameToId(portal.client.client_id, clients),
+          },
+        }
+      : portal;
+    return mapPortalFormIds(
+      withClient,
+      (name) => forms.find((form) => form.name === name)?.id || name
+    );
+  });
+
 export function convertActionNameToId(name: string, actions: Asset[]): string {
   const found = actions.find((a) => a.name === name);
   return (found && found.id) || name;
@@ -254,9 +329,13 @@ export const obfuscateSensitiveValues = (
 // Uppercase-only to avoid false positives on lowercase Auth0 template variables like @@password@@
 const UNRESOLVED_PLACEHOLDER_REGEX = /^(##[A-Z0-9_]+##|@@[A-Z0-9_]+@@)$/;
 
+// True for a ##...## or @@...@@ keyword that no mapping replaced.
+export const isUnresolvedPlaceholder = (value: unknown): value is string =>
+  typeof value === 'string' && UNRESOLVED_PLACEHOLDER_REGEX.test(value);
+
 // Recursively collects all fields in an asset that still contain an unresolved
 // ##...## (string) or @@...@@ (array) keyword placeholder.
-const collectUnresolvedPlaceholders = (
+export const collectUnresolvedPlaceholders = (
   data: Asset | null,
   parentPath = ''
 ): { path: string; value: string }[] => {
@@ -266,7 +345,7 @@ const collectUnresolvedPlaceholders = (
   Object.keys(data).forEach((key) => {
     const fullPath = parentPath ? `${parentPath}.${key}` : key;
     const value = data[key];
-    if (typeof value === 'string' && UNRESOLVED_PLACEHOLDER_REGEX.test(value)) {
+    if (isUnresolvedPlaceholder(value)) {
       found.push({ path: fullPath, value });
     } else if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
       found.push(...collectUnresolvedPlaceholders(value, fullPath));
@@ -274,6 +353,10 @@ const collectUnresolvedPlaceholders = (
   });
   return found;
 };
+
+// "##FOO_BAR##" -> "FOO_BAR", the key to define in AUTH0_KEYWORD_REPLACE_MAPPINGS.
+export const placeholderKeywordName = (value: string): string =>
+  value.replace(/^##|##$|^@@|@@$/g, '');
 
 // Throws an error if any field in the asset contains an unresolved ##...## or @@...@@ placeholder,
 // listing all offending fields so the user can fix them before deploying.
@@ -318,7 +401,8 @@ export const stripObfuscatedFieldsFromPayload = (
 
 // Strips unresolved ##...## / @@...@@ placeholders before sending to Auth0.
 // Keyword replacement runs first; any remaining placeholder means no mapping was
-// provided. The field is dropped so Auth0 preserves its existing value.
+// provided. The field is left out of the payload: Auth0 keeps its stored value only when the API merges
+// updates. If the API replaces the parent object, the handler must restore the value itself.
 export const stripUnresolvedPlaceholders = (
   data: Asset | null,
   resourceType: string,
@@ -333,10 +417,9 @@ export const stripUnresolvedPlaceholders = (
   unresolved.forEach(({ path, value }) => {
     log.warn(
       `Stripping unresolved placeholder for ${resourceType} "${resourceName}" field "${path}": ${value}. ` +
-        `To use this value, define ${value.replace(
-          /^##|##$|^@@|@@$/g,
-          ''
-        )} in AUTH0_KEYWORD_REPLACE_MAPPINGS. The existing value on Auth0 will be preserved.`
+        `To use this value, define ${placeholderKeywordName(
+          value
+        )} in AUTH0_KEYWORD_REPLACE_MAPPINGS. The field is omitted from the request.`
     );
     dotProp.delete(newAsset, path);
   });

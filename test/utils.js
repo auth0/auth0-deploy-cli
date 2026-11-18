@@ -266,6 +266,9 @@ export function mockMgmtClient() {
     agents: {
       list: (params) => mockPagedData(params, 'agents', []),
     },
+    portals: {
+      list: () => Promise.resolve({ portals: [] }),
+    },
     tokenExchangeProfiles: {
       list: (params) => mockPagedData(params, 'tokenExchangeProfiles', []),
     },

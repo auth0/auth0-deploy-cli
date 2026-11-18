@@ -5,6 +5,7 @@ import sanitizeName from 'sanitize-filename';
 import dotProp from 'dot-prop';
 import { forOwn, isObject } from 'lodash';
 import { loadFileAndReplaceKeywords, Auth0 } from './tools';
+import { mapPortalFormIds, withoutSecret } from './tools/utils';
 import log from './logger';
 import { Asset, Assets, Config, KeywordMappings } from './types';
 
@@ -225,6 +226,46 @@ export function convertClientIdToName(
     return clientId;
   }
 }
+
+// Clients or forms used to export portal references by name. Uses the already loaded list when
+// given, otherwise fetches it; on failure the raw ids are kept rather than failing the export.
+export async function loadPortalReferences(
+  needed: boolean,
+  loaded: Asset[] | null | undefined,
+  fetch: () => Promise<Asset[]>,
+  what: string
+): Promise<Asset[]> {
+  if (!needed) return [];
+  if (loaded) return loaded;
+  try {
+    return await fetch();
+  } catch (err) {
+    log.warn(`Could not list ${what} to export portal references by name: ${err.message}`);
+    return [];
+  }
+}
+
+// The shape written to config: no id, timestamps or secret, and the application and forms by name.
+export const toExportedPortal = (
+  { id, created_at, updated_at, ...asset }: Asset,
+  clients: Asset[],
+  forms: Asset[]
+): Asset => {
+  const portal = withoutSecret(asset);
+  const withClient = portal.client?.client_id
+    ? {
+        ...portal,
+        client: {
+          ...portal.client,
+          client_id: convertClientIdToName(portal.client.client_id, clients),
+        },
+      }
+    : portal;
+  return mapPortalFormIds(
+    withClient,
+    (formId) => forms.find((form) => form.id === formId)?.name || formId
+  );
+};
 
 export function hasKeywordMarkers(value: any): boolean {
   if (typeof value !== 'string') return false;
