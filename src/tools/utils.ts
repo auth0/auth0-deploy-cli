@@ -553,3 +553,26 @@ export function isDryRun(config: ConfigFunction): boolean {
 export function printCLIMessage(message: string): void {
   process.stdout.write(message + '\n');
 }
+
+export const isFeatureNotEnabledError = (err): boolean =>
+  err?.statusCode === 403 && err?.body?.errorCode === 'feature_not_enabled';
+
+// Retries a write without oidc_support when the tenant doesn't have it enabled, so the rest of the resource still applies
+export async function writeSkippingUnavailableOidcSupport<P extends object, T>(
+  payload: P,
+  oidcSupportPath: string,
+  label: string,
+  write: (payload: P) => Promise<T>
+): Promise<T> {
+  try {
+    return await write(payload);
+  } catch (err) {
+    const notEnabled = isFeatureNotEnabledError(err) && /oidc_support/.test(err.body.message || '');
+    if (!notEnabled || !_.has(payload, oidcSupportPath)) throw err;
+
+    log.warn(
+      `oidc_support is not available for this tenant, so it was skipped for ${label}. The rest of the configuration was applied.`
+    );
+    return write(_.omit(payload, oidcSupportPath) as P);
+  }
+}

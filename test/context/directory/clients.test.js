@@ -478,4 +478,39 @@ describe('#directory context clients', () => {
       },
     });
   });
+
+  it('should leave the default oidc_support out of the dump and keep a non-default value', async () => {
+    const dir = path.join(testDataDir, 'directory', 'clientsOidcSupportDump');
+    cleanThenMkdir(dir);
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+
+    context.assets.clients = [
+      {
+        name: 'defaultClient',
+        is_first_party: true,
+        oidc_support: { is_allowed: true, allow_all_scopes: true },
+      },
+      {
+        name: 'strictDefaultClient',
+        is_first_party: false,
+        third_party_security_mode: 'strict',
+        oidc_support: { is_allowed: false },
+      },
+      {
+        name: 'scopedClient',
+        is_first_party: true,
+        oidc_support: { is_allowed: true, allowed_scopes: ['profile'] },
+      },
+    ];
+
+    await handler.dump(context);
+
+    const load = (name) => loadJSON(path.join(dir, 'clients', `${name}.json`));
+    expect(load('defaultClient')).to.not.have.property('oidc_support');
+    expect(load('strictDefaultClient')).to.not.have.property('oidc_support');
+    expect(load('scopedClient').oidc_support).to.deep.equal({
+      is_allowed: true,
+      allowed_scopes: ['profile'],
+    });
+  });
 });
