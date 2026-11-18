@@ -2999,3 +2999,114 @@ Each experiment is stored as a separate JSON file named after the experiment (e.
   ]
 }
 ```
+
+## Portals
+
+> **Early Access.** Universal Portals is an Early Access feature that must be enabled on the tenant. The Deploy CLI client needs the `read:portals`, `create:portals`, `update:portals` and `delete:portals` scopes. If the feature isn't enabled for the tenant, portals are skipped on export, and an import that configures portals skips them with a warning.
+
+A portal is a customer-facing self-service site made of a sidebar, pages and page components, signed in through an OAuth client.
+
+Notes and guardrails:
+
+- **Portals are matched by `slug`.** The slug is unique per tenant. The `name` is not unique, so two portals may share a name. Changing the slug of a portal in the configuration creates a new portal; the old one is only deleted with `AUTH0_ALLOW_DELETE=true`. Directory exports name each file after the slug.
+- **`client.client_secret` is write-only.** The API never returns it, so it is never exported and has to be added to the configuration, for example with a `##KEYWORD##` mapping. It is required to create a portal: an import that creates a portal without it fails during validation, before any resource is written, and so does the dry run. A `##KEYWORD##` with no mapping counts as missing. When updating, the `client` block is only sent if `client.client_secret` is configured, so an export can be re-imported into the same tenant unchanged. A configured secret is sent on every import and cannot be compared with the tenant's, so the dry run lists that portal as an update. An export does not keep the `client_secret` line, even with `AUTH0_PRESERVE_KEYWORDS`, so add it back after re-exporting.
+- **Clearing blocks.** `navigation`, `pages` and `custom_code` left out of the configuration are not changed on the tenant, so a configuration can manage only part of a portal. To clear one, set it empty (for example `navigation:` in YAML or `null` in JSON) with `AUTH0_ALLOW_DELETE=true`; without it the CLI warns and leaves the block unchanged. The dry run previews the clearing as an update, and gives the same warning when deletes are off.
+- **The client application is referenced by name.** `client.client_id` is exported as the application's `name` and resolved to its id on import, so the application can be created in the same import. A value that matches no application is sent as is. Changing the application without supplying `client.client_secret` is not applied; the import and the dry run warn instead.
+- **Forms are referenced by name.** The `form_id` of form components, including those inside sections, is exported as the form's `name` and resolved to its id on import. Forms are processed before portals, so a form created in the same import can be referenced. A value that matches no form is sent as is.
+- **Sidebar components.** Use the `v2` types (`sidebar:component:auth0:external_link:v2` and `sidebar:component:auth0:internal_link:v2`). The deprecated `sidebar:component:auth0:external_link` and `sidebar:component:auth0:internal_link` types are still sent as configured, with a warning in the import and the dry run.
+- `custom_code.head` is only injected when the portal is served from a custom domain.
+- The API lists at most 50 portals without pagination. If the tenant has that many, the CLI warns that portals beyond the first 50 are not exported or managed. Those portals are never updated or deleted. A configured portal whose slug belongs to one of them is previewed as a create, and the import fails with a message saying the portal may exist but is not listed; portal updates in that run are not applied. A directory export at the limit keeps local portal files it cannot match, instead of removing them.
+- `id`, `created_at` and `updated_at` are read-only. They are not exported and are ignored on create and update.
+
+### Schema Properties
+
+| Property      | Type     | Required  | Description                                                                                                                                                                                                                                                 |
+| ------------- | -------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `slug`        | `string` | Yes       | URL slug of the portal. Unique per tenant; used as the matching key.                                                                                                                                                                                        |
+| `name`        | `string` | Yes       | Display name (1–150 characters). Not unique.                                                                                                                                                                                                                |
+| `client`      | `object` | On create | `{ token_endpoint_auth_method: "client_secret_post", client_id, client_secret }`; `token_endpoint_auth_method` and `client_id` are required when `client` is set. `client_id` is the application name. `client_secret` is write-only and is never exported. |
+| `navigation`  | `object` | No        | `{ sidebar: { components: [...] } }`. Each component is `{ type, config }`.                                                                                                                                                                                 |
+| `pages`       | `object` | No        | `{ default: "<page slug>", standard: [{ title, slug, components: [...] }] }`.                                                                                                                                                                               |
+| `custom_code` | `object` | No        | `{ head: "<html>" }` (1–10000 characters), injected into the `<head>` when served from a custom domain.                                                                                                                                                     |
+
+### YAML Example
+
+```yaml
+# Contents of ./tenant.yaml
+portals:
+  - slug: support
+    name: 'Support Portal'
+    client:
+      token_endpoint_auth_method: client_secret_post
+      client_id: 'My App'
+      client_secret: '##PORTAL_CLIENT_SECRET##'
+    navigation:
+      sidebar:
+        components:
+          - type: 'sidebar:component:auth0:external_link:v2'
+            config:
+              label: 'Documentation'
+              href: 'https://example.com/docs'
+          - type: 'sidebar:component:auth0:internal_link:v2'
+            config:
+              label: 'Home'
+              page_slug: 'home'
+    pages:
+      default: home
+      standard:
+        - title: 'Home'
+          slug: home
+          components:
+            - type: 'page:component:auth0:typography:heading'
+              config:
+                title: 'Welcome'
+            - type: 'page:component:auth0:form'
+              config:
+                form_id: 'My Signup Form'
+                completion_message: 'Thanks for signing up'
+    custom_code:
+      head: '<style>body { font-family: sans-serif; }</style>'
+```
+
+### Directory Example
+
+Folder: `./portals/`
+
+Each portal is stored as a separate JSON file named after its slug (e.g. `support.json`):
+
+```json
+{
+  "slug": "support",
+  "name": "Support Portal",
+  "client": {
+    "token_endpoint_auth_method": "client_secret_post",
+    "client_id": "My App",
+    "client_secret": "##PORTAL_CLIENT_SECRET##"
+  },
+  "navigation": {
+    "sidebar": {
+      "components": [
+        {
+          "type": "sidebar:component:auth0:external_link:v2",
+          "config": { "label": "Documentation", "href": "https://example.com/docs" }
+        }
+      ]
+    }
+  },
+  "pages": {
+    "default": "home",
+    "standard": [
+      {
+        "title": "Home",
+        "slug": "home",
+        "components": [
+          {
+            "type": "page:component:auth0:typography:heading",
+            "config": { "title": "Welcome" }
+          }
+        ]
+      }
+    ]
+  }
+}
+```

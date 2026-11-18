@@ -1091,3 +1091,60 @@ describe('preserveKeywords', () => {
     log.debug = originalLogDebug;
   });
 });
+
+describe('#Keyword preservation of fields the tenant does not return', () => {
+  const captureWarnings = (fn: () => void): string => {
+    const warnings: string[] = [];
+    // eslint-disable-next-line no-console
+    const originalWarn = console.warn;
+    // eslint-disable-next-line no-console
+    console.warn = (...args) => warnings.push(args.join(' '));
+    try {
+      fn();
+    } finally {
+      // eslint-disable-next-line no-console
+      console.warn = originalWarn;
+    }
+    return warnings.join('\n');
+  };
+  const portalHandlers = [{ id: 'id', identifiers: ['id', 'slug'], type: 'portals' }];
+
+  it('should not print a write-only secret that the tenant does not return', () => {
+    const remoteAssets = {
+      portals: [{ slug: 'support', name: 'Support', client: { client_id: 'abc' } }],
+    };
+    let preserved;
+    const output = captureWarnings(() => {
+      preserved = preserveKeywords({
+        localAssets: {
+          portals: [
+            {
+              slug: 'support',
+              name: 'Support',
+              client: { client_id: 'abc', client_secret: '##PORTAL_SECRET##' },
+            },
+          ],
+        },
+        remoteAssets,
+        keywordMappings: { PORTAL_SECRET: 'super-secret-value' },
+        auth0Handlers: portalHandlers,
+      });
+    });
+
+    expect(output).to.not.include('super-secret-value');
+    expect(preserved).to.deep.equal(remoteAssets);
+  });
+
+  it('should still warn when the tenant value differs from the local one', () => {
+    const output = captureWarnings(() => {
+      preserveKeywords({
+        localAssets: { portals: [{ slug: 'support', name: '##PORTAL_NAME##' }] },
+        remoteAssets: { portals: [{ slug: 'support', name: 'Changed On Tenant' }] },
+        keywordMappings: { PORTAL_NAME: 'Support' },
+        auth0Handlers: portalHandlers,
+      });
+    });
+
+    expect(output).to.include('will be preserved');
+  });
+});
