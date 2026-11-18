@@ -25,8 +25,7 @@ const readOnlyFields: Partial<Record<AssetTypes, string[]>> = {
     'owners',
   ],
   attackProtection: [
-    // Returned by GET but rejected by PATCH with "Additional properties not allowed"
-    'bruteForceProtection.form_submission_mode',
+    // Legacy field briefly returned by GET but rejected by PATCH with "Additional properties not allowed"
     'bruteForceProtection.form_submission_behavior',
   ],
 };

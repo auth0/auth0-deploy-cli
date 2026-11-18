@@ -28,4 +28,23 @@ describe('#readonly', function () {
     const clear = cleanAssets(assets, {});
     expect(clear.databases).is.deep.equal([target]);
   });
+
+  it('should keep bruteForceProtection.form_submission_mode and clear form_submission_behavior', () => {
+    const assets = {
+      attackProtection: {
+        bruteForceProtection: {
+          enabled: true,
+          form_submission_mode: 'manual',
+          form_submission_behavior: 'auto_submit',
+        },
+      },
+    };
+    const clear = cleanAssets(assets, {});
+    expect(clear.attackProtection).is.deep.equal({
+      bruteForceProtection: {
+        enabled: true,
+        form_submission_mode: 'manual',
+      },
+    });
+  });
 });

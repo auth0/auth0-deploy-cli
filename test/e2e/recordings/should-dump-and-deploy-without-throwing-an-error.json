@@ -6198,6 +6198,7 @@
                 "user_notification"
             ],
             "mode": "count_per_identifier_and_ip",
+            "form_submission_mode": "auto",
             "allowlist": [],
             "max_attempts": 10
         },
