@@ -361,9 +361,19 @@ connections:
 
 > **Early Access:** Requires the `token_vault_xaa` feature flag to be enabled on the tenant.
 
-For enterprise connections with strategy `oidc` or `okta`, the Deploy CLI supports configuring the connection as a Requesting Application for Cross App Access via the top-level `cross_app_access_requesting_app` field:
+For enterprise connections with strategy `oidc`, `okta` or `samlp`, the Deploy CLI supports configuring the connection as a Requesting Application for Cross App Access via the top-level `cross_app_access_requesting_app` field:
 
 - `cross_app_access_requesting_app.active` (boolean): Set to `true` to enable the connection as a Requesting Application for Cross App Access. Defaults to `true`.
+
+**SAML (`samlp`) connections**
+
+For `samlp`, the IdP token endpoint is configured through these `options` fields (all optional, shared with OIDC/Okta): `client_id`, `client_secret`, `discovery_url`, `oidc_metadata`, `token_endpoint_auth_method` (`client_secret_post` or `private_key_jwt`), `token_endpoint_auth_signing_alg` and `token_endpoint_jwtca_aud_format` (`issuer` or `token_endpoint`).
+
+- `active: true` and `token_endpoint_auth_method: private_key_jwt` need the Cross App Access SAML feature enabled on the tenant; the Management API returns `400 operation_not_supported` otherwise.
+- If the feature is later disabled on the tenant, the API stops returning `cross_app_access_requesting_app` on export, and an import that still sends `active: true` for that connection fails with the same `400`.
+- Activating the requesting app also needs `options.oidc_metadata.token_endpoint`, either set directly or populated from `discovery_url`; the Management API returns `400 operation_not_supported` without it.
+- `client_secret` is exported as the placeholder `##CONNECTIONS_SAMLP_SECRET##`. On import, set the real value with `AUTH0_KEYWORD_REPLACE_MAPPINGS` (`{"CONNECTIONS_SAMLP_SECRET": "<secret>"}`). The placeholder is shared by every `samlp` connection, so a mapping sets the same secret on all of them. If it is left unresolved, the secret already stored on each connection is kept and a warning is logged. Send `client_secret: ""` or `null` to clear it. `AUTH0_EXPORT_SECRETS: true` exports the real values instead.
+- Sending `active: false` on a connection that is currently active turns the role off. Omitting `cross_app_access_requesting_app` leaves it unchanged.
 
 **YAML Example**
 
