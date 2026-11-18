@@ -394,7 +394,7 @@ describe('#agents handler', () => {
         await handler.processChanges({ agents: [{ name: 'Agent A' }] });
         expect.fail('should have thrown');
       } catch (err) {
-        expect(err.message).to.include('agents_as_principals_limited_ea');
+        expect(err.message).to.include('not enabled for this tenant');
       }
       expect(calls).to.deep.equal([]);
     });
@@ -606,7 +606,7 @@ describe('#agents handler', () => {
         await handler.dryRunChanges({ agents: [{ name: 'Agent A' }] });
         expect.fail('should have thrown');
       } catch (err) {
-        expect(err.message).to.include('agents_as_principals_limited_ea');
+        expect(err.message).to.include('not enabled for this tenant');
       }
     });
   });

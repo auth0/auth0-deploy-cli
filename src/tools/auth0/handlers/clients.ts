@@ -91,12 +91,12 @@ const myOrganizationConfigurationSchema = {
     enforce_permission_ceiling: {
       type: 'boolean',
       description:
-        'When true, limits the permissions that organization admins can assign to members to only those held by the admin themselves. Early Access, gated by the my_org_member_management_ea feature flag.',
+        'When true, limits the permissions that organization admins can assign to members to only those held by the admin themselves. Early Access, requires this feature to be enabled on the tenant.',
     },
     enforce_self_assignment_restriction: {
       type: 'boolean',
       description:
-        'When true, prevents organization admins from assigning permissions to themselves. Early Access, gated by the my_org_member_management_ea feature flag.',
+        'When true, prevents organization admins from assigning permissions to themselves. Early Access, requires this feature to be enabled on the tenant.',
     },
   },
   required: ['allowed_strategies', 'connection_deletion_behavior'],
@@ -105,7 +105,7 @@ const myOrganizationConfigurationSchema = {
 const tokenVaultPrivilegedAccessSchema = {
   type: ['object', 'null'],
   description:
-    'Settings for Token Vault Privileged Access, hardening a privileged client by restricting the caller IPs, connections, and scopes it may use at runtime. Early Access, gated by the token_vault_subject_type_jwt_ea_rollout feature flag. Export-only: this object is exported for visibility but is not deployed by the Deploy CLI (it is stripped from create/update payloads because the required credentials are tenant-specific ids). Manage it directly on the tenant.',
+    'Settings for Token Vault Privileged Access, hardening a privileged client by restricting the caller IPs, connections, and scopes it may use at runtime. Early Access, requires this feature to be enabled on the tenant. Export-only: this object is exported for visibility but is not deployed by the Deploy CLI (it is stripped from create/update payloads because the required credentials are tenant-specific ids). Manage it directly on the tenant.',
   properties: {
     ip_allowlist: {
       type: 'array',
@@ -389,7 +389,7 @@ export const schema = {
       b2b_integration_configuration: {
         type: ['object', 'null'],
         description:
-          'B2B integration configuration. Early Access. Required feature flag: enterprise_connect_entitled.',
+          'B2B integration configuration. Early Access. Requires this feature to be enabled on the tenant.',
         properties: {
           integration_type: {
             type: 'string',

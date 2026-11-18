@@ -470,7 +470,7 @@ describe('#attackProtection handler', () => {
           },
           phoneProviderProtection: {
             get: () => {
-              // Flag-off tenants return 403 for the sms_exponential_backoff-gated endpoint
+              // Tenants without the feature return 403 for this endpoint
               const err = new Error('Forbidden');
               err.statusCode = 403;
               throw err;

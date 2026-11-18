@@ -359,7 +359,7 @@ connections:
 
 ## Connections (Cross App Access — Requesting Application)
 
-> **Early Access:** Requires the `token_vault_xaa` feature flag to be enabled on the tenant.
+> **Early Access:** Requires this feature to be enabled on the tenant.
 
 For enterprise connections with strategy `oidc`, `okta` or `samlp`, the Deploy CLI supports configuring the connection as a Requesting Application for Cross App Access via the top-level `cross_app_access_requesting_app` field:
 
@@ -613,7 +613,7 @@ Contents of `database.json`
 
 ### Passkey signup behavior — `authentication_methods.passkey.signup_behavior`
 
-> **Early Availability:** requires the `connection_passkey_auth_signup_behavior` feature flag on your tenant. Without it, the Management API rejects any create or update that includes `passkey.signup_behavior` with a 400 (`Passkey signup_behavior is not enabled for this tenant`) and does not return the property. Remove `passkey.signup_behavior` from configs exported from a flagged tenant before importing them into a tenant without the flag; `--dry-run` cannot detect this. `password.signup_behavior` is a separate setting and is not affected by the flag.
+> **Early Availability:** requires this feature to be enabled on your tenant. Without it, the Management API rejects any create or update that includes `passkey.signup_behavior` with a 400 (`Passkey signup_behavior is not enabled for this tenant`) and does not return the property. Remove `passkey.signup_behavior` from configs exported from a tenant with the feature enabled before importing them into a tenant without it; `--dry-run` cannot detect this. `password.signup_behavior` is a separate setting and is not affected.
 
 `options.authentication_methods.passkey.signup_behavior` controls whether the passkey enrollment prompt is shown during signup. Allowed values are `allow` and `block`. Setting it to `allow` on a connection that is not passkey-ready (for example, one with `requires_username: true`) fails with a 400 from the Management API.
 
@@ -682,7 +682,7 @@ resourceServers:
 
 ### Auth0 My Account API — `authorization_policy`
 
-The `authorization_policy` field can be set on the **Auth0 My Account API** resource server (the system resource server with identifier `https://<tenant-domain>/me/`) when the `acr` feature flag is enabled on the tenant. It specifies an Authentication Context Class Reference (ACR) policy that controls the authentication assurance requirements for access tokens issued to that API.
+The `authorization_policy` field can be set on the **Auth0 My Account API** resource server (the system resource server with identifier `https://<tenant-domain>/me/`) when this feature is enabled on the tenant. It specifies an Authentication Context Class Reference (ACR) policy that controls the authentication assurance requirements for access tokens issued to that API.
 
 **YAML Example**
 
@@ -715,11 +715,11 @@ resourceServers:
 }
 ```
 
-> **Note:** `authorization_policy` is only accepted by the Auth0 API for the My Account resource server and only when the `acr` feature flag is enabled on the tenant.
+> **Note:** `authorization_policy` is only accepted by the Auth0 API for the My Account resource server and only when this feature is enabled on the tenant.
 
 ### Consent Non-repudiation — `require_consent_non_repudiation`
 
-The `require_consent_non_repudiation` field is a boolean that can be set on your own resource servers (the APIs that rich authorization requests are made for) when the `my_account_consents` entitlement is enabled on the tenant. When `true`, the authorization server rejects consent decisions that do not include a valid signature and `kid`, so the approver cannot later deny a consent they granted. Defaults to `false`.
+The `require_consent_non_repudiation` field is a boolean that can be set on your own resource servers (the APIs that rich authorization requests are made for) when this feature is enabled on the tenant. When `true`, the authorization server rejects consent decisions that do not include a valid signature and `kid`, so the approver cannot later deny a consent they granted. Defaults to `false`.
 
 **YAML Example**
 
@@ -740,11 +740,11 @@ resourceServers:
 }
 ```
 
-> **Note:** `require_consent_non_repudiation` requires the `my_account_consents` entitlement to be enabled on the tenant. It is currently not accepted on the system **Auth0 My Account API** resource server.
+> **Note:** `require_consent_non_repudiation` requires this feature to be enabled on the tenant. It is currently not accepted on the system **Auth0 My Account API** resource server.
 
 ### Universal Commerce Protocol (UCP) — `type`
 
-> **Early Access.** Requires the `universal_commerce_protocol` feature flag on the tenant.
+> **Early Access.** Requires this feature to be enabled on the tenant.
 
 The `type` field declares a resource server as a Universal Commerce Protocol server. The only accepted value is `universal_commerce_protocol_server`. Doing so marks the API for UCP billing and merges its scopes into `scopes_supported` in the tenant's discovery metadata (`/.well-known/oauth-authorization-server` and `/.well-known/openid-configuration`).
 
@@ -789,7 +789,7 @@ The current holder must be released in the same config. The Deploy CLI logs a wa
 Notes:
 
 - Resource servers that don't hold the type have no `type` property in API responses, so exports are unchanged for them.
-- `type: null` is accepted whether or not the tenant has the feature flag. Setting `universal_commerce_protocol_server` without the flag fails with `403`.
+- `type: null` is accepted whether or not the tenant has this feature enabled. Setting `universal_commerce_protocol_server` without the feature enabled fails with `403`.
 
 ### Online Refresh Tokens — `allow_online_access` and `allow_online_access_with_ephemeral_sessions`
 
@@ -797,7 +797,7 @@ The `allow_online_access` field enables issuance of Online Refresh Tokens (ORTs)
 
 `allow_online_access_with_ephemeral_sessions` permits ORT issuance even when the session uses a non-persistent (ephemeral) cookie. This field can only be set to `true` if `allow_online_access` is also `true`.
 
-Both fields default to `false` and require the `online_refresh_tokens` feature flag to be enabled on the tenant.
+Both fields default to `false` and require this feature to be enabled on the tenant.
 
 **YAML Example**
 
@@ -1129,7 +1129,7 @@ For `universal_login` template `templates/` will be created.
 
 ## Themes (Identifier display settings)
 
-> **Early Access:** Requires the `universal_login_theme_identifiers` feature flag to be enabled on the tenant. When the flag is off, the Auth0 API rejects a theme write that includes `identifiers` and strips the field from responses.
+> **Early Access:** Requires this feature to be enabled on the tenant. When it is not enabled, the Auth0 API rejects a theme write that includes `identifiers` and strips the field from responses.
 
 The Deploy CLI supports configuring identifier display settings on the branding theme via the top-level `identifiers` object. All three members are required when `identifiers` is supplied:
 
@@ -1184,7 +1184,7 @@ themes:
 
 ## Tenant Settings (Country codes)
 
-> **Early Access:** Requires the `tenant_country_codes_filtering` feature flag to be enabled on the tenant. When the flag is off, the Auth0 API rejects a tenant settings write that includes `country_codes`.
+> **Early Access:** Requires this feature to be enabled on the tenant. When it is not enabled, the Auth0 API rejects a tenant settings write that includes `country_codes`.
 
 The Deploy CLI supports configuring phone country code filtering for identifier input via the top-level `country_codes` object in tenant settings:
 
@@ -1263,13 +1263,13 @@ The Deploy CLI supports configuring Client ID Metadata Document (CIMD) support v
 - `client_id_metadata_document_supported` (boolean): Whether the authorization server supports retrieving client metadata from a `client_id` URL.
 - `client_id_metadata_document_dynamic_registration_supported` (boolean): Whether CIMD clients can be registered dynamically during the authorization flow. Requires `client_id_metadata_document_supported` to be `true`.
 
-> **Early Access:** `client_id_metadata_document_dynamic_registration_supported` requires the `dynamic_cimd` feature flag to be enabled on the tenant. When the flag is off, the Auth0 API omits the setting from exports and rejects any tenant settings write that includes it.
+> **Early Access:** `client_id_metadata_document_dynamic_registration_supported` requires this feature to be enabled on the tenant. When it is not enabled, the Auth0 API omits the setting from exports and rejects any tenant settings write that includes it.
 
 Behavior notes:
 
 - Setting `client_id_metadata_document_dynamic_registration_supported: true` together with `client_id_metadata_document_supported: false` fails validation before any API call is made.
 - If the configuration sets only one of the two, it is checked against the tenant's current value. Enabling dynamic registration while CIMD support is off on the tenant fails with an error before any tenant settings are written. Disabling CIMD support while dynamic registration is on is reported by `--dry-run`; on import, the Auth0 API rejects the tenant settings update. Set both values in the same configuration to change them together.
-- Tenants with the `dynamic_cimd` flag export `client_id_metadata_document_dynamic_registration_supported: false` by default. When importing into a tenant without the flag, a `false` value is dropped automatically so the configuration can be deployed across environments. A `true` value is still sent, and the API's error is reported.
+- Tenants with this feature enabled export `client_id_metadata_document_dynamic_registration_supported: false` by default. When importing into a tenant without it, a `false` value is dropped automatically so the configuration can be deployed across environments. A `true` value is still sent, and the API's error is reported.
 
 **YAML Example**
 
@@ -1327,7 +1327,7 @@ The following fields are read-only and are never sent to the API: `external_meta
 
 ### Dynamically registered CIMD clients
 
-> **Early Access:** Requires the `dynamic_cimd` feature flag.
+> **Early Access:** Requires this feature to be enabled on the tenant.
 
 When `client_id_metadata_document_dynamic_registration_supported` is enabled, CIMD clients can register themselves during the authorization flow. These clients have `external_metadata_created_by: client` and are not managed by the Deploy CLI:
 
@@ -1426,9 +1426,9 @@ NetworkACLs have the following key properties:
   - `scope`: The scope of the rule ('management', 'authentication', or 'tenant')
   - `match`, `not_match`, or `match_all`: Criteria for matching requests
 
-The `match` and `not_match` criteria also support an `auth0_managed` array for matching Auth0-managed IP ranges (e.g. `auth0.icloud_relay_proxy`, `auth0.low_reputation`). Each value must follow the pattern `^auth0\.[^.\s]+$`. This is an Early Access feature gated behind the `tenant_acl_curated_blocklists` feature flag and requires the `advanced-breached-password-detection` entitlement; the API rejects rules using `auth0_managed` with an HTTP 403 if the tenant is not entitled.
+The `match` and `not_match` criteria also support an `auth0_managed` array for matching Auth0-managed IP ranges (e.g. `auth0.icloud_relay_proxy`, `auth0.low_reputation`). Each value must follow the pattern `^auth0\.[^.\s]+$`. This is an Early Access feature that must be enabled on the tenant; the API rejects rules using `auth0_managed` with an HTTP 403 if the tenant is not entitled.
 
-Set `match_all: true` for a rule that unconditionally matches all traffic (e.g. block or allow everything within a scope), with no other signal required. `match_all` is mutually exclusive with `match` and `not_match` — a rule may use only one of the three, and combining them is rejected. Only `true` is valid; omit the property rather than setting it to `false`. `match_all` is gated behind the `tenant_acl_match_all` feature flag, and the API rejects rules using it with an HTTP 400 if the tenant does not have the flag enabled.
+Set `match_all: true` for a rule that unconditionally matches all traffic (e.g. block or allow everything within a scope), with no other signal required. `match_all` is mutually exclusive with `match` and `not_match` — a rule may use only one of the three, and combining them is rejected. Only `true` is valid; omit the property rather than setting it to `false`. `match_all` requires this feature to be enabled on the tenant, and the API rejects rules using it with an HTTP 400 if it is not enabled.
 
 **YAML Example**
 
@@ -1562,7 +1562,7 @@ Contents of `Block All Tenant Traffic-p-99.json`:
 
 Network ACL Keys are HMAC signing keys used for [HTTP message signature verification](https://auth0.com/docs/secure/tenant-access-control-list) in Network ACL rules. Each key has a name, an algorithm (`hmac-sha256`), and a server-computed fingerprint. The Deploy CLI supports creating and deleting NetworkACL keys.
 
-> **Note:** This feature requires the `tenant_acl_hmac_signature` and `tenant_acl_management_api` feature flags plus the `tenant-access-control` entitlement. Contact Auth0 support if the feature is not available on your tenant.
+> **Note:** This feature must be enabled on your tenant. Contact Auth0 support if the feature is not available on your tenant.
 
 NetworkACL keys have the following properties:
 
@@ -1647,7 +1647,7 @@ The deploy CLI supports managing organizations, including their connections, cli
 
 ### Org-to-App Entitlement (`is_app_entitlement_active` / `clients`)
 
-> **Note:** Requires the `org_to_app_entitlement_enabled` feature flag to be enabled on the tenant.
+> **Note:** Requires this feature to be enabled on the tenant.
 
 `is_app_entitlement_active` controls whether org-to-app entitlement is active for an organization. When active, the `clients` array specifies which client applications org members are entitled to use for login.
 
@@ -1863,7 +1863,7 @@ File: `./connection-profiles/Enterprise SSO Profile.json`
 
 ### B2B Integration Configuration on Clients
 
-> **Early Access** — requires the `enterprise_connect_entitled` entitlement on your tenant.
+> **Early Access** — requires this feature to be enabled on your tenant.
 
 The `b2b_integration_configuration` object enables Enterprise Connect functionality on a client. It can be set at **creation time** regardless of `app_type`. Once set, it can be updated via deploy as normal.
 
@@ -1890,7 +1890,7 @@ clients:
 
 ### My Organization Member Management on Clients
 
-> **Early Access** — requires the `my_org_member_management_ea` feature flag on your tenant.
+> **Early Access** — requires this feature to be enabled on your tenant.
 
 Two boolean fields control member management behaviour for the My Organization API. Both are nested under `my_organization_configuration` on the client object.
 
@@ -2536,7 +2536,7 @@ Each client profile is stored as a separate JSON file named after its `name` (e.
 
 Agents are first-class principals that represent an AI agent on the tenant. An agent can be linked to one or more machine-to-machine clients; a client can be linked to only one agent at a time.
 
-> ⚠️ **NOTE:** Agents is a Limited Early Access feature (`agents_as_principals_limited_ea`). The Deploy CLI client needs the `read:agents`, `create:agents`, `update:agents` and `delete:agents` scopes, plus `update:clients` to manage client links. If the feature isn't enabled for the tenant, agents are skipped on export, an empty `agents: []` list is ignored, and an import that configures agents fails.
+> ⚠️ **NOTE:** Agents is a Limited Early Access feature. The Deploy CLI client needs the `read:agents`, `create:agents`, `update:agents` and `delete:agents` scopes, plus `update:clients` to manage client links. If the feature isn't enabled for the tenant, agents are skipped on export, an empty `agents: []` list is ignored, and an import that configures agents fails.
 
 Agents are matched by `name`. Agent names are not unique on the tenant: if several agents share a name, an import that configures that name fails until they are renamed, and directory exports number their file names (for example `my-agent-1.json`). Directory exports also remove files of agents that no longer exist on the tenant. Linked clients are referenced by client `name` and are processed after clients, so a client created in the same import can be linked.
 
@@ -2702,7 +2702,7 @@ Contents of `My API Client.json` (deploy-time, with pem):
 
 ## Token Vault Privileged Access
 
-> **Early Access:** `token_vault_privileged_access` requires the `token_vault_subject_type_jwt_ea_rollout` feature flag to be enabled on the tenant, and writes additionally require the `create:client_token_vault_privileged_access` / `update:client_token_vault_privileged_access` scopes. This field is export-only in the Deploy CLI (see below), so these requirements affect only manual configuration on the tenant, not the CLI.
+> **Early Access:** `token_vault_privileged_access` requires this feature to be enabled on the tenant, and writes additionally require the `create:client_token_vault_privileged_access` / `update:client_token_vault_privileged_access` scopes. This field is export-only in the Deploy CLI (see below), so these requirements affect only manual configuration on the tenant, not the CLI.
 
 The Deploy CLI exports the `token_vault_privileged_access` property on clients, which hardens a privileged Token Vault worker by restricting the caller IPs, connections, and scopes it may use at runtime.
 
@@ -2828,7 +2828,7 @@ For more details, see the [Management API documentation](https://auth0.com/docs/
 
 ## Feature Flags
 
-> **Early Access.** Feature Flags are part of Auth0's Experiment Center and are only available on tenants entitled to the feature (`experiment_center_ea`). On tenants without the entitlement the resource is skipped.
+> **Early Access.** Feature Flags are part of Auth0's Experiment Center and are only available on tenants entitled to the feature. On tenants without the entitlement the resource is skipped.
 
 Feature Flags define the typed, configurable parameters that experiments vary. Each flag declares a set of parameters; experiment variations later override those parameters.
 

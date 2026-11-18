@@ -143,7 +143,7 @@ export const schema = {
       require_consent_non_repudiation: {
         type: 'boolean',
         description:
-          'When true, the authorization server rejects consent decisions that do not include a valid signature and kid. Requires the my_account_consents entitlement.',
+          'When true, the authorization server rejects consent decisions that do not include a valid signature and kid. Requires this feature to be enabled on the tenant.',
       },
       type: {
         type: ['string', 'null'],

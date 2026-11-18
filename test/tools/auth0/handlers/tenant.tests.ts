@@ -211,7 +211,7 @@ describe('#tenant handler', () => {
         ]);
       });
 
-      it('should send false when the tenant has the dynamic_cimd feature flag', async () => {
+      it('should send false when the tenant has the feature enabled', async () => {
         // Flag active: GET defaults the property to false rather than omitting it.
         const { auth0, calls } = buildClient({
           client_id_metadata_document_dynamic_registration_supported: true,
@@ -229,7 +229,7 @@ describe('#tenant handler', () => {
         ]);
       });
 
-      it('should drop false when the tenant lacks the dynamic_cimd feature flag', async () => {
+      it('should drop false when the tenant lacks the feature', async () => {
         // Flag inactive: GET omits the property, and PATCH would return 403 not_entitled.
         const { auth0, calls } = buildClient({ friendly_name: 'Test' });
         // @ts-ignore
