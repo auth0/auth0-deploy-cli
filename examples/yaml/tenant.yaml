@@ -600,6 +600,7 @@ attackProtection:
     mode: count_per_identifier_and_ip
     allowlist: []
     max_attempts: 10
+    form_submission_mode: auto
   suspiciousIpThrottling:
     enabled: true
     shields:
