@@ -1,5 +1,5 @@
 import { Management } from 'auth0';
-import { has, omit, pick } from 'lodash';
+import { has, isEqual, omit, pick } from 'lodash';
 import { Assets, Auth0APIClient, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
 import DefaultAPIHandler from './default';
@@ -141,7 +141,7 @@ const tokenVaultPrivilegedAccessSchema = {
   },
 };
 
-// Shared with client profiles. Requires this feature to be enabled on the tenant.
+// Shared with client profiles. Mirrors the API shape rules for is_allowed, allow_all_scopes and allowed_scopes.
 export const oidcSupportSchema = {
   type: 'object',
   properties: {
@@ -153,6 +153,36 @@ export const oidcSupportSchema = {
     },
   },
   required: ['is_allowed'],
+  if: { properties: { is_allowed: { const: false } } },
+  then: { properties: { allow_all_scopes: false, allowed_scopes: false } },
+  else: {
+    not: {
+      anyOf: [
+        {
+          required: ['allow_all_scopes', 'allowed_scopes'],
+          properties: { allow_all_scopes: { const: true } },
+        },
+        {
+          required: ['allow_all_scopes'],
+          properties: { allow_all_scopes: { const: false } },
+          not: { required: ['allowed_scopes'] },
+        },
+      ],
+    },
+  },
+};
+
+// The API returns a class default when nothing is stored; omit it so an import does not pin it as explicit.
+export const omitDefaultOidcSupport = (client: Client): Client => {
+  if (!client.oidc_support) return client;
+  const strictThirdParty =
+    client.is_first_party === false && client.third_party_security_mode === 'strict';
+  const classDefault = strictThirdParty
+    ? { is_allowed: false }
+    : { is_allowed: true, allow_all_scopes: true };
+  return isEqual(client.oidc_support, classDefault)
+    ? (omit(client, 'oidc_support') as Client)
+    : client;
 };
 
 export const schema = {

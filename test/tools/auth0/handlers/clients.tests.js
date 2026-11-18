@@ -2633,6 +2633,41 @@ describe('#clients handler', () => {
         expect(valid).to.equal(false);
       });
 
+      [
+        ['is_allowed alone', { is_allowed: true }, true],
+        ['an empty allowed_scopes', { is_allowed: true, allowed_scopes: [] }, true],
+        [
+          'allow_all_scopes false with allowed_scopes',
+          { is_allowed: true, allow_all_scopes: false, allowed_scopes: ['email'] },
+          true,
+        ],
+        [
+          'allow_all_scopes false without allowed_scopes',
+          { is_allowed: true, allow_all_scopes: false },
+          false,
+        ],
+        [
+          'allow_all_scopes true with allowed_scopes',
+          { is_allowed: true, allow_all_scopes: true, allowed_scopes: ['email'] },
+          false,
+        ],
+        [
+          'allowed_scopes when is_allowed is false',
+          { is_allowed: false, allowed_scopes: ['email'] },
+          false,
+        ],
+        [
+          'allow_all_scopes when is_allowed is false',
+          { is_allowed: false, allow_all_scopes: false },
+          false,
+        ],
+      ].forEach(([title, value, expected]) => {
+        it(`should ${expected ? 'accept' : 'reject'} ${title}`, () => {
+          const valid = ajv.validate(clients.schema, [{ name: 'c', oidc_support: value }]);
+          expect(valid).to.equal(expected);
+        });
+      });
+
       it('should reject a missing is_allowed', () => {
         const valid = ajv.validate(clients.schema, [
           { name: 'c', oidc_support: { allow_all_scopes: true } },
@@ -2736,6 +2771,82 @@ describe('#clients handler', () => {
       expect(payloads[1]).to.not.have.property('oidc_support');
       expect(payloads[1].description).to.equal('new');
       expect(warnings.some((w) => w.includes('oidc_support'))).to.equal(true);
+    });
+
+    describe('omitDefaultOidcSupport', () => {
+      const allowAll = { is_allowed: true, allow_all_scopes: true };
+
+      it('should drop the allow-all default for a first-party client', () => {
+        const client = { name: 'c', is_first_party: true, oidc_support: allowAll };
+        expect(clients.omitDefaultOidcSupport(client)).to.deep.equal({
+          name: 'c',
+          is_first_party: true,
+        });
+      });
+
+      it('should treat a missing is_first_party as first-party', () => {
+        expect(
+          clients.omitDefaultOidcSupport({ name: 'c', oidc_support: allowAll })
+        ).to.not.have.property('oidc_support');
+      });
+
+      it('should ignore third_party_security_mode on a first-party client', () => {
+        const client = {
+          name: 'c',
+          is_first_party: true,
+          third_party_security_mode: 'strict',
+          oidc_support: allowAll,
+        };
+        expect(clients.omitDefaultOidcSupport(client)).to.not.have.property('oidc_support');
+      });
+
+      it('should drop the allow-all default for a permissive third-party client', () => {
+        const client = { name: 'c', is_first_party: false, oidc_support: allowAll };
+        expect(clients.omitDefaultOidcSupport(client)).to.not.have.property('oidc_support');
+      });
+
+      it('should drop the deny default for a strict third-party client', () => {
+        const client = {
+          name: 'c',
+          is_first_party: false,
+          third_party_security_mode: 'strict',
+          oidc_support: { is_allowed: false },
+        };
+        expect(clients.omitDefaultOidcSupport(client)).to.not.have.property('oidc_support');
+      });
+
+      it('should keep a value that is the default for another class', () => {
+        const strictWithAllowAll = {
+          name: 'c',
+          is_first_party: false,
+          third_party_security_mode: 'strict',
+          oidc_support: allowAll,
+        };
+        const firstPartyDenied = {
+          name: 'c',
+          is_first_party: true,
+          oidc_support: { is_allowed: false },
+        };
+        expect(clients.omitDefaultOidcSupport(strictWithAllowAll)).to.equal(strictWithAllowAll);
+        expect(clients.omitDefaultOidcSupport(firstPartyDenied)).to.equal(firstPartyDenied);
+      });
+
+      it('should keep a non-default value and return clients without oidc_support unchanged', () => {
+        const scoped = {
+          name: 'c',
+          is_first_party: true,
+          oidc_support: { is_allowed: true, allowed_scopes: ['profile'] },
+        };
+        const plain = { name: 'c' };
+        expect(clients.omitDefaultOidcSupport(scoped)).to.equal(scoped);
+        expect(clients.omitDefaultOidcSupport(plain)).to.equal(plain);
+      });
+
+      it('should not mutate the client it is given', () => {
+        const client = { name: 'c', is_first_party: true, oidc_support: allowAll };
+        clients.omitDefaultOidcSupport(client);
+        expect(client.oidc_support).to.deep.equal(allowAll);
+      });
     });
 
     describe('CIMD clients', () => {

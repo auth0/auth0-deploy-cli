@@ -574,6 +574,34 @@ describe('#clientProfiles handler', () => {
         expect(valid).to.equal(false);
       });
 
+      [
+        ['is_allowed alone', { is_allowed: true }, true],
+        [
+          'allow_all_scopes false with allowed_scopes',
+          { is_allowed: true, allow_all_scopes: false, allowed_scopes: ['email'] },
+          true,
+        ],
+        [
+          'allow_all_scopes false without allowed_scopes',
+          { is_allowed: true, allow_all_scopes: false },
+          false,
+        ],
+        [
+          'allow_all_scopes true with allowed_scopes',
+          { is_allowed: true, allow_all_scopes: true, allowed_scopes: ['email'] },
+          false,
+        ],
+        [
+          'allowed_scopes when is_allowed is false',
+          { is_allowed: false, allowed_scopes: ['email'] },
+          false,
+        ],
+      ].forEach(([title, value, expected]) => {
+        it(`should ${expected ? 'accept' : 'reject'} ${title}`, () => {
+          expect(ajv.validate(clientProfiles.schema, [withOidc(value)])).to.equal(expected);
+        });
+      });
+
       it('should reject a missing is_allowed', () => {
         const valid = ajv.validate(clientProfiles.schema, [withOidc({ allow_all_scopes: true })]);
         expect(valid).to.equal(false);
