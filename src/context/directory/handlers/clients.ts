@@ -16,7 +16,7 @@ import {
 import { ParsedAsset } from '../../../types';
 import { DirectoryHandler } from '.';
 import DirectoryContext from '..';
-import { Client } from '../../../tools/auth0/handlers/clients';
+import { Client, omitDefaultOidcSupport } from '../../../tools/auth0/handlers/clients';
 
 type ParsedClients = ParsedAsset<'clients', Client[]>;
 
@@ -161,7 +161,7 @@ async function dump(context: DirectoryContext): Promise<void> {
       }
     }
 
-    dumpJSON(clientFile, clearClientArrays(client));
+    dumpJSON(clientFile, clearClientArrays(omitDefaultOidcSupport(client)));
   });
 }
 

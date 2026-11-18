@@ -1,5 +1,5 @@
 import { Management } from 'auth0';
-import { has, omit, pick } from 'lodash';
+import { has, isEqual, omit, pick } from 'lodash';
 import { Assets, Auth0APIClient, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
 import DefaultAPIHandler from './default';
@@ -7,7 +7,7 @@ import { calculateChanges } from '../../calculateChanges';
 import { getConnectionProfile } from './connectionProfiles';
 import { getUserAttributeProfiles } from './userAttributeProfiles';
 import log from '../../../logger';
-import { shouldExcludeThirdPartyClients } from '../../utils';
+import { shouldExcludeThirdPartyClients, writeSkippingUnavailableOidcSupport } from '../../utils';
 
 const multiResourceRefreshTokenPoliciesSchema = {
   type: ['array', 'null'],
@@ -139,6 +139,50 @@ const tokenVaultPrivilegedAccessSchema = {
       },
     },
   },
+};
+
+// Shared with client profiles. Mirrors the API shape rules for is_allowed, allow_all_scopes and allowed_scopes.
+export const oidcSupportSchema = {
+  type: 'object',
+  properties: {
+    is_allowed: { type: 'boolean' },
+    allow_all_scopes: { type: 'boolean' },
+    allowed_scopes: {
+      type: 'array',
+      items: { type: 'string', enum: ['profile', 'email', 'address', 'phone'] },
+    },
+  },
+  required: ['is_allowed'],
+  if: { properties: { is_allowed: { const: false } } },
+  then: { properties: { allow_all_scopes: false, allowed_scopes: false } },
+  else: {
+    not: {
+      anyOf: [
+        {
+          required: ['allow_all_scopes', 'allowed_scopes'],
+          properties: { allow_all_scopes: { const: true } },
+        },
+        {
+          required: ['allow_all_scopes'],
+          properties: { allow_all_scopes: { const: false } },
+          not: { required: ['allowed_scopes'] },
+        },
+      ],
+    },
+  },
+};
+
+// The API returns a class default when nothing is stored; omit it so an import does not pin it as explicit.
+export const omitDefaultOidcSupport = (client: Client): Client => {
+  if (!client.oidc_support) return client;
+  const strictThirdParty =
+    client.is_first_party === false && client.third_party_security_mode === 'strict';
+  const classDefault = strictThirdParty
+    ? { is_allowed: false }
+    : { is_allowed: true, allow_all_scopes: true };
+  return isEqual(client.oidc_support, classDefault)
+    ? (omit(client, 'oidc_support') as Client)
+    : client;
 };
 
 export const schema = {
@@ -484,6 +528,7 @@ export const schema = {
         description:
           'Indicates the security mode for a Third Party Client, to apply new security semantics and improvements.',
       },
+      oidc_support: oidcSupportSchema,
       redirection_policy: {
         type: 'string',
         enum: ['allow_always', 'open_redirect_protection'],
@@ -1010,7 +1055,12 @@ export default class ClientHandler extends DefaultAPIHandler {
     client: Client
   ): Promise<Management.RegisterCimdClientResponseContent | Client> {
     if (!this.isCimdClient(client)) {
-      return this.client.clients.create(client as Management.CreateClientRequestContent);
+      return writeSkippingUnavailableOidcSupport(
+        client,
+        'oidc_support',
+        `client "${client.name}"`,
+        (payload) => this.client.clients.create(payload as Management.CreateClientRequestContent)
+      );
     }
 
     const externalClientId = client.external_client_id!;
@@ -1039,6 +1089,7 @@ export default class ClientHandler extends DefaultAPIHandler {
       'skip_non_verifiable_callback_uri_confirmation_prompt',
       'jwt_configuration',
       'refresh_token',
+      'oidc_support',
     ]) as Management.UpdateClientRequestContent;
   }
 
@@ -1069,14 +1120,24 @@ export default class ClientHandler extends DefaultAPIHandler {
         }
       }
 
-      return this.client.clients.update(clientId, payload);
+      return writeSkippingUnavailableOidcSupport(
+        payload,
+        'oidc_support',
+        `client "${client.name || clientId}"`,
+        (body) => this.client.clients.update(clientId, body)
+      );
     }
 
     const updatePayload = this.getCIMDEditableFields(client);
     const registrationClientId = client.client_id || clientId;
 
     if (registrationClientId && Object.keys(updatePayload).length > 0) {
-      return this.client.clients.update(registrationClientId, updatePayload);
+      return writeSkippingUnavailableOidcSupport(
+        updatePayload,
+        'oidc_support',
+        `client "${client.name || registrationClientId}"`,
+        (body) => this.client.clients.update(registrationClientId, body)
+      );
     }
 
     return client;

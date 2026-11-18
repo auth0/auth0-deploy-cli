@@ -6,7 +6,7 @@ import { isFile, sanitize, clearClientArrays } from '../../../utils';
 import { YAMLHandler } from '.';
 import YAMLContext from '..';
 import { ParsedAsset } from '../../../types';
-import { Client } from '../../../tools/auth0/handlers/clients';
+import { Client, omitDefaultOidcSupport } from '../../../tools/auth0/handlers/clients';
 
 type ParsedClients = ParsedAsset<'clients', Client[]>;
 
@@ -147,7 +147,7 @@ async function dump(context: YAMLContext): Promise<ParsedClients> {
           }
         }
 
-        return clearClientArrays(client) as Client;
+        return clearClientArrays(omitDefaultOidcSupport(client)) as Client;
       }),
     ],
   };

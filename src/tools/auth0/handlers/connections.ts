@@ -1,5 +1,5 @@
 import dotProp from 'dot-prop';
-import { chunk, keyBy } from 'lodash';
+import { chunk, cloneDeep, keyBy } from 'lodash';
 import { Management, ManagementError } from 'auth0';
 import DefaultAPIHandler, { order } from './default';
 import {
@@ -8,6 +8,8 @@ import {
   getEnabledClients,
   sleep,
   filterIncluded,
+  collectUnresolvedPlaceholders,
+  placeholderKeywordName,
 } from '../../utils';
 import { CalculatedChanges, Asset, Assets, Auth0APIClient } from '../../../types';
 import { ConfigFunction } from '../../../configFactory';
@@ -46,12 +48,18 @@ const connectionOptionsSchema = {
   },
 };
 
-const oidcOktaStrategies = new Set(['oidc', 'okta']);
-const oidcOktaOnlyConnectionOptionFields = [
-  'token_endpoint_auth_signing_alg',
-  'id_token_signed_response_algs',
-  'token_endpoint_jwtca_aud_format',
-  'id_token_session_expiry_supported',
+// Option fields that are only valid for the listed strategies.
+const strategyRestrictedConnectionOptionFields = [
+  {
+    fields: ['id_token_signed_response_algs', 'id_token_session_expiry_supported'],
+    strategies: ['oidc', 'okta'],
+    label: '"oidc" and "okta"',
+  },
+  {
+    fields: ['token_endpoint_auth_signing_alg', 'token_endpoint_jwtca_aud_format'],
+    strategies: ['oidc', 'okta', 'samlp'],
+    label: '"oidc", "okta" and "samlp"',
+  },
 ];
 
 export const schema = {
@@ -219,6 +227,43 @@ export const addExcludedConnectionPropertiesToChanges = ({
     ...proposedChanges,
     update: newProposedUpdates,
   };
+};
+
+// Unresolved options placeholders are stripped before the update, and options is replaced whole, so the stored
+// value would be wiped. Reuse the stored value instead.
+// exported only for unit testing purposes
+export const restoreUnresolvedOptions = (
+  connection: Asset,
+  existingConnections: Asset[] | null,
+  warned: Set<string>
+): Pick<Asset, 'options'> | {} => {
+  const unresolved = collectUnresolvedPlaceholders(connection.options ?? null);
+  if (unresolved.length === 0) return {};
+
+  const storedOptions = existingConnections?.find(
+    (c) => c.name === connection.name && c.strategy === connection.strategy
+  )?.options;
+  if (!storedOptions) return {};
+
+  const restorable = unresolved.filter(({ path }) => dotProp.get(storedOptions, path) != null);
+  if (restorable.length === 0) return {};
+
+  const options = cloneDeep(connection.options);
+  restorable.forEach(({ path, value }) => {
+    dotProp.set(options, path, dotProp.get(storedOptions, path));
+
+    const warnKey = `${connection.strategy}/${connection.name}/${path}`;
+    if (warned.has(warnKey)) return;
+    warned.add(warnKey);
+    log.warn(
+      `Reusing the stored options.${path} for connection "${connection.name}" because ${value} is unresolved. ` +
+        `To set a new value, define ${placeholderKeywordName(
+          value
+        )} in AUTH0_KEYWORD_REPLACE_MAPPINGS.`
+    );
+  });
+
+  return { options };
 };
 
 /**
@@ -426,6 +471,9 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
   // tenants. Null on export, where every connection is enriched.
   private enabledClientsEnrichmentFilter: Set<string> | null = null;
 
+  // Options fields already warned about by restoreUnresolvedOptions, so a preview + apply run warns once.
+  private warnedRestoredOptions = new Set<string>();
+
   constructor(config: DefaultAPIHandler) {
     super({
       ...config,
@@ -482,21 +530,22 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
       if (!connection?.options) return;
 
       const strategy = connection?.strategy ?? 'unknown';
-      if (oidcOktaStrategies.has(strategy)) return;
 
-      const unsupportedFields = oidcOktaOnlyConnectionOptionFields.filter(
-        (field) => field in connection.options
-      );
+      const errors: string[] = [];
+      for (const { fields, strategies, label } of strategyRestrictedConnectionOptionFields) {
+        if (strategies.includes(strategy)) continue;
 
-      if (unsupportedFields.length > 0) {
-        throw new ValidationError(
+        const unsupportedFields = fields.filter((field) => field in connection.options);
+        if (unsupportedFields.length === 0) continue;
+
+        errors.push(
           `Connection "${connection.name}": option(s) ${unsupportedFields
             .map((field) => `"${field}"`)
-            .join(
-              ', '
-            )} are only supported for strategies "oidc" and "okta". Found strategy "${strategy}".`
+            .join(', ')} are only supported for strategies ${label}. Found strategy "${strategy}".`
         );
       }
+
+      if (errors.length > 0) throw new ValidationError(errors.join(' '));
     });
 
     await super.validate(assets);
@@ -872,18 +921,8 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
     return this.existing;
   }
 
-  async calcChanges(assets: Assets): Promise<CalculatedChanges> {
-    const { connections } = assets;
-
-    // Do nothing if not set
-    if (!connections)
-      return {
-        del: [],
-        create: [],
-        update: [],
-        conflicts: [],
-      };
-
+  // Shared by calcChanges and dryRunChanges so the real import and the preview send the same payload.
+  private async formatConnections(assets: Assets, connections: Asset[]) {
     // Scope getType() enrichment to the local config (see getType()).
     this.setEnabledClientsEnrichmentFilter(connections);
 
@@ -915,12 +954,34 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
         managedClients
       );
 
-      return {
+      const withOptions = {
         ...connection,
         ...this.getFormattedOptions(connection, managedClients),
+      };
+
+      return {
+        ...withOptions,
+        ...restoreUnresolvedOptions(withOptions, existingConnections, this.warnedRestoredOptions),
         ...(enabledClients !== undefined && { enabled_clients: enabledClients }),
       };
     });
+
+    return { existingConnections, formatted };
+  }
+
+  async calcChanges(assets: Assets): Promise<CalculatedChanges> {
+    const { connections } = assets;
+
+    // Do nothing if not set
+    if (!connections)
+      return {
+        del: [],
+        create: [],
+        update: [],
+        conflicts: [],
+      };
+
+    const { existingConnections, formatted } = await this.formatConnections(assets, connections);
 
     const proposedChanges = await super.calcChanges({ ...assets, connections: formatted });
 
@@ -945,41 +1006,7 @@ export default class ConnectionsHandler extends DefaultAPIHandler {
       };
     }
 
-    // Scope getType() enrichment to the local config (see getType()).
-    this.setEnabledClientsEnrichmentFilter(connections);
-
-    const clients = await paginate<Client>(this.client.clients.list, {
-      paginate: true,
-      include_totals: true,
-    });
-
-    const existingConnections = await paginate<Connection>(this.client.connections.list, {
-      checkpoint: true,
-      include_totals: true,
-    });
-
-    await this.scimHandler.createIdMap(existingConnections);
-
-    // Dynamic CIMD clients are not managed by deploy-cli, so names must not resolve to them.
-    const managedClients = excludeDynamicCimdClients(clients);
-
-    // connections.list omits enabled_clients; getType() enriches them so excluded clients stay enabled.
-    const existingWithEnabledClients = (await this.getType()) ?? [];
-
-    const formatted = connections.map((connection) => {
-      const enabledClients = getEnabledClients(
-        assets,
-        connection,
-        existingWithEnabledClients,
-        managedClients
-      );
-
-      return {
-        ...connection,
-        ...this.getFormattedOptions(connection, managedClients),
-        ...(enabledClients !== undefined && { enabled_clients: enabledClients }),
-      };
-    });
+    const { existingConnections, formatted } = await this.formatConnections(assets, connections);
 
     let proposedChanges = await super.dryRunChanges({ ...assets, connections: formatted });
 

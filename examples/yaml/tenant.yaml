@@ -600,6 +600,7 @@ attackProtection:
     mode: count_per_identifier_and_ip
     allowlist: []
     max_attempts: 10
+    form_submission_mode: auto
   suspiciousIpThrottling:
     enabled: true
     shields:
@@ -672,6 +673,30 @@ agents:
       - "My M2M"
     metadata:
       team: "support"
+
+portals:
+  - slug: "support"
+    name: "Support Portal"
+    client:
+      token_endpoint_auth_method: "client_secret_post"
+      client_id: "My SPA"
+      client_secret: "##PORTAL_CLIENT_SECRET##"
+    navigation:
+      sidebar:
+        components:
+          - type: "sidebar:component:auth0:external_link:v2"
+            config:
+              label: "Documentation"
+              href: "https://example.com/docs"
+    pages:
+      default: "home"
+      standard:
+        - title: "Home"
+          slug: "home"
+          components:
+            - type: "page:component:auth0:typography:heading"
+              config:
+                title: "Welcome"
 
 userAttributeProfiles:
   - name: "My User Attribute Profile"

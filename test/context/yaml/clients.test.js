@@ -489,4 +489,36 @@ describe('#YAML context clients', () => {
 
     expect(context.assets.clients).to.deep.equal(target);
   });
+
+  it('should leave the default oidc_support out of the dump and keep a non-default value', async () => {
+    const context = new Context({ AUTH0_INPUT_FILE: './test.yml' }, mockMgmtClient());
+
+    context.assets.clients = [
+      {
+        name: 'defaultClient',
+        is_first_party: true,
+        oidc_support: { is_allowed: true, allow_all_scopes: true },
+      },
+      {
+        name: 'strictDefaultClient',
+        is_first_party: false,
+        third_party_security_mode: 'strict',
+        oidc_support: { is_allowed: false },
+      },
+      {
+        name: 'scopedClient',
+        is_first_party: true,
+        oidc_support: { is_allowed: true, allowed_scopes: ['profile'] },
+      },
+    ];
+
+    const dumped = await handler.dump(context);
+
+    expect(dumped.clients[0]).to.not.have.property('oidc_support');
+    expect(dumped.clients[1]).to.not.have.property('oidc_support');
+    expect(dumped.clients[2].oidc_support).to.deep.equal({
+      is_allowed: true,
+      allowed_scopes: ['profile'],
+    });
+  });
 });

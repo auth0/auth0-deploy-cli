@@ -4,6 +4,8 @@ import DefaultAPIHandler from './default';
 import { paginate } from '../client';
 import { getObjectDifferences } from '../../calculateDryRunChanges';
 import log from '../../../logger';
+import { writeSkippingUnavailableOidcSupport } from '../../utils';
+import { oidcSupportSchema } from './clients';
 
 // The Management API allows at most one client profile per tenant (create returns 403 otherwise)
 export const MAX_CLIENT_PROFILES_PER_TENANT = 1;
@@ -53,6 +55,7 @@ export const schema = {
             },
           }),
           require_proof_of_possession: defaultValueSchema({ type: 'boolean' }),
+          oidc_support: defaultValueSchema(oidcSupportSchema),
         },
       },
       apply_policy: {
@@ -73,6 +76,8 @@ export const schema = {
     required: ['name', 'client_configuration', 'apply_policy'],
   },
 };
+
+const OIDC_SUPPORT_PATH = 'client_configuration.oidc_support';
 
 export type ClientProfile = Management.ClientProfile;
 
@@ -111,6 +116,22 @@ export default class ClientProfilesHandler extends DefaultAPIHandler {
       identifiers: ['id', 'name'],
       stripCreateFields: ['created_at', 'updated_at'],
       stripUpdateFields: ['created_at', 'updated_at'],
+      functions: {
+        create: (profile) =>
+          writeSkippingUnavailableOidcSupport(
+            profile,
+            OIDC_SUPPORT_PATH,
+            `client profile "${profile.name}"`,
+            (payload) => this.client.clientProfiles.create(payload)
+          ),
+        update: (id, profile) =>
+          writeSkippingUnavailableOidcSupport(
+            profile,
+            OIDC_SUPPORT_PATH,
+            `client profile "${profile.name}"`,
+            (payload) => this.client.clientProfiles.update(id, payload)
+          ),
+      },
     });
   }
 

@@ -361,9 +361,19 @@ connections:
 
 > **Early Access:** Requires the `token_vault_xaa` feature flag to be enabled on the tenant.
 
-For enterprise connections with strategy `oidc` or `okta`, the Deploy CLI supports configuring the connection as a Requesting Application for Cross App Access via the top-level `cross_app_access_requesting_app` field:
+For enterprise connections with strategy `oidc`, `okta` or `samlp`, the Deploy CLI supports configuring the connection as a Requesting Application for Cross App Access via the top-level `cross_app_access_requesting_app` field:
 
 - `cross_app_access_requesting_app.active` (boolean): Set to `true` to enable the connection as a Requesting Application for Cross App Access. Defaults to `true`.
+
+**SAML (`samlp`) connections**
+
+For `samlp`, the IdP token endpoint is configured through these `options` fields (all optional, shared with OIDC/Okta): `client_id`, `client_secret`, `discovery_url`, `oidc_metadata`, `token_endpoint_auth_method` (`client_secret_post` or `private_key_jwt`), `token_endpoint_auth_signing_alg` and `token_endpoint_jwtca_aud_format` (`issuer` or `token_endpoint`).
+
+- `active: true` and `token_endpoint_auth_method: private_key_jwt` need the Cross App Access SAML feature enabled on the tenant; the Management API returns `400 operation_not_supported` otherwise.
+- If the feature is later disabled on the tenant, the API stops returning `cross_app_access_requesting_app` on export, and an import that still sends `active: true` for that connection fails with the same `400`.
+- Activating the requesting app also needs `options.oidc_metadata.token_endpoint`, either set directly or populated from `discovery_url`; the Management API returns `400 operation_not_supported` without it.
+- `client_secret` is exported as the placeholder `##CONNECTIONS_SAMLP_SECRET##`. On import, set the real value with `AUTH0_KEYWORD_REPLACE_MAPPINGS` (`{"CONNECTIONS_SAMLP_SECRET": "<secret>"}`). The placeholder is shared by every `samlp` connection, so a mapping sets the same secret on all of them. If it is left unresolved, the secret already stored on each connection is kept and a warning is logged. Send `client_secret: ""` or `null` to clear it. `AUTH0_EXPORT_SECRETS: true` exports the real values instead.
+- Sending `active: false` on a connection that is currently active turns the role off. Omitting `cross_app_access_requesting_app` leaves it unchanged.
 
 **YAML Example**
 
@@ -487,6 +497,50 @@ clients:
 }
 ```
 
+## Clients (OIDC support)
+
+The Deploy CLI supports the `oidc_support` property on clients, which controls whether a client may use OpenID Connect flows and which optional profile scopes it may request. It is mainly used to opt strict third-party clients in to OIDC.
+
+> ⚠️ **NOTE:** This feature must be enabled on the tenant. The property is only available on OIDC-conformant clients (`oidc_conformant: true`). If the feature isn't enabled for the tenant, the Deploy CLI skips `oidc_support` for that client, logs a warning, and applies the rest of the client's configuration.
+
+- `oidc_support.is_allowed` (boolean, required): Whether the client may use OIDC.
+- `oidc_support.allowed_scopes` (array): Optional scopes the client may request: `profile`, `email`, `address`, `phone`. `openid` is implied by `is_allowed: true` and is not a valid entry.
+- `oidc_support.allow_all_scopes` (boolean): Allows all of the optional scopes above.
+
+When `is_allowed` is `true`, `is_allowed` on its own allows OIDC with no optional scopes. `allow_all_scopes: true` cannot be combined with `allowed_scopes`, and `allow_all_scopes: false` requires `allowed_scopes`. When `is_allowed` is `false`, set neither. `oidc_support` is replaced as a whole on update, so always provide the complete value. It cannot be cleared from config; set it to the value you want.
+
+For [CIMD clients](#clients-client-id-metadata-document), `oidc_support` is applied when the client is updated. The first deploy only registers the client, so deploy again to apply it.
+
+On a tenant without the feature, `--dry-run` still lists a client that sets `oidc_support` as an update, because the field is only skipped when the import writes it.
+
+**Export behavior:** a client that has no stored value is returned by the Management API with a default (`{ is_allowed: false }` for strict third-party clients, otherwise `{ is_allowed: true, allow_all_scopes: true }`). Exports leave `oidc_support` out when it equals that default, so only values that differ from it are written. A client with no `oidc_support` in the config keeps whatever the tenant has.
+
+**YAML Example**
+
+```yaml
+clients:
+  - name: My Third-Party Application
+    oidc_conformant: true
+    oidc_support:
+      is_allowed: true
+      allowed_scopes:
+        - profile
+        - email
+```
+
+**Directory Example**
+
+```json
+{
+  "name": "My Third-Party Application",
+  "oidc_conformant": true,
+  "oidc_support": {
+    "is_allowed": true,
+    "allowed_scopes": ["profile", "email"]
+  }
+}
+```
+
 ## Databases
 
 When managing database connections, the values of `options.customScripts` point to specific javascript files relative to
@@ -559,7 +613,7 @@ Contents of `database.json`
 
 ### Passkey signup behavior — `authentication_methods.passkey.signup_behavior`
 
-> **Early Availability:** requires the `connection_passkey_auth_signup_behavior` feature flag on your tenant. Without it, the Management API rejects any create or update that includes `signup_behavior` with a 400 (`Passkey signup_behavior is not enabled for this tenant`) and does not return the property. Remove `signup_behavior` from configs exported from a flagged tenant before importing them into a tenant without the flag; `--dry-run` cannot detect this.
+> **Early Availability:** requires the `connection_passkey_auth_signup_behavior` feature flag on your tenant. Without it, the Management API rejects any create or update that includes `passkey.signup_behavior` with a 400 (`Passkey signup_behavior is not enabled for this tenant`) and does not return the property. Remove `passkey.signup_behavior` from configs exported from a flagged tenant before importing them into a tenant without the flag; `--dry-run` cannot detect this. `password.signup_behavior` is a separate setting and is not affected by the flag.
 
 `options.authentication_methods.passkey.signup_behavior` controls whether the passkey enrollment prompt is shown during signup. Allowed values are `allow` and `block`. Setting it to `allow` on a connection that is not passkey-ready (for example, one with `requires_username: true`) fails with a 400 from the Management API.
 
@@ -2407,6 +2461,7 @@ Client profiles are matched by `name`. Renaming a profile replaces it (delete, t
 | `client_configuration.organization_require_behavior`     | `object`         | No       | `{ default_value: "no_prompt" \| "pre_login_prompt" \| "post_login_prompt" }`: organization prompt behavior.                                                          |
 | `client_configuration.organization_discovery_methods`    | `object`         | No       | `{ default_value: ("email" \| "organization_name")[] }`: how the organization is discovered. Only allowed when `organization_require_behavior` is `pre_login_prompt`. |
 | `client_configuration.require_proof_of_possession`       | `object`         | No       | `{ default_value: boolean }`: when `true`, governed clients must provide a DPoP proof.                                                                                |
+| `client_configuration.oidc_support`                      | `object`         | No       | `{ default_value: {...} }`: OIDC support for governed clients. See [Clients (OIDC support)](#clients-oidc-support).                                                   |
 | `apply_policy.external_metadata_type`                    | `string`         | Yes      | Registration type to match. Currently only `cimd`.                                                                                                                    |
 | `apply_policy.external_metadata_created_by`              | `string`         | Yes      | How the client was registered. Currently only `client`.                                                                                                               |
 
@@ -2435,6 +2490,12 @@ clientProfiles:
           - organization_name
       require_proof_of_possession:
         default_value: true
+      oidc_support:
+        default_value:
+          is_allowed: true
+          allowed_scopes:
+            - profile
+            - email
     apply_policy:
       external_metadata_type: cimd
       external_metadata_created_by: client
@@ -2459,7 +2520,10 @@ Each client profile is stored as a separate JSON file named after its `name` (e.
     "organization_usage": { "default_value": "allow" },
     "organization_require_behavior": { "default_value": "pre_login_prompt" },
     "organization_discovery_methods": { "default_value": ["email", "organization_name"] },
-    "require_proof_of_possession": { "default_value": true }
+    "require_proof_of_possession": { "default_value": true },
+    "oidc_support": {
+      "default_value": { "is_allowed": true, "allowed_scopes": ["profile", "email"] }
+    }
   },
   "apply_policy": {
     "external_metadata_type": "cimd",
@@ -2987,5 +3051,116 @@ Each experiment is stored as a separate JSON file named after the experiment (e.
     { "variation_name": "control", "is_control": true, "weight": 50 },
     { "variation_name": "variant-a", "is_control": false, "weight": 50 }
   ]
+}
+```
+
+## Portals
+
+> **Early Access.** Universal Portals is an Early Access feature that must be enabled on the tenant. The Deploy CLI client needs the `read:portals`, `create:portals`, `update:portals` and `delete:portals` scopes. If the feature isn't enabled for the tenant, portals are skipped on export, and an import that configures portals skips them with a warning.
+
+A portal is a customer-facing self-service site made of a sidebar, pages and page components, signed in through an OAuth client.
+
+Notes and guardrails:
+
+- **Portals are matched by `slug`.** The slug is unique per tenant. The `name` is not unique, so two portals may share a name. Changing the slug of a portal in the configuration creates a new portal; the old one is only deleted with `AUTH0_ALLOW_DELETE=true`. Directory exports name each file after the slug.
+- **`client.client_secret` is write-only.** The API never returns it, so it is never exported and has to be added to the configuration, for example with a `##KEYWORD##` mapping. It is required to create a portal: an import that creates a portal without it fails during validation, before any resource is written, and so does the dry run. A `##KEYWORD##` with no mapping counts as missing. When updating, the `client` block is only sent if `client.client_secret` is configured, so an export can be re-imported into the same tenant unchanged. A configured secret is sent on every import and cannot be compared with the tenant's, so the dry run lists that portal as an update. An export does not keep the `client_secret` line, even with `AUTH0_PRESERVE_KEYWORDS`, so add it back after re-exporting.
+- **Clearing blocks.** `navigation`, `pages` and `custom_code` left out of the configuration are not changed on the tenant, so a configuration can manage only part of a portal. To clear one, set it empty (for example `navigation:` in YAML or `null` in JSON) with `AUTH0_ALLOW_DELETE=true`; without it the CLI warns and leaves the block unchanged. The dry run previews the clearing as an update, and gives the same warning when deletes are off.
+- **The client application is referenced by name.** `client.client_id` is exported as the application's `name` and resolved to its id on import, so the application can be created in the same import. A value that matches no application is sent as is. Changing the application without supplying `client.client_secret` is not applied; the import and the dry run warn instead.
+- **Forms are referenced by name.** The `form_id` of form components, including those inside sections, is exported as the form's `name` and resolved to its id on import. Forms are processed before portals, so a form created in the same import can be referenced. A value that matches no form is sent as is.
+- **Sidebar components.** Use the `v2` types (`sidebar:component:auth0:external_link:v2` and `sidebar:component:auth0:internal_link:v2`). The deprecated `sidebar:component:auth0:external_link` and `sidebar:component:auth0:internal_link` types are still sent as configured, with a warning in the import and the dry run.
+- `custom_code.head` is only injected when the portal is served from a custom domain.
+- The API lists at most 50 portals without pagination. If the tenant has that many, the CLI warns that portals beyond the first 50 are not exported or managed. Those portals are never updated or deleted. A configured portal whose slug belongs to one of them is previewed as a create, and the import fails with a message saying the portal may exist but is not listed; portal updates in that run are not applied. A directory export at the limit keeps local portal files it cannot match, instead of removing them.
+- `id`, `created_at` and `updated_at` are read-only. They are not exported and are ignored on create and update.
+
+### Schema Properties
+
+| Property      | Type     | Required  | Description                                                                                                                                                                                                                                                 |
+| ------------- | -------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `slug`        | `string` | Yes       | URL slug of the portal. Unique per tenant; used as the matching key.                                                                                                                                                                                        |
+| `name`        | `string` | Yes       | Display name (1–150 characters). Not unique.                                                                                                                                                                                                                |
+| `client`      | `object` | On create | `{ token_endpoint_auth_method: "client_secret_post", client_id, client_secret }`; `token_endpoint_auth_method` and `client_id` are required when `client` is set. `client_id` is the application name. `client_secret` is write-only and is never exported. |
+| `navigation`  | `object` | No        | `{ sidebar: { components: [...] } }`. Each component is `{ type, config }`.                                                                                                                                                                                 |
+| `pages`       | `object` | No        | `{ default: "<page slug>", standard: [{ title, slug, components: [...] }] }`.                                                                                                                                                                               |
+| `custom_code` | `object` | No        | `{ head: "<html>" }` (1–10000 characters), injected into the `<head>` when served from a custom domain.                                                                                                                                                     |
+
+### YAML Example
+
+```yaml
+# Contents of ./tenant.yaml
+portals:
+  - slug: support
+    name: 'Support Portal'
+    client:
+      token_endpoint_auth_method: client_secret_post
+      client_id: 'My App'
+      client_secret: '##PORTAL_CLIENT_SECRET##'
+    navigation:
+      sidebar:
+        components:
+          - type: 'sidebar:component:auth0:external_link:v2'
+            config:
+              label: 'Documentation'
+              href: 'https://example.com/docs'
+          - type: 'sidebar:component:auth0:internal_link:v2'
+            config:
+              label: 'Home'
+              page_slug: 'home'
+    pages:
+      default: home
+      standard:
+        - title: 'Home'
+          slug: home
+          components:
+            - type: 'page:component:auth0:typography:heading'
+              config:
+                title: 'Welcome'
+            - type: 'page:component:auth0:form'
+              config:
+                form_id: 'My Signup Form'
+                completion_message: 'Thanks for signing up'
+    custom_code:
+      head: '<style>body { font-family: sans-serif; }</style>'
+```
+
+### Directory Example
+
+Folder: `./portals/`
+
+Each portal is stored as a separate JSON file named after its slug (e.g. `support.json`):
+
+```json
+{
+  "slug": "support",
+  "name": "Support Portal",
+  "client": {
+    "token_endpoint_auth_method": "client_secret_post",
+    "client_id": "My App",
+    "client_secret": "##PORTAL_CLIENT_SECRET##"
+  },
+  "navigation": {
+    "sidebar": {
+      "components": [
+        {
+          "type": "sidebar:component:auth0:external_link:v2",
+          "config": { "label": "Documentation", "href": "https://example.com/docs" }
+        }
+      ]
+    }
+  },
+  "pages": {
+    "default": "home",
+    "standard": [
+      {
+        "title": "Home",
+        "slug": "home",
+        "components": [
+          {
+            "type": "page:component:auth0:typography:heading",
+            "config": { "title": "Welcome" }
+          }
+        ]
+      }
+    ]
+  }
 }
 ```
