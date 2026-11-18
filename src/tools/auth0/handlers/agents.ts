@@ -113,10 +113,10 @@ export default class AgentsHandler extends DefaultAPIHandler {
     } catch (err) {
       if (isFeatureNotEnabledError(err)) {
         log.debug(
-          'Agents are not enabled for this tenant. Contact Auth0 support to enable the agents_as_principals_limited_ea feature.'
+          'Agents are not enabled for this tenant. Contact Auth0 support to enable the Agents feature.'
         );
         this.agentsUnavailable =
-          'not enabled for this tenant. Contact Auth0 support to enable the agents_as_principals_limited_ea feature';
+          'not enabled for this tenant. Contact Auth0 support to enable the Agents feature';
         return null;
       }
       // Endpoint not available on this tenant or region; skip like other EA handlers so the

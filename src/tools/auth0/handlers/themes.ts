@@ -213,7 +213,7 @@ export const schema = {
       identifiers: {
         additionalProperties: false,
         description:
-          'Identifier display settings on the theme. Requires the `universal_login_theme_identifiers` feature flag to be enabled on the tenant.',
+          'Identifier display settings on the theme. Requires this feature to be enabled on the tenant.',
         properties: {
           login_display: {
             description: 'Login display mode',

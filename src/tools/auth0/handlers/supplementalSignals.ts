@@ -32,9 +32,7 @@ export default class SupplementalSignalsHandler extends DefaultHandler {
       return supplementalSignals;
     } catch (err) {
       if (err instanceof ManagementError && err.statusCode === 403) {
-        log.debug(
-          'Supplemental Signals unavailable: insufficient scope or missing attack_protection entitlement.'
-        );
+        log.debug('Supplemental Signals unavailable: insufficient scope or missing entitlement.');
         return null;
       }
       throw err;
@@ -56,9 +54,7 @@ export default class SupplementalSignalsHandler extends DefaultHandler {
         this.didUpdate(supplementalSignals);
       } catch (err) {
         if (err instanceof ManagementError && err.statusCode === 403) {
-          log.debug(
-            'Supplemental Signals unavailable: insufficient scope or missing attack_protection entitlement.'
-          );
+          log.debug('Supplemental Signals unavailable: insufficient scope or missing entitlement.');
           return;
         }
         throw err;
