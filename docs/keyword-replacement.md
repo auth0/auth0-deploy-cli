@@ -45,6 +45,10 @@ clients:
 }
 ```
 
+### Keywords without a mapping
+
+If a keyword has no entry in `AUTH0_KEYWORD_REPLACE_MAPPINGS`, the field is left out of the request and a warning is logged. For connections, Auth0 replaces `options` as a whole on update, so for an unresolved keyword under `options` the value already stored on the connection with the same name and strategy is reused instead.
+
 ## Array Concatenation
 
 You may encounter situations where you would want to concatenate values onto a static array through keyword replacement. There is no special syntax to support this case, however, it is possible to achieve this by escaping double quotes in a single string that contains the appropriate values and injecting with the `##` keyword syntax. This technique works for both the [YAML and directory formats](./available-resource-config-formats.md).
