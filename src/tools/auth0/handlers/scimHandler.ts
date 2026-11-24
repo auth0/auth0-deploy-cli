@@ -96,36 +96,46 @@ export default class ScimHandler {
       this.isScimStrategy(connection.strategy)
     );
 
+    const [probe, ...rest] = scimConnections;
+    if (!probe) return;
+
+    // Look up one connection outside the pool first. A 403 clears the read scope, but
+    // tasks already queued would each still burn a throttle slot before noticing.
+    await this.loadScimConfiguration(probe);
+    if (!this.scimScopes.read) return;
+
     await this.poolClient
       .addEachTask({
-        data: scimConnections,
-        generator: (connection) => {
-          if (!this.scimScopes.read) return Promise.resolve(null);
-
-          this.idMap.set(connection.id, { strategy: connection.strategy });
-          return this.getScimConfiguration(connection.id)
-            .then((response) => {
-              const scimConfiguration = response;
-              if (scimConfiguration) {
-                // eslint-disable-next-line camelcase
-                const { mapping, user_id_attribute, connection_id } = scimConfiguration;
-                // eslint-disable-next-line camelcase
-                if (connection_id) {
-                  this.idMap.set(connection_id, {
-                    ...this.idMap.get(connection_id)!,
-                    scimConfiguration: { mapping, user_id_attribute },
-                  });
-                }
-              }
-            })
-            .catch((error) => {
-              throw new Error(
-                `Problem fetching SCIM configurations while running \"createIdMap\".\n${error}`
-              );
-            });
-        },
+        data: rest,
+        // Returning undefined ends the task, so a 403 mid-pool stops spending rate-limit slots.
+        generator: (connection) =>
+          this.scimScopes.read ? this.loadScimConfiguration(connection) : undefined,
       })
       .promise();
+  }
+
+  private loadScimConfiguration(connection: Asset): Promise<void> {
+    this.idMap.set(connection.id, { strategy: connection.strategy });
+    return this.getScimConfiguration(connection.id)
+      .then((response) => {
+        const scimConfiguration = response;
+        if (scimConfiguration) {
+          // eslint-disable-next-line camelcase
+          const { mapping, user_id_attribute, connection_id } = scimConfiguration;
+          // eslint-disable-next-line camelcase
+          if (connection_id) {
+            this.idMap.set(connection_id, {
+              ...this.idMap.get(connection_id)!,
+              scimConfiguration: { mapping, user_id_attribute },
+            });
+          }
+        }
+      })
+      .catch((error) => {
+        throw new Error(
+          `Problem fetching SCIM configurations while running \"createIdMap\".\n${error}`
+        );
+      });
   }
 
   /**

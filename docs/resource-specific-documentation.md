@@ -359,11 +359,21 @@ connections:
 
 ## Connections (Cross App Access — Requesting Application)
 
-> **Early Access:** Requires the `token_vault_xaa` feature flag to be enabled on the tenant.
+> **Early Access:** Requires this feature to be enabled on the tenant.
 
-For enterprise connections with strategy `oidc` or `okta`, the Deploy CLI supports configuring the connection as a Requesting Application for Cross App Access via the top-level `cross_app_access_requesting_app` field:
+For enterprise connections with strategy `oidc`, `okta` or `samlp`, the Deploy CLI supports configuring the connection as a Requesting Application for Cross App Access via the top-level `cross_app_access_requesting_app` field:
 
 - `cross_app_access_requesting_app.active` (boolean): Set to `true` to enable the connection as a Requesting Application for Cross App Access. Defaults to `true`.
+
+**SAML (`samlp`) connections**
+
+For `samlp`, the IdP token endpoint is configured through these `options` fields (all optional, shared with OIDC/Okta): `client_id`, `client_secret`, `discovery_url`, `oidc_metadata`, `token_endpoint_auth_method` (`client_secret_post` or `private_key_jwt`), `token_endpoint_auth_signing_alg` and `token_endpoint_jwtca_aud_format` (`issuer` or `token_endpoint`).
+
+- `active: true` and `token_endpoint_auth_method: private_key_jwt` need the Cross App Access SAML feature enabled on the tenant; the Management API returns `400 operation_not_supported` otherwise.
+- If the feature is later disabled on the tenant, the API stops returning `cross_app_access_requesting_app` on export, and an import that still sends `active: true` for that connection fails with the same `400`.
+- Activating the requesting app also needs `options.oidc_metadata.token_endpoint`, either set directly or populated from `discovery_url`; the Management API returns `400 operation_not_supported` without it.
+- `client_secret` is exported as the placeholder `##CONNECTIONS_SAMLP_SECRET##`. On import, set the real value with `AUTH0_KEYWORD_REPLACE_MAPPINGS` (`{"CONNECTIONS_SAMLP_SECRET": "<secret>"}`). The placeholder is shared by every `samlp` connection, so a mapping sets the same secret on all of them. If it is left unresolved, the secret already stored on each connection is kept and a warning is logged. Send `client_secret: ""` or `null` to clear it. `AUTH0_EXPORT_SECRETS: true` exports the real values instead.
+- Sending `active: false` on a connection that is currently active turns the role off. Omitting `cross_app_access_requesting_app` leaves it unchanged.
 
 **YAML Example**
 
@@ -487,6 +497,50 @@ clients:
 }
 ```
 
+## Clients (OIDC support)
+
+The Deploy CLI supports the `oidc_support` property on clients, which controls whether a client may use OpenID Connect flows and which optional profile scopes it may request. It is mainly used to opt strict third-party clients in to OIDC.
+
+> ⚠️ **NOTE:** This feature must be enabled on the tenant. The property is only available on OIDC-conformant clients (`oidc_conformant: true`). If the feature isn't enabled for the tenant, the Deploy CLI skips `oidc_support` for that client, logs a warning, and applies the rest of the client's configuration.
+
+- `oidc_support.is_allowed` (boolean, required): Whether the client may use OIDC.
+- `oidc_support.allowed_scopes` (array): Optional scopes the client may request: `profile`, `email`, `address`, `phone`. `openid` is implied by `is_allowed: true` and is not a valid entry.
+- `oidc_support.allow_all_scopes` (boolean): Allows all of the optional scopes above.
+
+When `is_allowed` is `true`, `is_allowed` on its own allows OIDC with no optional scopes. `allow_all_scopes: true` cannot be combined with `allowed_scopes`, and `allow_all_scopes: false` requires `allowed_scopes`. When `is_allowed` is `false`, set neither. `oidc_support` is replaced as a whole on update, so always provide the complete value. It cannot be cleared from config; set it to the value you want.
+
+For [CIMD clients](#clients-client-id-metadata-document), `oidc_support` is applied when the client is updated. The first deploy only registers the client, so deploy again to apply it.
+
+On a tenant without the feature, `--dry-run` still lists a client that sets `oidc_support` as an update, because the field is only skipped when the import writes it.
+
+**Export behavior:** a client that has no stored value is returned by the Management API with a default (`{ is_allowed: false }` for strict third-party clients, otherwise `{ is_allowed: true, allow_all_scopes: true }`). Exports leave `oidc_support` out when it equals that default, so only values that differ from it are written. A client with no `oidc_support` in the config keeps whatever the tenant has.
+
+**YAML Example**
+
+```yaml
+clients:
+  - name: My Third-Party Application
+    oidc_conformant: true
+    oidc_support:
+      is_allowed: true
+      allowed_scopes:
+        - profile
+        - email
+```
+
+**Directory Example**
+
+```json
+{
+  "name": "My Third-Party Application",
+  "oidc_conformant": true,
+  "oidc_support": {
+    "is_allowed": true,
+    "allowed_scopes": ["profile", "email"]
+  }
+}
+```
+
 ## Databases
 
 When managing database connections, the values of `options.customScripts` point to specific javascript files relative to
@@ -557,6 +611,45 @@ Contents of `database.json`
 }
 ```
 
+### Passkey signup behavior — `authentication_methods.passkey.signup_behavior`
+
+> **Early Availability:** requires this feature to be enabled on your tenant. Without it, the Management API rejects any create or update that includes `passkey.signup_behavior` with a 400 (`Passkey signup_behavior is not enabled for this tenant`) and does not return the property. Remove `passkey.signup_behavior` from configs exported from a tenant with the feature enabled before importing them into a tenant without it; `--dry-run` cannot detect this. `password.signup_behavior` is a separate setting and is not affected.
+
+`options.authentication_methods.passkey.signup_behavior` controls whether the passkey enrollment prompt is shown during signup. Allowed values are `allow` and `block`. Setting it to `allow` on a connection that is not passkey-ready (for example, one with `requires_username: true`) fails with a 400 from the Management API.
+
+If `signup_behavior` is omitted from a `passkey` block, Auth0 currently sets it to `allow` when `passkey.enabled` is `true` and `block` otherwise (observed during Early Availability; may change). Set it explicitly to keep the value stable across deploys.
+
+When `authentication_methods` is present in your config, it is sent as a whole object on update, so include every method you want to keep (for example `password`) alongside `passkey`. Any setting left out is reset to its Auth0 default. When `authentication_methods` is omitted from the config entirely, the existing tenant value is preserved.
+
+**YAML Example**
+
+```yaml
+databases:
+  - name: Username-Password-Authentication
+    options:
+      authentication_methods:
+        password:
+          enabled: true
+        passkey:
+          enabled: true
+          signup_behavior: allow
+```
+
+**Directory Example**
+
+Contents of `database.json`
+
+```json
+{
+  "options": {
+    "authentication_methods": {
+      "password": { "enabled": true },
+      "passkey": { "enabled": true, "signup_behavior": "allow" }
+    }
+  }
+}
+```
+
 ## Resource Servers
 
 Resource servers (APIs) configuration supports the Management API payload schema. The following fields are supported:
@@ -589,7 +682,7 @@ resourceServers:
 
 ### Auth0 My Account API — `authorization_policy`
 
-The `authorization_policy` field can be set on the **Auth0 My Account API** resource server (the system resource server with identifier `https://<tenant-domain>/me/`) when the `acr` feature flag is enabled on the tenant. It specifies an Authentication Context Class Reference (ACR) policy that controls the authentication assurance requirements for access tokens issued to that API.
+The `authorization_policy` field can be set on the **Auth0 My Account API** resource server (the system resource server with identifier `https://<tenant-domain>/me/`) when this feature is enabled on the tenant. It specifies an Authentication Context Class Reference (ACR) policy that controls the authentication assurance requirements for access tokens issued to that API.
 
 **YAML Example**
 
@@ -622,18 +715,18 @@ resourceServers:
 }
 ```
 
-> **Note:** `authorization_policy` is only accepted by the Auth0 API for the My Account resource server and only when the `acr` feature flag is enabled on the tenant.
+> **Note:** `authorization_policy` is only accepted by the Auth0 API for the My Account resource server and only when this feature is enabled on the tenant.
 
-### Auth0 My Account API — `require_consent_non_repudiation`
+### Consent Non-repudiation — `require_consent_non_repudiation`
 
-The `require_consent_non_repudiation` field is a boolean that can be set on the **Auth0 My Account API** resource server (the system resource server with identifier `https://<tenant-domain>/me/`) when the `my_account_consents` entitlement is enabled on the tenant. When `true`, the authorization server rejects consent decisions that do not include a valid signature and `kid`, so the approver cannot later deny a consent they granted. Defaults to `false`.
+The `require_consent_non_repudiation` field is a boolean that can be set on your own resource servers (the APIs that rich authorization requests are made for) when this feature is enabled on the tenant. When `true`, the authorization server rejects consent decisions that do not include a valid signature and `kid`, so the approver cannot later deny a consent they granted. Defaults to `false`.
 
 **YAML Example**
 
 ```yaml
 resourceServers:
-  - name: Auth0 My Account API
-    identifier: https://your-tenant.auth0.com/me/
+  - name: My API
+    identifier: https://api.example.com
     require_consent_non_repudiation: true
 ```
 
@@ -641,13 +734,62 @@ resourceServers:
 
 ```json
 {
-  "name": "Auth0 My Account API",
-  "identifier": "https://your-tenant.auth0.com/me/",
+  "name": "My API",
+  "identifier": "https://api.example.com",
   "require_consent_non_repudiation": true
 }
 ```
 
-> **Note:** `require_consent_non_repudiation` requires the `my_account_consents` entitlement to be enabled on the tenant.
+> **Note:** `require_consent_non_repudiation` requires this feature to be enabled on the tenant. It is currently not accepted on the system **Auth0 My Account API** resource server.
+
+### Universal Commerce Protocol (UCP) — `type`
+
+> **Early Access.** Requires this feature to be enabled on the tenant.
+
+The `type` field declares a resource server as a Universal Commerce Protocol server. The only accepted value is `universal_commerce_protocol_server`. Doing so marks the API for UCP billing and merges its scopes into `scopes_supported` in the tenant's discovery metadata (`/.well-known/oauth-authorization-server` and `/.well-known/openid-configuration`).
+
+Constraints enforced by the Auth0 API:
+
+- Only **one** resource server per tenant can have `type: universal_commerce_protocol_server`. The Deploy CLI rejects a config with more than one before calling the API.
+- Scopes beginning with `dev.ucp` are reserved for UCP-typed resource servers; any other resource server with one is rejected with `400`.
+- Setting `type` on a tenant that is not enabled for UCP fails with a `403`.
+
+**YAML Example**
+
+```yaml
+resourceServers:
+  - name: Commerce API
+    identifier: https://commerce.example.com
+    type: universal_commerce_protocol_server
+```
+
+To clear the type, set it to `null`. Omitting `type` leaves the existing value unchanged:
+
+```yaml
+resourceServers:
+  - name: Commerce API
+    identifier: https://commerce.example.com
+    type: null
+```
+
+**Directory Example**
+
+```json
+{
+  "name": "Commerce API",
+  "identifier": "https://commerce.example.com",
+  "type": "universal_commerce_protocol_server"
+}
+```
+
+To move the type to another API, set `type: null` on the current holder and the type on the new one in the same config. The Deploy CLI updates the current holder first so the "only one" rule is never violated mid-deploy. If the current holder has `dev.ucp` scopes, also set `scopes: []` on it; omitting `scopes` leaves them in place, and the API rejects the update. The Deploy CLI warns when `type: null` is combined with `dev.ucp` scopes.
+
+The current holder must be released in the same config. The Deploy CLI logs a warning (during `--dry-run` it shows with `AUTH0_DEBUG=true`), and the API returns `409`, when another resource server is given the type but the holder is missing `type: null` (omitting `type` leaves it unchanged), is excluded by name through `AUTH0_EXCLUDED_RESOURCE_SERVERS`, or is removed from the config while `AUTH0_ALLOW_DELETE` is not `true`.
+
+Notes:
+
+- Resource servers that don't hold the type have no `type` property in API responses, so exports are unchanged for them.
+- `type: null` is accepted whether or not the tenant has this feature enabled. Setting `universal_commerce_protocol_server` without the feature enabled fails with `403`.
 
 ### Online Refresh Tokens — `allow_online_access` and `allow_online_access_with_ephemeral_sessions`
 
@@ -655,7 +797,7 @@ The `allow_online_access` field enables issuance of Online Refresh Tokens (ORTs)
 
 `allow_online_access_with_ephemeral_sessions` permits ORT issuance even when the session uses a non-persistent (ephemeral) cookie. This field can only be set to `true` if `allow_online_access` is also `true`.
 
-Both fields default to `false` and require the `online_refresh_tokens` feature flag to be enabled on the tenant.
+Both fields default to `false` and require this feature to be enabled on the tenant.
 
 **YAML Example**
 
@@ -987,7 +1129,7 @@ For `universal_login` template `templates/` will be created.
 
 ## Themes (Identifier display settings)
 
-> **Early Access:** Requires the `universal_login_theme_identifiers` feature flag to be enabled on the tenant. When the flag is off, the Auth0 API rejects a theme write that includes `identifiers` and strips the field from responses.
+> **Early Access:** Requires this feature to be enabled on the tenant. When it is not enabled, the Auth0 API rejects a theme write that includes `identifiers` and strips the field from responses.
 
 The Deploy CLI supports configuring identifier display settings on the branding theme via the top-level `identifiers` object. All three members are required when `identifiers` is supplied:
 
@@ -1042,7 +1184,7 @@ themes:
 
 ## Tenant Settings (Country codes)
 
-> **Early Access:** Requires the `tenant_country_codes_filtering` feature flag to be enabled on the tenant. When the flag is off, the Auth0 API rejects a tenant settings write that includes `country_codes`.
+> **Early Access:** Requires this feature to be enabled on the tenant. When it is not enabled, the Auth0 API rejects a tenant settings write that includes `country_codes`.
 
 The Deploy CLI supports configuring phone country code filtering for identifier input via the top-level `country_codes` object in tenant settings:
 
@@ -1121,13 +1263,13 @@ The Deploy CLI supports configuring Client ID Metadata Document (CIMD) support v
 - `client_id_metadata_document_supported` (boolean): Whether the authorization server supports retrieving client metadata from a `client_id` URL.
 - `client_id_metadata_document_dynamic_registration_supported` (boolean): Whether CIMD clients can be registered dynamically during the authorization flow. Requires `client_id_metadata_document_supported` to be `true`.
 
-> **Early Access:** `client_id_metadata_document_dynamic_registration_supported` requires the `dynamic_cimd` feature flag to be enabled on the tenant. When the flag is off, the Auth0 API omits the setting from exports and rejects any tenant settings write that includes it.
+> **Early Access:** `client_id_metadata_document_dynamic_registration_supported` requires this feature to be enabled on the tenant. When it is not enabled, the Auth0 API omits the setting from exports and rejects any tenant settings write that includes it.
 
 Behavior notes:
 
 - Setting `client_id_metadata_document_dynamic_registration_supported: true` together with `client_id_metadata_document_supported: false` fails validation before any API call is made.
 - If the configuration sets only one of the two, it is checked against the tenant's current value. Enabling dynamic registration while CIMD support is off on the tenant fails with an error before any tenant settings are written. Disabling CIMD support while dynamic registration is on is reported by `--dry-run`; on import, the Auth0 API rejects the tenant settings update. Set both values in the same configuration to change them together.
-- Tenants with the `dynamic_cimd` flag export `client_id_metadata_document_dynamic_registration_supported: false` by default. When importing into a tenant without the flag, a `false` value is dropped automatically so the configuration can be deployed across environments. A `true` value is still sent, and the API's error is reported.
+- Tenants with this feature enabled export `client_id_metadata_document_dynamic_registration_supported: false` by default. When importing into a tenant without it, a `false` value is dropped automatically so the configuration can be deployed across environments. A `true` value is still sent, and the API's error is reported.
 
 **YAML Example**
 
@@ -1185,7 +1327,7 @@ The following fields are read-only and are never sent to the API: `external_meta
 
 ### Dynamically registered CIMD clients
 
-> **Early Access:** Requires the `dynamic_cimd` feature flag.
+> **Early Access:** Requires this feature to be enabled on the tenant.
 
 When `client_id_metadata_document_dynamic_registration_supported` is enabled, CIMD clients can register themselves during the authorization flow. These clients have `external_metadata_created_by: client` and are not managed by the Deploy CLI:
 
@@ -1284,9 +1426,9 @@ NetworkACLs have the following key properties:
   - `scope`: The scope of the rule ('management', 'authentication', or 'tenant')
   - `match`, `not_match`, or `match_all`: Criteria for matching requests
 
-The `match` and `not_match` criteria also support an `auth0_managed` array for matching Auth0-managed IP ranges (e.g. `auth0.icloud_relay_proxy`, `auth0.low_reputation`). Each value must follow the pattern `^auth0\.[^.\s]+$`. This is an Early Access feature gated behind the `tenant_acl_curated_blocklists` feature flag and requires the `advanced-breached-password-detection` entitlement; the API rejects rules using `auth0_managed` with an HTTP 403 if the tenant is not entitled.
+The `match` and `not_match` criteria also support an `auth0_managed` array for matching Auth0-managed IP ranges (e.g. `auth0.icloud_relay_proxy`, `auth0.low_reputation`). Each value must follow the pattern `^auth0\.[^.\s]+$`. This is an Early Access feature that must be enabled on the tenant; the API rejects rules using `auth0_managed` with an HTTP 403 if the tenant is not entitled.
 
-Set `match_all: true` for a rule that unconditionally matches all traffic (e.g. block or allow everything within a scope), with no other signal required. `match_all` is mutually exclusive with `match` and `not_match` — a rule may use only one of the three, and combining them is rejected. Only `true` is valid; omit the property rather than setting it to `false`. `match_all` is gated behind the `tenant_acl_match_all` feature flag, and the API rejects rules using it with an HTTP 400 if the tenant does not have the flag enabled.
+Set `match_all: true` for a rule that unconditionally matches all traffic (e.g. block or allow everything within a scope), with no other signal required. `match_all` is mutually exclusive with `match` and `not_match` — a rule may use only one of the three, and combining them is rejected. Only `true` is valid; omit the property rather than setting it to `false`. `match_all` requires this feature to be enabled on the tenant, and the API rejects rules using it with an HTTP 400 if it is not enabled.
 
 **YAML Example**
 
@@ -1420,7 +1562,7 @@ Contents of `Block All Tenant Traffic-p-99.json`:
 
 Network ACL Keys are HMAC signing keys used for [HTTP message signature verification](https://auth0.com/docs/secure/tenant-access-control-list) in Network ACL rules. Each key has a name, an algorithm (`hmac-sha256`), and a server-computed fingerprint. The Deploy CLI supports creating and deleting NetworkACL keys.
 
-> **Note:** This feature requires the `tenant_acl_hmac_signature` and `tenant_acl_management_api` feature flags plus the `tenant-access-control` entitlement. Contact Auth0 support if the feature is not available on your tenant.
+> **Note:** This feature must be enabled on your tenant. Contact Auth0 support if the feature is not available on your tenant.
 
 NetworkACL keys have the following properties:
 
@@ -1505,7 +1647,7 @@ The deploy CLI supports managing organizations, including their connections, cli
 
 ### Org-to-App Entitlement (`is_app_entitlement_active` / `clients`)
 
-> **Note:** Requires the `org_to_app_entitlement_enabled` feature flag to be enabled on the tenant.
+> **Note:** Requires this feature to be enabled on the tenant.
 
 `is_app_entitlement_active` controls whether org-to-app entitlement is active for an organization. When active, the `clients` array specifies which client applications org members are entitled to use for login.
 
@@ -1721,7 +1863,7 @@ File: `./connection-profiles/Enterprise SSO Profile.json`
 
 ### B2B Integration Configuration on Clients
 
-> **Early Access** — requires the `enterprise_connect_entitled` entitlement on your tenant.
+> **Early Access** — requires this feature to be enabled on your tenant.
 
 The `b2b_integration_configuration` object enables Enterprise Connect functionality on a client. It can be set at **creation time** regardless of `app_type`. Once set, it can be updated via deploy as normal.
 
@@ -1748,7 +1890,7 @@ clients:
 
 ### My Organization Member Management on Clients
 
-> **Early Access** — requires the `my_org_member_management_ea` feature flag on your tenant.
+> **Early Access** — requires this feature to be enabled on your tenant.
 
 Two boolean fields control member management behaviour for the My Organization API. Both are nested under `my_organization_configuration` on the client object.
 
@@ -2319,6 +2461,7 @@ Client profiles are matched by `name`. Renaming a profile replaces it (delete, t
 | `client_configuration.organization_require_behavior`     | `object`         | No       | `{ default_value: "no_prompt" \| "pre_login_prompt" \| "post_login_prompt" }`: organization prompt behavior.                                                          |
 | `client_configuration.organization_discovery_methods`    | `object`         | No       | `{ default_value: ("email" \| "organization_name")[] }`: how the organization is discovered. Only allowed when `organization_require_behavior` is `pre_login_prompt`. |
 | `client_configuration.require_proof_of_possession`       | `object`         | No       | `{ default_value: boolean }`: when `true`, governed clients must provide a DPoP proof.                                                                                |
+| `client_configuration.oidc_support`                      | `object`         | No       | `{ default_value: {...} }`: OIDC support for governed clients. See [Clients (OIDC support)](#clients-oidc-support).                                                   |
 | `apply_policy.external_metadata_type`                    | `string`         | Yes      | Registration type to match. Currently only `cimd`.                                                                                                                    |
 | `apply_policy.external_metadata_created_by`              | `string`         | Yes      | How the client was registered. Currently only `client`.                                                                                                               |
 
@@ -2347,6 +2490,12 @@ clientProfiles:
           - organization_name
       require_proof_of_possession:
         default_value: true
+      oidc_support:
+        default_value:
+          is_allowed: true
+          allowed_scopes:
+            - profile
+            - email
     apply_policy:
       external_metadata_type: cimd
       external_metadata_created_by: client
@@ -2371,11 +2520,70 @@ Each client profile is stored as a separate JSON file named after its `name` (e.
     "organization_usage": { "default_value": "allow" },
     "organization_require_behavior": { "default_value": "pre_login_prompt" },
     "organization_discovery_methods": { "default_value": ["email", "organization_name"] },
-    "require_proof_of_possession": { "default_value": true }
+    "require_proof_of_possession": { "default_value": true },
+    "oidc_support": {
+      "default_value": { "is_allowed": true, "allowed_scopes": ["profile", "email"] }
+    }
   },
   "apply_policy": {
     "external_metadata_type": "cimd",
     "external_metadata_created_by": "client"
+  }
+}
+```
+
+## Agents
+
+Agents are first-class principals that represent an AI agent on the tenant. An agent can be linked to one or more machine-to-machine clients; a client can be linked to only one agent at a time.
+
+> ⚠️ **NOTE:** Agents is a Limited Early Access feature. The Deploy CLI client needs the `read:agents`, `create:agents`, `update:agents` and `delete:agents` scopes, plus `update:clients` to manage client links. If the feature isn't enabled for the tenant, agents are skipped on export, an empty `agents: []` list is ignored, and an import that configures agents fails.
+
+Agents are matched by `name`. Agent names are not unique on the tenant: if several agents share a name, an import that configures that name fails until they are renamed, and directory exports number their file names (for example `my-agent-1.json`). Directory exports also remove files of agents that no longer exist on the tenant. Linked clients are referenced by client `name` and are processed after clients, so a client created in the same import can be linked.
+
+- Omit `clients` to leave an agent's links untouched. Removing a client from the list (or `clients: []`) unlinks it only when `AUTH0_ALLOW_DELETE=true`; otherwise the CLI warns and keeps the link. Moving a client to another agent is not a removal.
+- Clients follow the same rules as the clients handler: clients in `AUTH0_EXCLUDED_CLIENTS`, third-party clients with `AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS`, and dynamic CIMD clients are never linked, unlinked or exported in `clients`. A client name must match exactly one client on the tenant.
+- The client the Deploy CLI authenticates with (`AUTH0_CLIENT_ID`) is never linked or unlinked, the same way the clients handler never modifies it. The CLI warns and skips the change.
+- Renaming an agent creates a new agent; the old one is only deleted with `AUTH0_ALLOW_DELETE=true`. `external_agent_id` must be unique, so keeping it on a renamed agent fails while the old agent still exists.
+- Set links on the agent, not on the client: `agent_id` in a client's configuration is ignored with a warning, and is not exported.
+- `external_agent_id` can only be set when the agent is created. Changing it on an existing agent fails the import and the dry run.
+- `metadata` is replaced as a whole on update, so always provide the complete object.
+- Deleting an agent keeps its linked clients. Before deleting an agent (with `AUTH0_ALLOW_DELETE=true`), the Deploy CLI unlinks its clients so none of them is left pointing at the deleted agent. If the delete then fails, the clients are linked back to the agent.
+
+### Schema Properties
+
+| Property            | Type       | Required | Description                                                                               |
+| ------------------- | ---------- | -------- | ----------------------------------------------------------------------------------------- |
+| `name`              | `string`   | Yes      | Display name of the agent (1–255 characters). Avoid PII, it may appear in logs.           |
+| `clients`           | `string[]` | No       | Names of the clients linked to the agent.                                                 |
+| `external_agent_id` | `string`   | No       | Customer-supplied identifier used in tokens and logs instead of the generated `agent_id`. |
+| `metadata`          | `object`   | No       | Free-form JSON (up to 10 KB). Avoid PII, it may appear in logs.                           |
+
+### YAML Example
+
+```yaml
+# Contents of ./tenant.yaml
+agents:
+  - name: 'Support Agent'
+    clients:
+      - 'My M2M'
+    external_agent_id: 'support-agent'
+    metadata:
+      team: 'support'
+```
+
+### Directory Example
+
+Folder: `./agents/`
+
+Each agent is stored as a separate JSON file named after its `name` (e.g. `Support Agent.json`):
+
+```json
+{
+  "name": "Support Agent",
+  "clients": ["My M2M"],
+  "external_agent_id": "support-agent",
+  "metadata": {
+    "team": "support"
   }
 }
 ```
@@ -2494,7 +2702,7 @@ Contents of `My API Client.json` (deploy-time, with pem):
 
 ## Token Vault Privileged Access
 
-> **Early Access:** `token_vault_privileged_access` requires the `token_vault_subject_type_jwt_ea_rollout` feature flag to be enabled on the tenant, and writes additionally require the `create:client_token_vault_privileged_access` / `update:client_token_vault_privileged_access` scopes. This field is export-only in the Deploy CLI (see below), so these requirements affect only manual configuration on the tenant, not the CLI.
+> **Early Access:** `token_vault_privileged_access` requires this feature to be enabled on the tenant, and writes additionally require the `create:client_token_vault_privileged_access` / `update:client_token_vault_privileged_access` scopes. This field is export-only in the Deploy CLI (see below), so these requirements affect only manual configuration on the tenant, not the CLI.
 
 The Deploy CLI exports the `token_vault_privileged_access` property on clients, which hardens a privileged Token Vault worker by restricting the caller IPs, connections, and scopes it may use at runtime.
 
@@ -2524,6 +2732,36 @@ clients:
             - 'chat:write'
             - 'channels:read'
 ```
+
+## Flow Vault Connections
+
+`account_name` and `ready` are read-only. The Management API derives them from the connection and does not accept them on create or update, so the Deploy CLI does not export them. If they are present in a file (for example from an older export), they are ignored on import, so keyword mappings applied to them have no effect.
+
+`setup` holds credentials, so it does not appear in exports. Add it to the connection by hand. [Keyword replacement](./keyword-replacement.md) works in it in both formats: `##KEY##` for a string value, or a quoted `'@@KEY@@'` to substitute the whole object (the mapping value is then a JSON object).
+
+```yaml
+flowVaultConnections:
+  - name: My HTTP Connection
+    app_id: HTTP
+    setup:
+      type: BEARER
+      token: '##HTTP_BEARER_TOKEN##'
+  # or the whole object: setup: '@@HTTP_SETUP@@'
+```
+
+In directory format, put the same fields in `flow-vault-connections/<name>.json`. A whole-object token must be a quoted string there too (`"setup": "@@HTTP_SETUP@@"`).
+
+```json
+{
+  "name": "My HTTP Connection",
+  "app_id": "HTTP",
+  "setup": { "type": "BEARER", "token": "##HTTP_BEARER_TOKEN##" }
+}
+```
+
+Because `setup` is never exported, running an export over the same files removes it. Keep it in version control or re-add it afterwards.
+
+Because the Management API never returns `setup`, a connection that includes it always shows as an UPDATE in `--dry-run`. That matches a real import, which always sends `setup`. To hide it from the preview, set [`AUTH0_IGNORE_DRY_RUN_FIELDS`](./configuring-the-deploy-cli.md#auth0_ignore_dry_run_fields) to `{ "flowVaultConnections": ["setup"] }`.
 
 ## MFA Advanced Factor Configuration
 
@@ -2590,7 +2828,7 @@ For more details, see the [Management API documentation](https://auth0.com/docs/
 
 ## Feature Flags
 
-> **Early Access.** Feature Flags are part of Auth0's Experiment Center and are only available on tenants entitled to the feature (`experiment_center_ea`). On tenants without the entitlement the resource is skipped.
+> **Early Access.** Feature Flags are part of Auth0's Experiment Center and are only available on tenants entitled to the feature. On tenants without the entitlement the resource is skipped.
 
 Feature Flags define the typed, configurable parameters that experiments vary. Each flag declares a set of parameters; experiment variations later override those parameters.
 
@@ -2813,5 +3051,116 @@ Each experiment is stored as a separate JSON file named after the experiment (e.
     { "variation_name": "control", "is_control": true, "weight": 50 },
     { "variation_name": "variant-a", "is_control": false, "weight": 50 }
   ]
+}
+```
+
+## Portals
+
+> **Early Access.** Universal Portals is an Early Access feature that must be enabled on the tenant. The Deploy CLI client needs the `read:portals`, `create:portals`, `update:portals` and `delete:portals` scopes. If the feature isn't enabled for the tenant, portals are skipped on export, and an import that configures portals skips them with a warning.
+
+A portal is a customer-facing self-service site made of a sidebar, pages and page components, signed in through an OAuth client.
+
+Notes and guardrails:
+
+- **Portals are matched by `slug`.** The slug is unique per tenant. The `name` is not unique, so two portals may share a name. Changing the slug of a portal in the configuration creates a new portal; the old one is only deleted with `AUTH0_ALLOW_DELETE=true`. Directory exports name each file after the slug.
+- **`client.client_secret` is write-only.** The API never returns it, so it is never exported and has to be added to the configuration, for example with a `##KEYWORD##` mapping. It is required to create a portal: an import that creates a portal without it fails during validation, before any resource is written, and so does the dry run. A `##KEYWORD##` with no mapping counts as missing. When updating, the `client` block is only sent if `client.client_secret` is configured, so an export can be re-imported into the same tenant unchanged. A configured secret is sent on every import and cannot be compared with the tenant's, so the dry run lists that portal as an update. An export does not keep the `client_secret` line, even with `AUTH0_PRESERVE_KEYWORDS`, so add it back after re-exporting.
+- **Clearing blocks.** `navigation`, `pages` and `custom_code` left out of the configuration are not changed on the tenant, so a configuration can manage only part of a portal. To clear one, set it empty (for example `navigation:` in YAML or `null` in JSON) with `AUTH0_ALLOW_DELETE=true`; without it the CLI warns and leaves the block unchanged. The dry run previews the clearing as an update, and gives the same warning when deletes are off.
+- **The client application is referenced by name.** `client.client_id` is exported as the application's `name` and resolved to its id on import, so the application can be created in the same import. A value that matches no application is sent as is. Changing the application without supplying `client.client_secret` is not applied; the import and the dry run warn instead.
+- **Forms are referenced by name.** The `form_id` of form components, including those inside sections, is exported as the form's `name` and resolved to its id on import. Forms are processed before portals, so a form created in the same import can be referenced. A value that matches no form is sent as is.
+- **Sidebar components.** Use the `v2` types (`sidebar:component:auth0:external_link:v2` and `sidebar:component:auth0:internal_link:v2`). The deprecated `sidebar:component:auth0:external_link` and `sidebar:component:auth0:internal_link` types are still sent as configured, with a warning in the import and the dry run.
+- `custom_code.head` is only injected when the portal is served from a custom domain.
+- The API lists at most 50 portals without pagination. If the tenant has that many, the CLI warns that portals beyond the first 50 are not exported or managed. Those portals are never updated or deleted. A configured portal whose slug belongs to one of them is previewed as a create, and the import fails with a message saying the portal may exist but is not listed; portal updates in that run are not applied. A directory export at the limit keeps local portal files it cannot match, instead of removing them.
+- `id`, `created_at` and `updated_at` are read-only. They are not exported and are ignored on create and update.
+
+### Schema Properties
+
+| Property      | Type     | Required  | Description                                                                                                                                                                                                                                                 |
+| ------------- | -------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `slug`        | `string` | Yes       | URL slug of the portal. Unique per tenant; used as the matching key.                                                                                                                                                                                        |
+| `name`        | `string` | Yes       | Display name (1–150 characters). Not unique.                                                                                                                                                                                                                |
+| `client`      | `object` | On create | `{ token_endpoint_auth_method: "client_secret_post", client_id, client_secret }`; `token_endpoint_auth_method` and `client_id` are required when `client` is set. `client_id` is the application name. `client_secret` is write-only and is never exported. |
+| `navigation`  | `object` | No        | `{ sidebar: { components: [...] } }`. Each component is `{ type, config }`.                                                                                                                                                                                 |
+| `pages`       | `object` | No        | `{ default: "<page slug>", standard: [{ title, slug, components: [...] }] }`.                                                                                                                                                                               |
+| `custom_code` | `object` | No        | `{ head: "<html>" }` (1–10000 characters), injected into the `<head>` when served from a custom domain.                                                                                                                                                     |
+
+### YAML Example
+
+```yaml
+# Contents of ./tenant.yaml
+portals:
+  - slug: support
+    name: 'Support Portal'
+    client:
+      token_endpoint_auth_method: client_secret_post
+      client_id: 'My App'
+      client_secret: '##PORTAL_CLIENT_SECRET##'
+    navigation:
+      sidebar:
+        components:
+          - type: 'sidebar:component:auth0:external_link:v2'
+            config:
+              label: 'Documentation'
+              href: 'https://example.com/docs'
+          - type: 'sidebar:component:auth0:internal_link:v2'
+            config:
+              label: 'Home'
+              page_slug: 'home'
+    pages:
+      default: home
+      standard:
+        - title: 'Home'
+          slug: home
+          components:
+            - type: 'page:component:auth0:typography:heading'
+              config:
+                title: 'Welcome'
+            - type: 'page:component:auth0:form'
+              config:
+                form_id: 'My Signup Form'
+                completion_message: 'Thanks for signing up'
+    custom_code:
+      head: '<style>body { font-family: sans-serif; }</style>'
+```
+
+### Directory Example
+
+Folder: `./portals/`
+
+Each portal is stored as a separate JSON file named after its slug (e.g. `support.json`):
+
+```json
+{
+  "slug": "support",
+  "name": "Support Portal",
+  "client": {
+    "token_endpoint_auth_method": "client_secret_post",
+    "client_id": "My App",
+    "client_secret": "##PORTAL_CLIENT_SECRET##"
+  },
+  "navigation": {
+    "sidebar": {
+      "components": [
+        {
+          "type": "sidebar:component:auth0:external_link:v2",
+          "config": { "label": "Documentation", "href": "https://example.com/docs" }
+        }
+      ]
+    }
+  },
+  "pages": {
+    "default": "home",
+    "standard": [
+      {
+        "title": "Home",
+        "slug": "home",
+        "components": [
+          {
+            "type": "page:component:auth0:typography:heading",
+            "config": { "title": "Welcome" }
+          }
+        ]
+      }
+    ]
+  }
 }
 ```

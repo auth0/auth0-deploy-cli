@@ -5,7 +5,7 @@ tenant:
   friendly_name: 'Auth0 Deploy Example'
   # Advertise CIMD support in the authorization server metadata (see "My CIMD Client" below)
   client_id_metadata_document_supported: true
-  # Early Access: requires the `dynamic_cimd` feature flag on the tenant
+  # Early Access: requires this feature to be enabled on the tenant
   # client_id_metadata_document_dynamic_registration_supported: true
 
 pages:
@@ -103,7 +103,7 @@ clients:
   -
     name: "My B2B Integration Client"
     app_type: "spa"
-    # Enterprise Connect EA. Requires enterprise_connect_entitled on the tenant.
+    # Enterprise Connect EA. Requires this feature to be enabled on the tenant.
     # b2b_integration_configuration can be set at creation time.
     # To update it via deploy, the client must already have this object (re-create otherwise).
     b2b_integration_configuration:
@@ -142,6 +142,12 @@ databases:
           identifier:
             active: false  # Set to true when email.unique is false
           profile_required: false
+      # authentication_methods:  # Replaced as a whole on update; list every method to keep
+      #   password:
+      #     enabled: true
+      #   passkey:
+      #     enabled: true
+      #     signup_behavior: "allow"  # (Early Availability) "allow" or "block"
       # custom_password_hash:  # (Early Availability) Reference action by name
       #   action_id: "MyPasswordHashAction"
       #   hash_algorithm: "bcrypt"
@@ -226,16 +232,17 @@ resourceServers:
         description: "update account"
       - value: "read:account"
         description: "read account"
+    # require_consent_non_repudiation is only applicable when this feature is enabled on the tenant
+    require_consent_non_repudiation: true
     # client_id: "if linked to a resource server client (readonly)"
+    # type: "universal_commerce_protocol_server" # EA, one per tenant, null clears it
     # Add other resource server settings (https://auth0.com/docs/api/management/v2#!/Resource_Servers/post_resource_servers)
   -
     name: "Auth0 My Account API"
     identifier: "https://##AUTH0_DOMAIN##/me/"
-    # authorization_policy is only applicable to the My Account API when the acr feature flag is enabled
+    # authorization_policy is only applicable to the My Account API when this feature is enabled on the tenant
     authorization_policy:
       policy_id: "019b76da-a800-73c9-b656-b349ae415c17"
-    # require_consent_non_repudiation is only applicable to the My Account API when the my_account_consents entitlement is enabled
-    require_consent_non_repudiation: true
 
 tokenExchangeProfiles:
   - name: "Custom Authentication Profile"
@@ -593,6 +600,7 @@ attackProtection:
     mode: count_per_identifier_and_ip
     allowlist: []
     max_attempts: 10
+    form_submission_mode: auto
   suspiciousIpThrottling:
     enabled: true
     shields:
@@ -658,6 +666,37 @@ clientProfiles:
     apply_policy:
       external_metadata_type: "cimd"
       external_metadata_created_by: "client"
+
+agents:
+  - name: "Support Agent"
+    clients:
+      - "My M2M"
+    metadata:
+      team: "support"
+
+portals:
+  - slug: "support"
+    name: "Support Portal"
+    client:
+      token_endpoint_auth_method: "client_secret_post"
+      client_id: "My SPA"
+      client_secret: "##PORTAL_CLIENT_SECRET##"
+    navigation:
+      sidebar:
+        components:
+          - type: "sidebar:component:auth0:external_link:v2"
+            config:
+              label: "Documentation"
+              href: "https://example.com/docs"
+    pages:
+      default: "home"
+      standard:
+        - title: "Home"
+          slug: "home"
+          components:
+            - type: "page:component:auth0:typography:heading"
+              config:
+                title: "Welcome"
 
 userAttributeProfiles:
   - name: "My User Attribute Profile"
@@ -774,11 +813,11 @@ organizations:
     display_name: My Organization
     # Controls whether third-party clients can perform standard user flows (e.g. Authorization Code,
     # Refresh Token exchange) within the context of this organization.
-    # Requires the organizations_third_party_client_support feature flag to be enabled on the tenant.
+    # Requires this feature to be enabled on the tenant.
     # Allowed values: allow, block (defaults to block)
     third_party_client_access: block
     # Controls whether org-to-app entitlement is active for this organization.
-    # Requires the org_to_app_entitlement_enabled feature flag to be enabled on the tenant.
+    # Requires this feature to be enabled on the tenant.
     is_app_entitlement_active: false
     # List of client applications that org members are entitled to use for login.
     # Only relevant when is_app_entitlement_active is true.

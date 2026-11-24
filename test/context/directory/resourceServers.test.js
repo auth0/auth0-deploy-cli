@@ -36,6 +36,32 @@ describe('#directory context resourceServers', () => {
     expect(context.assets.resourceServers).to.deep.equal(resourceServersTarget);
   });
 
+  it('should process the resource server type, including null', async () => {
+    const repoDir = path.join(testDataDir, 'directory', 'resourceServersType');
+    createDir(repoDir, {
+      [constants.RESOURCE_SERVERS_DIRECTORY]: {
+        'holder.json':
+          '{ "name": "holder", "identifier": "http://holder.com/api", "type": "universal_commerce_protocol_server" }',
+        'cleared.json':
+          '{ "name": "cleared", "identifier": "http://cleared.com/api", "type": null }',
+        'omitted.json': '{ "name": "omitted", "identifier": "http://omitted.com/api" }',
+      },
+    });
+
+    const context = new Context({ AUTH0_INPUT_FILE: repoDir }, mockMgmtClient());
+    await context.loadAssetsFromLocal();
+
+    expect(context.assets.resourceServers).to.deep.equal([
+      { name: 'cleared', identifier: 'http://cleared.com/api', type: null },
+      {
+        name: 'holder',
+        identifier: 'http://holder.com/api',
+        type: 'universal_commerce_protocol_server',
+      },
+      { name: 'omitted', identifier: 'http://omitted.com/api' },
+    ]);
+  });
+
   it('should ignore unknown file', async () => {
     const repoDir = path.join(testDataDir, 'directory', 'resourceServers2');
     const invalid = {
@@ -89,6 +115,28 @@ describe('#directory context resourceServers', () => {
     );
   });
 
+  it('should dump the resource server type only when it is set', async () => {
+    const dir = path.join(testDataDir, 'directory', 'resourceServersTypeDump');
+    cleanThenMkdir(dir);
+    const context = new Context({ AUTH0_INPUT_FILE: dir }, mockMgmtClient());
+
+    context.assets.resourceServers = [
+      {
+        identifier: 'http://holder.com/api',
+        name: 'holder',
+        type: 'universal_commerce_protocol_server',
+      },
+      { identifier: 'http://plain.com/api', name: 'plain' },
+    ];
+
+    await handler.dump(context);
+    const folder = path.join(dir, constants.RESOURCE_SERVERS_DIRECTORY);
+    expect(loadJSON(path.join(folder, 'holder.json'))).to.deep.equal(
+      context.assets.resourceServers[0]
+    );
+    expect(loadJSON(path.join(folder, 'plain.json'))).to.not.have.property('type');
+  });
+
   it('should dump resource servers sanitized', async () => {
     const dir = path.join(testDataDir, 'directory', 'resourceServersDump');
     cleanThenMkdir(dir);
@@ -119,15 +167,15 @@ describe('#directory context resourceServers', () => {
 
     const mockClient = mockMgmtClient();
     mockClient.clients = {
-      getAll: (params) => {
+      list: (params) => {
         const clients = [
           { client_id: 'client_123', name: 'Test Client' },
           { client_id: 'client_456', name: 'Another Client' },
         ];
         if (params && params.include_totals) {
-          return { data: { clients, total: clients.length } };
+          return { data: clients, response: { total: clients.length } };
         }
-        return { data: clients };
+        return clients;
       },
     };
 

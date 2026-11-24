@@ -4,7 +4,7 @@ import pageClient from '../../../../src/tools/auth0/client';
 const Ajv = require('ajv');
 const { expect } = require('chai');
 const clients = require('../../../../src/tools/auth0/handlers/clients');
-const { mockPagedData } = require('../../../utils');
+const { mockPagedData, notEnabledError, withCapturedWarnings } = require('../../../utils');
 
 const pool = {
   addEachTask: (data) => {
@@ -2576,6 +2576,344 @@ describe('#clients handler', () => {
     });
   });
 
+  describe('#clients oidc_support', () => {
+    const mockAuth0 = (overrides = {}, existing = []) => ({
+      clients: {
+        create: (data) => Promise.resolve({ data }),
+        update: (clientId, data) => Promise.resolve({ data }),
+        delete: () => Promise.resolve({ data: {} }),
+        list: (params) => mockPagedData(params, 'clients', existing),
+        ...overrides,
+      },
+      connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+      userAttributeProfiles: {
+        list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+      },
+      pool,
+    });
+
+    const runProcessChanges = async (auth0, assets) => {
+      const handler = new clients.default({ client: pageClient(auth0), config });
+      await Object.getPrototypeOf(handler).processChanges.apply(handler, [assets]);
+    };
+
+    describe('schema', () => {
+      const ajv = new Ajv({ useDefaults: true, nullable: true });
+
+      it('should accept is_allowed with allow_all_scopes', () => {
+        const valid = ajv.validate(clients.schema, [
+          { name: 'c', oidc_support: { is_allowed: true, allow_all_scopes: true } },
+        ]);
+        expect(valid).to.equal(true);
+      });
+
+      it('should accept is_allowed with allowed_scopes', () => {
+        const valid = ajv.validate(clients.schema, [
+          { name: 'c', oidc_support: { is_allowed: true, allowed_scopes: ['profile', 'email'] } },
+        ]);
+        expect(valid).to.equal(true);
+      });
+
+      it('should accept is_allowed false on its own', () => {
+        const valid = ajv.validate(clients.schema, [
+          { name: 'c', oidc_support: { is_allowed: false } },
+        ]);
+        expect(valid).to.equal(true);
+      });
+
+      it('should reject null', () => {
+        const valid = ajv.validate(clients.schema, [{ name: 'c', oidc_support: null }]);
+        expect(valid).to.equal(false);
+      });
+
+      it('should reject openid as an allowed scope', () => {
+        const valid = ajv.validate(clients.schema, [
+          { name: 'c', oidc_support: { is_allowed: true, allowed_scopes: ['openid'] } },
+        ]);
+        expect(valid).to.equal(false);
+      });
+
+      [
+        ['is_allowed alone', { is_allowed: true }, true],
+        ['an empty allowed_scopes', { is_allowed: true, allowed_scopes: [] }, true],
+        [
+          'allow_all_scopes false with allowed_scopes',
+          { is_allowed: true, allow_all_scopes: false, allowed_scopes: ['email'] },
+          true,
+        ],
+        [
+          'allow_all_scopes false without allowed_scopes',
+          { is_allowed: true, allow_all_scopes: false },
+          false,
+        ],
+        [
+          'allow_all_scopes true with allowed_scopes',
+          { is_allowed: true, allow_all_scopes: true, allowed_scopes: ['email'] },
+          false,
+        ],
+        [
+          'allowed_scopes when is_allowed is false',
+          { is_allowed: false, allowed_scopes: ['email'] },
+          false,
+        ],
+        [
+          'allow_all_scopes when is_allowed is false',
+          { is_allowed: false, allow_all_scopes: false },
+          false,
+        ],
+      ].forEach(([title, value, expected]) => {
+        it(`should ${expected ? 'accept' : 'reject'} ${title}`, () => {
+          const valid = ajv.validate(clients.schema, [{ name: 'c', oidc_support: value }]);
+          expect(valid).to.equal(expected);
+        });
+      });
+
+      it('should reject a missing is_allowed', () => {
+        const valid = ajv.validate(clients.schema, [
+          { name: 'c', oidc_support: { allow_all_scopes: true } },
+        ]);
+        expect(valid).to.equal(false);
+      });
+    });
+
+    it('should send oidc_support when creating a client', async () => {
+      let created;
+      const auth0 = mockAuth0({
+        create: (data) => {
+          created = data;
+          return Promise.resolve({ data });
+        },
+      });
+
+      await runProcessChanges(auth0, {
+        clients: [{ name: 'strictClient', oidc_support: { is_allowed: false } }],
+      });
+
+      expect(created.oidc_support).to.deep.equal({ is_allowed: false });
+    });
+
+    it('should send oidc_support when updating a client', async () => {
+      let updated;
+      const auth0 = mockAuth0(
+        {
+          update: (clientId, data) => {
+            updated = data;
+            return Promise.resolve({ data });
+          },
+        },
+        [{ client_id: 'client1', name: 'c', oidc_support: { is_allowed: false } }]
+      );
+
+      await runProcessChanges(auth0, {
+        clients: [
+          {
+            client_id: 'client1',
+            name: 'c',
+            oidc_support: { is_allowed: true, allowed_scopes: ['profile'] },
+          },
+        ],
+      });
+
+      expect(updated.oidc_support).to.deep.equal({ is_allowed: true, allowed_scopes: ['profile'] });
+    });
+
+    it('should create without oidc_support and warn when the tenant does not have it enabled', async () => {
+      const payloads = [];
+      const auth0 = mockAuth0({
+        create: (data) => {
+          payloads.push(data);
+          if (data.oidc_support) return Promise.reject(notEnabledError());
+          return Promise.resolve({ data });
+        },
+      });
+
+      const warnings = await withCapturedWarnings(() =>
+        runProcessChanges(auth0, {
+          clients: [{ name: 'someClient', oidc_support: { is_allowed: false } }],
+        })
+      );
+
+      expect(payloads).to.have.length(2);
+      expect(payloads[1]).to.not.have.property('oidc_support');
+      expect(payloads[1].name).to.equal('someClient');
+      expect(warnings.some((w) => w.includes('oidc_support') && w.includes('someClient'))).to.equal(
+        true
+      );
+    });
+
+    it('should update without oidc_support and warn when the tenant does not have it enabled', async () => {
+      const payloads = [];
+      const auth0 = mockAuth0(
+        {
+          update: (clientId, data) => {
+            payloads.push(data);
+            if (data.oidc_support) return Promise.reject(notEnabledError());
+            return Promise.resolve({ data });
+          },
+        },
+        [{ client_id: 'client1', name: 'c', description: 'old' }]
+      );
+
+      const warnings = await withCapturedWarnings(() =>
+        runProcessChanges(auth0, {
+          clients: [
+            {
+              client_id: 'client1',
+              name: 'c',
+              description: 'new',
+              oidc_support: { is_allowed: false },
+            },
+          ],
+        })
+      );
+
+      expect(payloads).to.have.length(2);
+      expect(payloads[1]).to.not.have.property('oidc_support');
+      expect(payloads[1].description).to.equal('new');
+      expect(warnings.some((w) => w.includes('oidc_support'))).to.equal(true);
+    });
+
+    describe('omitDefaultOidcSupport', () => {
+      const allowAll = { is_allowed: true, allow_all_scopes: true };
+
+      it('should drop the allow-all default for a first-party client', () => {
+        const client = { name: 'c', is_first_party: true, oidc_support: allowAll };
+        expect(clients.omitDefaultOidcSupport(client)).to.deep.equal({
+          name: 'c',
+          is_first_party: true,
+        });
+      });
+
+      it('should treat a missing is_first_party as first-party', () => {
+        expect(
+          clients.omitDefaultOidcSupport({ name: 'c', oidc_support: allowAll })
+        ).to.not.have.property('oidc_support');
+      });
+
+      it('should ignore third_party_security_mode on a first-party client', () => {
+        const client = {
+          name: 'c',
+          is_first_party: true,
+          third_party_security_mode: 'strict',
+          oidc_support: allowAll,
+        };
+        expect(clients.omitDefaultOidcSupport(client)).to.not.have.property('oidc_support');
+      });
+
+      it('should drop the allow-all default for a permissive third-party client', () => {
+        const client = { name: 'c', is_first_party: false, oidc_support: allowAll };
+        expect(clients.omitDefaultOidcSupport(client)).to.not.have.property('oidc_support');
+      });
+
+      it('should drop the deny default for a strict third-party client', () => {
+        const client = {
+          name: 'c',
+          is_first_party: false,
+          third_party_security_mode: 'strict',
+          oidc_support: { is_allowed: false },
+        };
+        expect(clients.omitDefaultOidcSupport(client)).to.not.have.property('oidc_support');
+      });
+
+      it('should keep a value that is the default for another class', () => {
+        const strictWithAllowAll = {
+          name: 'c',
+          is_first_party: false,
+          third_party_security_mode: 'strict',
+          oidc_support: allowAll,
+        };
+        const firstPartyDenied = {
+          name: 'c',
+          is_first_party: true,
+          oidc_support: { is_allowed: false },
+        };
+        expect(clients.omitDefaultOidcSupport(strictWithAllowAll)).to.equal(strictWithAllowAll);
+        expect(clients.omitDefaultOidcSupport(firstPartyDenied)).to.equal(firstPartyDenied);
+      });
+
+      it('should keep a non-default value and return clients without oidc_support unchanged', () => {
+        const scoped = {
+          name: 'c',
+          is_first_party: true,
+          oidc_support: { is_allowed: true, allowed_scopes: ['profile'] },
+        };
+        const plain = { name: 'c' };
+        expect(clients.omitDefaultOidcSupport(scoped)).to.equal(scoped);
+        expect(clients.omitDefaultOidcSupport(plain)).to.equal(plain);
+      });
+
+      it('should not mutate the client it is given', () => {
+        const client = { name: 'c', is_first_party: true, oidc_support: allowAll };
+        clients.omitDefaultOidcSupport(client);
+        expect(client.oidc_support).to.deep.equal(allowAll);
+      });
+    });
+
+    describe('CIMD clients', () => {
+      const cimdUrl = 'https://mcpserver.example.com/client.json';
+      const existingCimd = [
+        { client_id: 'client1', name: 'MCP Tool Server', external_client_id: cimdUrl },
+      ];
+      const localCimd = {
+        name: 'MCP Tool Server',
+        external_client_id: cimdUrl,
+        description: 'updated description',
+        oidc_support: { is_allowed: true, allowed_scopes: ['profile'] },
+      };
+
+      it('should send oidc_support when updating a CIMD client', async () => {
+        const updates = [];
+        const auth0 = mockAuth0(
+          {
+            update: (clientId, data) => {
+              updates.push({ clientId, data });
+              return Promise.resolve({ data });
+            },
+          },
+          existingCimd
+        );
+
+        await runProcessChanges(auth0, { clients: [localCimd] });
+
+        expect(updates).to.deep.equal([
+          {
+            clientId: 'client1',
+            data: {
+              description: 'updated description',
+              oidc_support: { is_allowed: true, allowed_scopes: ['profile'] },
+            },
+          },
+        ]);
+      });
+
+      it('should update a CIMD client without oidc_support and warn when the tenant does not have it enabled', async () => {
+        const payloads = [];
+        const auth0 = mockAuth0(
+          {
+            update: (clientId, data) => {
+              payloads.push(data);
+              if (data.oidc_support) return Promise.reject(notEnabledError());
+              return Promise.resolve({ data });
+            },
+          },
+          existingCimd
+        );
+
+        const warnings = await withCapturedWarnings(() =>
+          runProcessChanges(auth0, { clients: [localCimd] })
+        );
+
+        expect(payloads).to.deep.equal([
+          { description: 'updated description', oidc_support: localCimd.oidc_support },
+          { description: 'updated description' },
+        ]);
+        expect(
+          warnings.some((w) => w.includes('oidc_support') && w.includes('MCP Tool Server'))
+        ).to.equal(true);
+      });
+    });
+  });
+
   describe('#clients validate', () => {
     it('should allow validation when external_metadata_type is set without external_client_id', async () => {
       const handler = new clients.default({ client: {}, config });
@@ -2591,6 +2929,86 @@ describe('#clients handler', () => {
           ],
         },
       ]);
+    });
+  });
+
+  describe('#clients dryRunChanges exclusions', () => {
+    const dryRunConfig = (extra = {}) => {
+      const data = { AUTH0_CLIENT_ID: 'deploy_client', AUTH0_ALLOW_DELETE: true, ...extra };
+      return (key) => data[key];
+    };
+
+    const buildHandler = (tenantClients, handlerConfig) => {
+      const auth0 = {
+        clients: { list: (params) => mockPagedData(params, 'clients', tenantClients) },
+        connectionProfiles: { list: (params) => mockPagedData(params, 'connectionProfiles', []) },
+        userAttributeProfiles: {
+          list: (params) => mockPagedData(params, 'userAttributeProfiles', []),
+        },
+        pool,
+      };
+      return new clients.default({ client: pageClient(auth0), config: handlerConfig });
+    };
+
+    const tenantClients = [
+      { client_id: 'a', name: 'App A', description: 'old', is_first_party: true },
+      { client_id: 'b', name: 'App B', description: 'old', is_first_party: true },
+      { client_id: 'deploy_client', name: 'Deploy Client', is_first_party: true },
+      { client_id: 'stale', name: 'Stale App', is_first_party: true },
+    ];
+
+    it('should leave excluded clients and the management client out of deletes', async () => {
+      const handler = buildHandler(tenantClients, dryRunConfig());
+
+      const changes = await handler.dryRunChanges({
+        clients: [{ name: 'App A', description: 'old', is_first_party: true }],
+        exclude: { clients: ['App B'] },
+      });
+
+      expect(changes.del.map((c) => c.name)).to.deep.equal(['Stale App']);
+    });
+
+    it('should leave excluded clients out of updates and creates', async () => {
+      const handler = buildHandler(tenantClients, dryRunConfig());
+
+      const changes = await handler.dryRunChanges({
+        clients: [
+          { name: 'App A', description: 'new', is_first_party: true },
+          { name: 'App B', description: 'new', is_first_party: true },
+          { name: 'Excluded New', is_first_party: true },
+          { name: 'Brand New', is_first_party: true },
+        ],
+        exclude: { clients: ['App B', 'Excluded New'] },
+      });
+
+      expect(changes.update.map((c) => c.name)).to.deep.equal(['App A']);
+      expect(changes.create.map((c) => c.name)).to.deep.equal(['Brand New']);
+    });
+
+    it('should report excluded clients when nothing is excluded', async () => {
+      const handler = buildHandler(tenantClients, dryRunConfig());
+
+      const changes = await handler.dryRunChanges({
+        clients: [{ name: 'App A', description: 'old', is_first_party: true }],
+      });
+
+      expect(changes.del.map((c) => c.name)).to.have.members(['App B', 'Stale App']);
+    });
+
+    it('should leave third-party clients out of the changes when AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS is true', async () => {
+      const handler = buildHandler(
+        tenantClients,
+        dryRunConfig({ AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS: true })
+      );
+
+      const changes = await handler.dryRunChanges({
+        clients: [
+          { name: 'Third Party New', is_first_party: false },
+          { name: 'First Party New', is_first_party: true },
+        ],
+      });
+
+      expect(changes.create.map((c) => c.name)).to.deep.equal(['First Party New']);
     });
   });
 });

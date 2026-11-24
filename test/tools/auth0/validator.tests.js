@@ -97,6 +97,32 @@ describe('#schema validation tests', () => {
     auth0.validate().then(failedCb(done), passedCb(done, `should be ${expectedType}`, field));
   };
 
+  describe('#attackProtection validate', () => {
+    it('should pass validation with a valid bruteForceProtection.form_submission_mode', (done) => {
+      const data = {
+        bruteForceProtection: { enabled: true, form_submission_mode: 'manual' },
+      };
+
+      checkPassed({ attackProtection: data }, done);
+    });
+
+    it('should fail validation if bruteForceProtection.form_submission_mode is not allowed', (done) => {
+      const data = {
+        bruteForceProtection: { enabled: true, form_submission_mode: 'Manual' },
+      };
+
+      checkEnum({ attackProtection: data }, done);
+    });
+
+    it('should pass validation with the legacy bruteForceProtection.form_submission_behavior', (done) => {
+      const data = {
+        bruteForceProtection: { enabled: true, form_submission_behavior: 'auto_submit' },
+      };
+
+      checkPassed({ attackProtection: data }, done);
+    });
+  });
+
   describe('#branding validate', () => {
     it('should fail validation if branding is not an object', (done) => {
       const data = [
@@ -357,11 +383,37 @@ describe('#schema validation tests', () => {
       checkEnum({ databases: data }, done);
     });
 
+    it('should fail validation if bad passkey "signup_behavior" provided', (done) => {
+      const data = [
+        {
+          name: 'name',
+          options: {
+            authentication_methods: { passkey: { enabled: true, signup_behavior: 'maybe' } },
+          },
+        },
+      ];
+
+      checkEnum({ databases: data }, done);
+    });
+
     it('should pass validation', (done) => {
       const data = [
         {
           name: 'name',
           options: {},
+        },
+      ];
+
+      checkPassed({ databases: data }, done);
+    });
+
+    it('should pass validation with passkey "signup_behavior"', (done) => {
+      const data = [
+        {
+          name: 'name',
+          options: {
+            authentication_methods: { passkey: { enabled: true, signup_behavior: 'block' } },
+          },
         },
       ];
 

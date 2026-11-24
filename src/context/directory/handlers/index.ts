@@ -49,7 +49,9 @@ import featureFlags from './featureFlags';
 import variations from './variations';
 import segments from './segments';
 import experiments from './experiments';
+import portals from './portals';
 import clientAuthCredentials from './clientAuthCredentials';
+import agents from './agents';
 
 import DirectoryContext from '..';
 import { AssetTypes, Asset } from '../../../types';
@@ -115,7 +117,9 @@ const directoryHandlers: {
   variations,
   segments,
   experiments,
+  portals,
   clientAuthCredentials,
+  agents,
 };
 
 export default directoryHandlers;

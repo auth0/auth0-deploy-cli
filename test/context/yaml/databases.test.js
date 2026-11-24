@@ -50,6 +50,32 @@ describe('#YAML context databases', () => {
     expect(context.assets.databases).to.deep.equal(target);
   });
 
+  it('should process database with passkey signup_behavior', async () => {
+    cleanThenMkdir(dbDir);
+
+    const yaml = `
+    databases:
+      - name: "users"
+        options:
+          authentication_methods:
+            passkey:
+              enabled: true
+              signup_behavior: "##PASSKEY_SIGNUP##"
+    `;
+
+    fs.writeFileSync(yamlFile, yaml);
+
+    const context = new Context(
+      { ...config, AUTH0_KEYWORD_REPLACE_MAPPINGS: { PASSKEY_SIGNUP: 'allow' } },
+      mockMgmtClient()
+    );
+    await context.loadAssetsFromLocal();
+
+    expect(context.assets.databases[0].options.authentication_methods).to.deep.equal({
+      passkey: { enabled: true, signup_behavior: 'allow' },
+    });
+  });
+
   it('should process custom database', async () => {
     cleanThenMkdir(dbDir);
 

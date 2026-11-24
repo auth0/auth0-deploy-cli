@@ -36,6 +36,7 @@ export const schema = {
                 type: 'object',
                 properties: {
                   enabled: { type: 'boolean' },
+                  signup_behavior: { type: 'string', enum: ['allow', 'block'] },
                 },
               },
               password: {

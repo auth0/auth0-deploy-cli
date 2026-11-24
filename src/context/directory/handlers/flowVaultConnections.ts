@@ -62,7 +62,16 @@ async function dump(context: DirectoryContext) {
   const flowVaultsFolder = path.join(context.filePath, constants.FLOWS_VAULT_DIRECTORY);
   fs.ensureDirSync(flowVaultsFolder);
 
-  const removeKeysFromOutput = ['id', 'created_at', 'updated_at', 'refreshed_at', 'fingerprint'];
+  // account_name and ready are read-only, the API does not accept them on import
+  const removeKeysFromOutput = [
+    'id',
+    'created_at',
+    'updated_at',
+    'refreshed_at',
+    'fingerprint',
+    'account_name',
+    'ready',
+  ];
   flowVaultConnections.forEach((connection) => {
     removeKeysFromOutput.forEach((key) => {
       if (key in connection) {

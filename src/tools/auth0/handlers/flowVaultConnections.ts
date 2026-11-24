@@ -54,6 +54,7 @@ export default class FlowVaultHandler extends DefaultHandler {
       id: 'id',
       stripCreateFields: ['created_at', 'updated_at', 'refreshed_at', 'fingerprint', 'ready'],
       stripUpdateFields: ['created_at', 'updated_at', 'refreshed_at', 'fingerprint', 'ready'],
+      ignoreDryRunFields: ['account_name', 'ready'],
     });
   }
 

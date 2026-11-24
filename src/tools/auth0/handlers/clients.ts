@@ -1,5 +1,5 @@
 import { Management } from 'auth0';
-import { has, omit, pick } from 'lodash';
+import { has, isEqual, omit, pick } from 'lodash';
 import { Assets, Auth0APIClient, CalculatedChanges } from '../../../types';
 import { paginate } from '../client';
 import DefaultAPIHandler from './default';
@@ -7,7 +7,7 @@ import { calculateChanges } from '../../calculateChanges';
 import { getConnectionProfile } from './connectionProfiles';
 import { getUserAttributeProfiles } from './userAttributeProfiles';
 import log from '../../../logger';
-import { shouldExcludeThirdPartyClients } from '../../utils';
+import { shouldExcludeThirdPartyClients, writeSkippingUnavailableOidcSupport } from '../../utils';
 
 const multiResourceRefreshTokenPoliciesSchema = {
   type: ['array', 'null'],
@@ -91,12 +91,12 @@ const myOrganizationConfigurationSchema = {
     enforce_permission_ceiling: {
       type: 'boolean',
       description:
-        'When true, limits the permissions that organization admins can assign to members to only those held by the admin themselves. Early Access, gated by the my_org_member_management_ea feature flag.',
+        'When true, limits the permissions that organization admins can assign to members to only those held by the admin themselves. Early Access, requires this feature to be enabled on the tenant.',
     },
     enforce_self_assignment_restriction: {
       type: 'boolean',
       description:
-        'When true, prevents organization admins from assigning permissions to themselves. Early Access, gated by the my_org_member_management_ea feature flag.',
+        'When true, prevents organization admins from assigning permissions to themselves. Early Access, requires this feature to be enabled on the tenant.',
     },
   },
   required: ['allowed_strategies', 'connection_deletion_behavior'],
@@ -105,7 +105,7 @@ const myOrganizationConfigurationSchema = {
 const tokenVaultPrivilegedAccessSchema = {
   type: ['object', 'null'],
   description:
-    'Settings for Token Vault Privileged Access, hardening a privileged client by restricting the caller IPs, connections, and scopes it may use at runtime. Early Access, gated by the token_vault_subject_type_jwt_ea_rollout feature flag. Export-only: this object is exported for visibility but is not deployed by the Deploy CLI (it is stripped from create/update payloads because the required credentials are tenant-specific ids). Manage it directly on the tenant.',
+    'Settings for Token Vault Privileged Access, hardening a privileged client by restricting the caller IPs, connections, and scopes it may use at runtime. Early Access, requires this feature to be enabled on the tenant. Export-only: this object is exported for visibility but is not deployed by the Deploy CLI (it is stripped from create/update payloads because the required credentials are tenant-specific ids). Manage it directly on the tenant.',
   properties: {
     ip_allowlist: {
       type: 'array',
@@ -139,6 +139,50 @@ const tokenVaultPrivilegedAccessSchema = {
       },
     },
   },
+};
+
+// Shared with client profiles. Mirrors the API shape rules for is_allowed, allow_all_scopes and allowed_scopes.
+export const oidcSupportSchema = {
+  type: 'object',
+  properties: {
+    is_allowed: { type: 'boolean' },
+    allow_all_scopes: { type: 'boolean' },
+    allowed_scopes: {
+      type: 'array',
+      items: { type: 'string', enum: ['profile', 'email', 'address', 'phone'] },
+    },
+  },
+  required: ['is_allowed'],
+  if: { properties: { is_allowed: { const: false } } },
+  then: { properties: { allow_all_scopes: false, allowed_scopes: false } },
+  else: {
+    not: {
+      anyOf: [
+        {
+          required: ['allow_all_scopes', 'allowed_scopes'],
+          properties: { allow_all_scopes: { const: true } },
+        },
+        {
+          required: ['allow_all_scopes'],
+          properties: { allow_all_scopes: { const: false } },
+          not: { required: ['allowed_scopes'] },
+        },
+      ],
+    },
+  },
+};
+
+// The API returns a class default when nothing is stored; omit it so an import does not pin it as explicit.
+export const omitDefaultOidcSupport = (client: Client): Client => {
+  if (!client.oidc_support) return client;
+  const strictThirdParty =
+    client.is_first_party === false && client.third_party_security_mode === 'strict';
+  const classDefault = strictThirdParty
+    ? { is_allowed: false }
+    : { is_allowed: true, allow_all_scopes: true };
+  return isEqual(client.oidc_support, classDefault)
+    ? (omit(client, 'oidc_support') as Client)
+    : client;
 };
 
 export const schema = {
@@ -345,7 +389,7 @@ export const schema = {
       b2b_integration_configuration: {
         type: ['object', 'null'],
         description:
-          'B2B integration configuration. Early Access. Required feature flag: enterprise_connect_entitled.',
+          'B2B integration configuration. Early Access. Requires this feature to be enabled on the tenant.',
         properties: {
           integration_type: {
             type: 'string',
@@ -484,6 +528,7 @@ export const schema = {
         description:
           'Indicates the security mode for a Third Party Client, to apply new security semantics and improvements.',
       },
+      oidc_support: oidcSupportSchema,
       redirection_policy: {
         type: 'string',
         enum: ['allow_always', 'open_redirect_protection'],
@@ -707,11 +752,15 @@ export default class ClientHandler extends DefaultAPIHandler {
       id: 'client_id',
       identifiers: ['client_id', 'name'],
       objectFields: ['client_metadata'],
+      // agent_id is stripped from payloads, so it is never a change
+      ignoreDryRunFields: ['agent_id'],
       stripCreateFields: [
         'external_metadata_type',
         'external_metadata_created_by',
         'external_metadata_status',
         'jwks_uri',
+        // Agent links are managed by the agents handler
+        'agent_id',
       ],
       stripUpdateFields: [
         // Fields not allowed during updates
@@ -730,6 +779,8 @@ export default class ClientHandler extends DefaultAPIHandler {
         // API-generated timestamps; PATCH returns 400 if present
         'created_at',
         'updated_at',
+        // Agent links are managed by the agents handler
+        'agent_id',
       ],
       functions: {
         create: (client: Client) => this.createClient(client),
@@ -786,7 +837,39 @@ export default class ClientHandler extends DefaultAPIHandler {
     }
 
     await this.getType();
-    return super.dryRunChanges({ ...assets, clients: this.getManagedConfigClients(clients) });
+    const changes = await super.dryRunChanges({
+      ...assets,
+      clients: this.getManagedConfigClients(clients),
+    });
+
+    const filterClients = this.getManagedClientFilter(assets);
+    return {
+      del: filterClients(changes.del as Client[]),
+      update: filterClients(changes.update as Client[]),
+      create: filterClients(changes.create as Client[]),
+      conflicts: filterClients(changes.conflicts as Client[]),
+    };
+  }
+
+  /*
+   * Filter out, for both import and dry run:
+   * - The client used to access Auth0 Management API
+   * - Clients in the exclusion list
+   * - Third-party clients when AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS is enabled
+   */
+  private getManagedClientFilter(assets: Assets): (list: Client[]) => Client[] {
+    const excludedClients = (assets.exclude && assets.exclude.clients) || [];
+    const currentClient = this.config('AUTH0_CLIENT_ID') || '';
+    const excludeThirdParty = shouldExcludeThirdPartyClients(this.config);
+
+    return (list) =>
+      list.filter(
+        (item) =>
+          item.client_id !== currentClient &&
+          item.name &&
+          !excludedClients.includes(item.name) &&
+          (!excludeThirdParty || item.is_first_party)
+      );
   }
 
   async calcChanges(assets: Assets): Promise<CalculatedChanges> {
@@ -839,30 +922,24 @@ export default class ClientHandler extends DefaultAPIHandler {
     // Do nothing if not set
     if (!clients) return;
 
-    assets.clients = await this.sanitizeMapClientReferences(this.client, clients);
+    // agent_id is a tenant-specific id and is stripped from payloads; agent links are managed
+    // by the agents handler. Warn so a configured agent_id isn't silently ignored.
+    const clientsWithAgentId = clients
+      .filter((client) => client.agent_id !== undefined)
+      .map((client) => `"${client.name}"`);
+    if (clientsWithAgentId.length > 0) {
+      log.warn(
+        `Ignoring agent_id on client(s) ${clientsWithAgentId.join(
+          ', '
+        )}. Link clients to agents with the clients list of each agent instead.`
+      );
+    }
 
-    const excludedClients = (assets.exclude && assets.exclude.clients) || [];
+    assets.clients = await this.sanitizeMapClientReferences(this.client, clients);
 
     const { del, update, create, conflicts } = await this.calcChanges(assets);
 
-    // Always filter out the client we are using to access Auth0 Management API
-    // As it could cause problems if it gets deleted or updated etc
-    const currentClient = this.config('AUTH0_CLIENT_ID') || '';
-
-    /*
-     * Filter out:
-     * - The client used to access Auth0 Management API
-     * - Clients in the exclusion list
-     * - Third-party clients when AUTH0_EXCLUDE_THIRD_PARTY_CLIENTS is enabled
-     */
-    const filterClients = (list: Client[]): Client[] =>
-      list.filter(
-        (item) =>
-          item.client_id !== currentClient &&
-          item.name &&
-          !excludedClients.includes(item.name) &&
-          (!shouldExcludeThirdPartyClients(this.config) || item.is_first_party)
-      );
+    const filterClients = this.getManagedClientFilter(assets);
 
     // Sanitize client fields
     const sanitizeClientFields = (list: Client[]): Client[] => {
@@ -938,7 +1015,8 @@ export default class ClientHandler extends DefaultAPIHandler {
       // ids — strip them so they are never exported to disk.
       .map(stripTokenVaultCredentialsOnExport)
       // external_metadata_status is read-only runtime state, not configuration.
-      .map((client) => omit(client, 'external_metadata_status') as Client);
+      // agent_id is a tenant-specific id; agent links are managed by the agents handler.
+      .map((client) => omit(client, ['external_metadata_status', 'agent_id']) as Client);
 
     // Enrich credential stubs with name and credential_type for export.
     // Auth0 does not return pem on read — it is never exported.
@@ -977,7 +1055,12 @@ export default class ClientHandler extends DefaultAPIHandler {
     client: Client
   ): Promise<Management.RegisterCimdClientResponseContent | Client> {
     if (!this.isCimdClient(client)) {
-      return this.client.clients.create(client as Management.CreateClientRequestContent);
+      return writeSkippingUnavailableOidcSupport(
+        client,
+        'oidc_support',
+        `client "${client.name}"`,
+        (payload) => this.client.clients.create(payload as Management.CreateClientRequestContent)
+      );
     }
 
     const externalClientId = client.external_client_id!;
@@ -1006,6 +1089,7 @@ export default class ClientHandler extends DefaultAPIHandler {
       'skip_non_verifiable_callback_uri_confirmation_prompt',
       'jwt_configuration',
       'refresh_token',
+      'oidc_support',
     ]) as Management.UpdateClientRequestContent;
   }
 
@@ -1036,14 +1120,24 @@ export default class ClientHandler extends DefaultAPIHandler {
         }
       }
 
-      return this.client.clients.update(clientId, payload);
+      return writeSkippingUnavailableOidcSupport(
+        payload,
+        'oidc_support',
+        `client "${client.name || clientId}"`,
+        (body) => this.client.clients.update(clientId, body)
+      );
     }
 
     const updatePayload = this.getCIMDEditableFields(client);
     const registrationClientId = client.client_id || clientId;
 
     if (registrationClientId && Object.keys(updatePayload).length > 0) {
-      return this.client.clients.update(registrationClientId, updatePayload);
+      return writeSkippingUnavailableOidcSupport(
+        updatePayload,
+        'oidc_support',
+        `client "${client.name || registrationClientId}"`,
+        (body) => this.client.clients.update(registrationClientId, body)
+      );
     }
 
     return client;

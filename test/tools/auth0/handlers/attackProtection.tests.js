@@ -231,7 +231,7 @@ describe('#attackProtection handler', () => {
       ]);
     });
 
-    it('should strip form_submission_mode and form_submission_behavior from bruteForceProtection before update', async () => {
+    it('should send form_submission_mode and strip form_submission_behavior from bruteForceProtection before update', async () => {
       let capturedPayload;
       const auth0 = {
         attackProtection: {
@@ -273,7 +273,7 @@ describe('#attackProtection handler', () => {
               max_attempts: 10,
               mode: 'count_per_identifier_and_ip',
               shields: ['block', 'user_notification'],
-              form_submission_mode: 'auto',
+              form_submission_mode: 'manual',
               form_submission_behavior: 'auto_submit',
             },
           },
@@ -286,8 +286,8 @@ describe('#attackProtection handler', () => {
         max_attempts: 10,
         mode: 'count_per_identifier_and_ip',
         shields: ['block', 'user_notification'],
+        form_submission_mode: 'manual',
       });
-      expect(capturedPayload).to.not.have.property('form_submission_mode');
       expect(capturedPayload).to.not.have.property('form_submission_behavior');
     });
 
@@ -470,7 +470,7 @@ describe('#attackProtection handler', () => {
           },
           phoneProviderProtection: {
             get: () => {
-              // Flag-off tenants return 403 for the sms_exponential_backoff-gated endpoint
+              // Tenants without the feature return 403 for this endpoint
               const err = new Error('Forbidden');
               err.statusCode = 403;
               throw err;
@@ -903,6 +903,61 @@ describe('#attackProtection handler', () => {
       const data2 = await handler.getType();
 
       expect(data1).to.equal(data2);
+    });
+  });
+
+  describe('#attackProtection dryRunChanges', () => {
+    const remoteBruteForceProtection = {
+      allowlist: [],
+      enabled: true,
+      max_attempts: 10,
+      mode: 'count_per_identifier_and_ip',
+      shields: ['block', 'user_notification'],
+      form_submission_mode: 'auto',
+    };
+
+    const buildHandler = () => {
+      const auth0 = {
+        attackProtection: {
+          botDetection: { get: () => ({}) },
+          captcha: { get: () => ({}) },
+          breachedPasswordDetection: { get: () => ({ enabled: true }) },
+          bruteForceProtection: { get: () => ({ ...remoteBruteForceProtection }) },
+          suspiciousIpThrottling: { get: () => ({ enabled: true }) },
+          phoneProviderProtection: { get: () => ({ type: 'default' }) },
+        },
+      };
+      return new attackProtection.default({ client: auth0 });
+    };
+
+    it('should not report an update when only the legacy form_submission_behavior is set locally', async () => {
+      const handler = buildHandler();
+
+      const changes = await handler.dryRunChanges({
+        attackProtection: {
+          bruteForceProtection: {
+            ...remoteBruteForceProtection,
+            form_submission_behavior: 'auto_submit',
+          },
+        },
+      });
+
+      expect(changes.update).to.have.length(0);
+    });
+
+    it('should report an update when form_submission_mode differs', async () => {
+      const handler = buildHandler();
+
+      const changes = await handler.dryRunChanges({
+        attackProtection: {
+          bruteForceProtection: {
+            ...remoteBruteForceProtection,
+            form_submission_mode: 'manual',
+          },
+        },
+      });
+
+      expect(changes.update).to.have.length(1);
     });
   });
 });

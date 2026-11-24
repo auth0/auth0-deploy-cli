@@ -57,6 +57,14 @@ export const schema = {
     },
     bruteForceProtection: {
       type: 'object',
+      properties: {
+        form_submission_mode: {
+          type: 'string',
+          enum: ['auto', 'manual'],
+          description:
+            'Whether the unblock form is submitted automatically when the link is opened or must be submitted manually by the user',
+        },
+      },
     },
     captcha: {
       type: 'object',
@@ -184,7 +192,7 @@ export const schema = {
           type: 'string',
           enum: ['exponential', 'default'],
           description:
-            'The backoff strategy applied to Send SMS during MFA enrollment. Gated by the sms_exponential_backoff feature flag; when the flag is disabled the API returns 403 and this setting is skipped on export.',
+            'The backoff strategy applied to Send SMS during MFA enrollment. Requires this feature to be enabled on the tenant; when it is not, the API returns 403 and this setting is skipped on export.',
         },
       },
       required: ['type'],
@@ -216,6 +224,8 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
         'captcha.recaptcha_enterprise.api_key',
         'captcha.recaptcha_enterprise.project_id',
         'captcha.recaptcha_v2.secret',
+        // Legacy field stripped on import and no longer returned by GET
+        'bruteForceProtection.form_submission_behavior',
       ],
     });
   }
@@ -305,7 +315,7 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
     } catch (err) {
       if (err.statusCode === 403) {
         log.warn(
-          'Phone provider protection is not enabled for this tenant (sms_exponential_backoff feature flag). Skipping phone provider protection settings.'
+          'Phone provider protection is not enabled for this tenant. Skipping phone provider protection settings.'
         );
       } else {
         throw err;
@@ -388,8 +398,8 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
     }
 
     if (attackProtection.bruteForceProtection) {
-      // Strip fields returned by GET but rejected by PATCH
-      const { form_submission_mode, form_submission_behavior, ...bruteForcePayload } =
+      // Strip the legacy form_submission_behavior field, rejected by PATCH but present in older exports
+      const { form_submission_behavior, ...bruteForcePayload } =
         attackProtection.bruteForceProtection as any;
       updates.push(this.client.attackProtection.bruteForceProtection.update(bruteForcePayload));
     }
@@ -403,7 +413,7 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
     }
 
     // Phone provider protection uses PATCH (not update) and requires `type` on every request.
-    // Guard the 403 (sms_exponential_backoff flag off) per-promise so a flag-off tenant does
+    // Guard the 403 (feature not enabled) per-promise so such a tenant does
     // not fail the whole attackProtection stage — mirrors the 403-skip in getType().
     if (attackProtection.phoneProviderProtection?.type) {
       updates.push(
@@ -414,7 +424,7 @@ export default class AttackProtectionHandler extends DefaultAPIHandler {
           .catch((err: any) => {
             if (err.statusCode === 403) {
               log.warn(
-                'Phone provider protection is not enabled for this tenant (sms_exponential_backoff feature flag). Skipping phone provider protection update.'
+                'Phone provider protection is not enabled for this tenant. Skipping phone provider protection update.'
               );
               return;
             }

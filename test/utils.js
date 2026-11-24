@@ -263,6 +263,12 @@ export function mockMgmtClient() {
     clientProfiles: {
       list: (params) => mockPagedData(params, 'clientProfiles', []),
     },
+    agents: {
+      list: (params) => mockPagedData(params, 'agents', []),
+    },
+    portals: {
+      list: () => Promise.resolve({ portals: [] }),
+    },
     tokenExchangeProfiles: {
       list: (params) => mockPagedData(params, 'tokenExchangeProfiles', []),
     },
@@ -368,4 +374,24 @@ export function createDirWithNestedDir(repoDir, files) {
       }
     });
   });
+}
+
+// 403 the Management API returns when a write carries oidc_support and the tenant doesn't have it enabled
+export function notEnabledError(message = 'oidc_support is not available for this tenant.') {
+  return Object.assign(new Error('Forbidden'), {
+    statusCode: 403,
+    body: { errorCode: 'feature_not_enabled', message },
+  });
+}
+
+export async function withCapturedWarnings(fn) {
+  const warnings = [];
+  const originalWarn = log.warn;
+  log.warn = (message) => warnings.push(message);
+  try {
+    await fn();
+  } finally {
+    log.warn = originalWarn;
+  }
+  return warnings;
 }

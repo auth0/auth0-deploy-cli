@@ -1,7 +1,7 @@
 const Ajv = require('ajv');
 const { expect } = require('chai');
 const clientProfiles = require('../../../../src/tools/auth0/handlers/clientProfiles');
-const { mockPagedData } = require('../../../utils');
+const { mockPagedData, notEnabledError, withCapturedWarnings } = require('../../../utils');
 const pageClient = require('../../../../src/tools/auth0/client').default;
 const log = require('../../../../src/logger').default;
 
@@ -527,6 +527,175 @@ describe('#clientProfiles handler', () => {
         },
       });
       expect(names(changes.create)).to.deep.equal(['CIMD Profile']);
+    });
+  });
+
+  describe('#clientProfiles oidc_support', () => {
+    const withOidc = (value) => ({
+      ...sampleProfile,
+      client_configuration: {
+        ...sampleProfile.client_configuration,
+        oidc_support: { default_value: value },
+      },
+    });
+
+    const runProcessChanges = async (client, assets) => {
+      const handler = new clientProfiles.default({ client: pageClient(client), config });
+      await Object.getPrototypeOf(handler).processChanges.apply(handler, [assets]);
+    };
+
+    describe('schema', () => {
+      const ajv = new Ajv({ useDefaults: true, nullable: true });
+
+      it('should accept is_allowed with allow_all_scopes', () => {
+        const valid = ajv.validate(clientProfiles.schema, [
+          withOidc({ is_allowed: true, allow_all_scopes: true }),
+        ]);
+        expect(valid).to.equal(true);
+      });
+
+      it('should accept is_allowed with allowed_scopes', () => {
+        const valid = ajv.validate(clientProfiles.schema, [
+          withOidc({ is_allowed: true, allowed_scopes: ['profile', 'phone'] }),
+        ]);
+        expect(valid).to.equal(true);
+      });
+
+      it('should accept is_allowed false on its own', () => {
+        expect(ajv.validate(clientProfiles.schema, [withOidc({ is_allowed: false })])).to.equal(
+          true
+        );
+      });
+
+      it('should reject an unknown allowed scope', () => {
+        const valid = ajv.validate(clientProfiles.schema, [
+          withOidc({ is_allowed: true, allowed_scopes: ['openid'] }),
+        ]);
+        expect(valid).to.equal(false);
+      });
+
+      [
+        ['is_allowed alone', { is_allowed: true }, true],
+        [
+          'allow_all_scopes false with allowed_scopes',
+          { is_allowed: true, allow_all_scopes: false, allowed_scopes: ['email'] },
+          true,
+        ],
+        [
+          'allow_all_scopes false without allowed_scopes',
+          { is_allowed: true, allow_all_scopes: false },
+          false,
+        ],
+        [
+          'allow_all_scopes true with allowed_scopes',
+          { is_allowed: true, allow_all_scopes: true, allowed_scopes: ['email'] },
+          false,
+        ],
+        [
+          'allowed_scopes when is_allowed is false',
+          { is_allowed: false, allowed_scopes: ['email'] },
+          false,
+        ],
+      ].forEach(([title, value, expected]) => {
+        it(`should ${expected ? 'accept' : 'reject'} ${title}`, () => {
+          expect(ajv.validate(clientProfiles.schema, [withOidc(value)])).to.equal(expected);
+        });
+      });
+
+      it('should reject a missing is_allowed', () => {
+        const valid = ajv.validate(clientProfiles.schema, [withOidc({ allow_all_scopes: true })]);
+        expect(valid).to.equal(false);
+      });
+    });
+
+    it('should send oidc_support when creating a profile', async () => {
+      let created;
+      const profile = withOidc({ is_allowed: true, allow_all_scopes: true });
+
+      await runProcessChanges(
+        mockClient({
+          create: (data) => {
+            created = data;
+            return Promise.resolve({ ...data, id: 'cp_new' });
+          },
+        }),
+        { clientProfiles: [profile] }
+      );
+
+      expect(created.client_configuration.oidc_support).to.deep.equal({
+        default_value: { is_allowed: true, allow_all_scopes: true },
+      });
+    });
+
+    it('should send oidc_support when updating a profile', async () => {
+      let updated;
+
+      await runProcessChanges(
+        mockClient(
+          {
+            update: (id, data) => {
+              updated = data;
+              return Promise.resolve({ ...data, id });
+            },
+          },
+          [existingProfile]
+        ),
+        { clientProfiles: [withOidc({ is_allowed: false })] }
+      );
+
+      expect(updated.client_configuration.oidc_support).to.deep.equal({
+        default_value: { is_allowed: false },
+      });
+    });
+
+    it('should create without oidc_support and warn when the tenant does not have it enabled', async () => {
+      const payloads = [];
+      const warnings = await withCapturedWarnings(() =>
+        runProcessChanges(
+          mockClient({
+            create: (data) => {
+              payloads.push(data);
+              if (data.client_configuration.oidc_support) return Promise.reject(notEnabledError());
+              return Promise.resolve({ ...data, id: 'cp_new' });
+            },
+          }),
+          { clientProfiles: [withOidc({ is_allowed: false })] }
+        )
+      );
+
+      expect(payloads).to.have.length(2);
+      expect(payloads[1].client_configuration).to.not.have.property('oidc_support');
+      expect(payloads[1].client_configuration.organization_usage).to.deep.equal({
+        default_value: 'allow',
+      });
+      expect(
+        warnings.some((w) => w.includes('oidc_support') && w.includes('CIMD Profile'))
+      ).to.equal(true);
+    });
+
+    it('should update without oidc_support and warn when the tenant does not have it enabled', async () => {
+      const payloads = [];
+      const warnings = await withCapturedWarnings(() =>
+        runProcessChanges(
+          mockClient(
+            {
+              update: (id, data) => {
+                payloads.push(data);
+                if (data.client_configuration.oidc_support) {
+                  return Promise.reject(notEnabledError());
+                }
+                return Promise.resolve({ ...data, id });
+              },
+            },
+            [existingProfile]
+          ),
+          { clientProfiles: [withOidc({ is_allowed: false })] }
+        )
+      );
+
+      expect(payloads).to.have.length(2);
+      expect(payloads[1].client_configuration).to.not.have.property('oidc_support');
+      expect(warnings.some((w) => w.includes('oidc_support'))).to.equal(true);
     });
   });
 });

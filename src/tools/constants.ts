@@ -237,7 +237,11 @@ const constants = {
   FEATURE_FLAGS_DIRECTORY: 'feature-flags',
   VARIATIONS_DIRECTORY: 'variations',
   SEGMENTS_DIRECTORY: 'segments',
+  PORTALS_DIRECTORY: 'portals',
+  // GET /portals is not paginated and returns at most this many portals.
+  PORTALS_LIST_LIMIT: 50,
   EXPERIMENTS_DIRECTORY: 'experiments',
+  AGENTS_DIRECTORY: 'agents',
 };
 
 export default constants;

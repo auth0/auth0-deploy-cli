@@ -46,7 +46,7 @@ export const schema = {
     client_id_metadata_document_dynamic_registration_supported: {
       type: 'boolean',
       description:
-        'Whether the authorization server supports dynamic registration of CIMD clients during the authorization flow. Requires client_id_metadata_document_supported to be enabled and the `dynamic_cimd` feature flag on the tenant.',
+        'Whether the authorization server supports dynamic registration of CIMD clients during the authorization flow. Requires client_id_metadata_document_supported to be enabled and this feature to be enabled on the tenant.',
     },
     default_token_quota: {
       type: 'object',
@@ -76,7 +76,7 @@ export const schema = {
     country_codes: {
       type: ['object', 'null'],
       description:
-        'Phone country code configuration for identifier input. Set to `null` to remove filtering (allow all countries). Requires the `tenant_country_codes_filtering` feature flag to be enabled on the tenant.',
+        'Phone country code configuration for identifier input. Set to `null` to remove filtering (allow all countries). Requires this feature to be enabled on the tenant.',
       properties: {
         list: {
           type: 'array',
@@ -283,8 +283,8 @@ export default class TenantHandler extends DefaultHandler {
     if (dependsOnExistingCimd) {
       if (!this.existing) await this.getType();
 
-      // client_id_metadata_document_dynamic_registration_supported is gated by the dynamic_cimd
-      // feature flag: GET omits it on tenants without the flag, and PATCH rejects it with 403
+      // client_id_metadata_document_dynamic_registration_supported is gated by a tenant
+      // feature: GET omits it on tenants without the feature, and PATCH rejects it with 403
       // even when false. Drop a `false` value (the API default) for those tenants so configs
       // exported from an entitled tenant still import elsewhere.
       if (

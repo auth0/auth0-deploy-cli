@@ -7,6 +7,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.4.0] - 2026-11-18
+
+### Added
+
+- Add support for Universal Portals (`portals`). [#1538]
+- Support the `oidc_support` property on `clients` and `client_configuration.oidc_support` on `clientProfiles`. When the feature is not enabled on the tenant, the field is skipped with a warning. [#1537]
+- Support `form_submission_mode` on `bruteForceProtection` for `attackProtection`. [#1539]
+- Support the Cross App Access (XAA) requesting app options on `samlp` connections. [#1535]
+
+### Changed
+
+- Reword availability notes in docs, schema descriptions and warning messages. [#1541]
+
+### Fixed
+
+- Keep the stored `options.client_secret` on `connections` when the exported `##CONNECTIONS_<STRATEGY>_SECRET##` placeholder is left unresolved. [#1535]
+- Apply client exclusions in dry-run for `clients` and `clientGrants`, and keep excluded clients enabled on `connections`. [#1536]
+
+## [9.3.0] - 2026-11-05
+
+### Added
+
+- Add support for `agents` (agents as principals). [#1528]
+- Support the `passkey` `signup_behavior` on `authentication_methods` for `databases`. [#1529]
+- Support the `UCP` resource server type, releasing it before it is reassigned. [#1530]
+
+### Fixed
+
+- Probe the SCIM scope before queuing per-connection SCIM lookups for `connections`. [#1531]
+- Stop exporting the read-only `account_name` and `ready` fields for `flowVaultConnections`. [#1532]
+- Scope `require_consent_non_repudiation` to customer resource servers. [#1533]
+
+## [9.2.0] - 2026-10-21
+
+### Added
+
+- Add Experiment Center support with the new `featureFlags`, `variations`, `segments`, and `experiments` resources. [#1517] [#1518] [#1519] [#1520]
+- Add support for client profiles (application profiles). [#1526]
+- Support dynamic CIMD client registration on `clients` and `tenant`. [#1522]
+
+### Fixed
+
+- Fail the import on `clientAuthCredentials` credential errors and stop the `private_key_jwt` downgrade when credential creation fails. [#1524]
+
 ## [9.1.0] - 2026-10-07
 
 ### Added
@@ -2033,11 +2077,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#1500]: https://github.com/auth0/auth0-deploy-cli/issues/1500
 [#1503]: https://github.com/auth0/auth0-deploy-cli/issues/1503
 [#1505]: https://github.com/auth0/auth0-deploy-cli/issues/1505
-[#1509]: https://github.com/auth0/auth0-deploy-cli/issues/1509
 [#1508]: https://github.com/auth0/auth0-deploy-cli/issues/1508
+[#1509]: https://github.com/auth0/auth0-deploy-cli/issues/1509
 [#1510]: https://github.com/auth0/auth0-deploy-cli/issues/1510
 [#1511]: https://github.com/auth0/auth0-deploy-cli/issues/1511
-[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v9.1.0...HEAD
+[#1517]: https://github.com/auth0/auth0-deploy-cli/issues/1517
+[#1518]: https://github.com/auth0/auth0-deploy-cli/issues/1518
+[#1519]: https://github.com/auth0/auth0-deploy-cli/issues/1519
+[#1520]: https://github.com/auth0/auth0-deploy-cli/issues/1520
+[#1522]: https://github.com/auth0/auth0-deploy-cli/issues/1522
+[#1524]: https://github.com/auth0/auth0-deploy-cli/issues/1524
+[#1526]: https://github.com/auth0/auth0-deploy-cli/issues/1526
+[#1528]: https://github.com/auth0/auth0-deploy-cli/issues/1528
+[#1529]: https://github.com/auth0/auth0-deploy-cli/issues/1529
+[#1530]: https://github.com/auth0/auth0-deploy-cli/issues/1530
+[#1531]: https://github.com/auth0/auth0-deploy-cli/issues/1531
+[#1532]: https://github.com/auth0/auth0-deploy-cli/issues/1532
+[#1533]: https://github.com/auth0/auth0-deploy-cli/issues/1533
+[#1535]: https://github.com/auth0/auth0-deploy-cli/issues/1535
+[#1536]: https://github.com/auth0/auth0-deploy-cli/issues/1536
+[#1537]: https://github.com/auth0/auth0-deploy-cli/issues/1537
+[#1538]: https://github.com/auth0/auth0-deploy-cli/issues/1538
+[#1539]: https://github.com/auth0/auth0-deploy-cli/issues/1539
+[#1541]: https://github.com/auth0/auth0-deploy-cli/issues/1541
+[Unreleased]: https://github.com/auth0/auth0-deploy-cli/compare/v9.4.0...HEAD
+[9.4.0]: https://github.com/auth0/auth0-deploy-cli/compare/v9.3.0...v9.4.0
+[9.3.0]: https://github.com/auth0/auth0-deploy-cli/compare/v9.2.0...v9.3.0
+[9.2.0]: https://github.com/auth0/auth0-deploy-cli/compare/v9.1.0...v9.2.0
 [9.1.0]: https://github.com/auth0/auth0-deploy-cli/compare/v9.0.0...v9.1.0
 [9.0.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.45.0...v9.0.0
 [8.45.0]: https://github.com/auth0/auth0-deploy-cli/compare/v8.44.0...v8.45.0

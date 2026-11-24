@@ -45,6 +45,10 @@ repository =>
   token-exchange-profiles
     profile1.json
     profile2.json
+  agents
+    Support Agent.json
+  portals
+    support.json
   guardian
     factors
       sms.json
