@@ -80,16 +80,21 @@ jobs:
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       # ── Build the artifact ────────────────────────────────────────────────────
-      # Replace this placeholder with ALL steps required to produce the artifact,
-      # including: runtime/toolchain setup (e.g. actions/setup-node, setup-go,
-      # setup-dotnet), dependency installation, compilation, and packaging (e.g.
-      # tar, zip, docker save). The final step must place the artifact at the
-      # path passed as inputs.artifact-path. The rl-scan action uses [ -f ] to
-      # verify the file exists — a missing or incorrect path fails the job.
-      - name: Build artifact   # TODO: replace with your toolchain setup + build + package steps
+      # Produces the same tarball that `npm publish` would upload, at inputs.artifact-path.
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 22.14.0
+          package-manager-cache: false
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build and pack
+        env:
+          ARTIFACT_PATH: ${{ inputs.artifact-path }}
         run: |
-          echo "TODO: replace this step with your build commands"
-          echo "      The built file must be at: ${{ inputs.artifact-path }}"
+          npm run build
+          mv "$(npm pack --silent)" "$ARTIFACT_PATH"
 
       - name: Run RL malware scan
         id: rl-scan-conclusion
