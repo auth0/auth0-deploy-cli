@@ -10,6 +10,16 @@ permissions:
   id-token: write
 
 jobs:
+  # Malware scan of the packed tarball. Nothing depends on this job, so a failed scan
+  # fails its own job but does not block the npm publish.
+  rl-scan:
+    uses: ./.github/workflows/rl.yml
+    with:
+      artifact-name: auth0-deploy-cli
+      artifact-path: auth0-deploy-cli.tgz
+      version: ${{ github.ref_name }}
+    secrets: inherit
+
   publish:
     runs-on: ubuntu-latest
 
